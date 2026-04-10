@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프롬어스 리포트 아카이브</title>
+<meta property="og:title" content="프롬어스 Daily Report">
+<meta property="og:description" content="프롬어스 투자 커뮤니티 데일리 리포트 아카이브">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f5; --white: #fff; --surface: #fff; --surface-2: #f5f2ed; --surface-3: #eeebe5;
+  --border: #e4dfd6; --border-light: #f0ece5;
+  --gold: #b8860b; --gold-bg: #fef9ec; --gold-border: #f5e6b8;
+  --text: #1a1612; --text-2: #4a4540; --text-3: #8a847a; --text-4: #b0a898;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 헤더 ── */
+.header {
+  text-align: center;
+  padding: 80px 24px 48px;
+  background: linear-gradient(180deg, #fdfcfa 0%, #f8f4ee 100%);
+  border-bottom: 1px solid var(--border-light);
+}
+.header-label {
+  font-size: 11px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.header-title em { font-style: italic; color: var(--gold); }
+.header-sub {
+  font-size: 15px;
+  color: var(--text-3);
+  max-width: 400px;
+  margin: 0 auto;
+}
+.divider-gold {
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin: 24px auto;
+  opacity: 0.5;
+}
+
+/* ── 통계 ── */
+.stats {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 32px 24px;
+}
+.stat-item { text-align: center; }
+.stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── 리포트 목록 ── */
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+.week-group {
+  margin-bottom: 32px;
+}
+.week-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 8px;
+}
+.week-reports {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.report-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+.report-card:hover {
+  border-color: var(--gold-border);
+  background: var(--gold-bg);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.08);
+}
+.report-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.report-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+}
+.report-weekday {
+  font-size: 13px;
+  color: var(--text-3);
+}
+.report-card-arrow {
+  font-size: 16px;
+  color: var(--text-4);
+  transition: transform 0.2s ease;
+}
+.report-card:hover .report-card-arrow {
+  transform: translateX(3px);
+  color: var(--gold);
+}
+.badge-new {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gold);
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+
+/* ── 푸터 ── */
+.footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-3);
+  font-size: 13px;
+}
+.footer .logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 480px) {
+  .header { padding: 60px 20px 36px; }
+  .stats { gap: 24px; }
+  .report-card { padding: 14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 class="header-title"><em>FROM-US</em> Daily Report</h1>
+  <div class="divider-gold"></div>
+  <p class="header-sub">카카오톡 대화 분석 기반 데일리 리포트 아카이브</p>
+</div>
+
+<div class="stats">
+  <div class="stat-item">
+    <div class="stat-val">5</div>
+    <div class="stat-label">Total Reports</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val">2026.04.10</div>
+    <div class="stat-label">Latest</div>
+  </div>
+</div>
+
+<div class="container">
+
+    <div class="week-group">
+      <div class="week-label">4월 W15</div>
+      <div class="week-reports">
+        <a href="reports/2026-04-10.html" class="report-card">
+          <div class="report-card-left">
+            <span class="badge-new">NEW</span>
+            <span class="report-date">2026.04.10</span>
+            <span class="report-weekday">금요일</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>
+        <a href="reports/2026-04-09.html" class="report-card">
+          <div class="report-card-left">
+            
+            <span class="report-date">2026.04.09</span>
+            <span class="report-weekday">목요일</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>
+        <a href="reports/2026-04-08.html" class="report-card">
+          <div class="report-card-left">
+            
+            <span class="report-date">2026.04.08</span>
+            <span class="report-weekday">수요일</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>
+        <a href="reports/2026-04-07.html" class="report-card">
+          <div class="report-card-left">
+            
+            <span class="report-date">2026.04.07</span>
+            <span class="report-weekday">화요일</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>
+        <a href="reports/2026-04-06.html" class="report-card">
+          <div class="report-card-left">
+            
+            <span class="report-date">2026.04.06</span>
+            <span class="report-weekday">월요일</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>
+      </div>
+    </div>
+</div>
+
+<div class="footer">
+  <div class="logo">From Us</div>
+  <p>프롬어스 리포트 아카이브</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--text-4)">본 리포트는 프롬어스 내부 대화를 분석하여 생성되었으며, 투자 권유가 아닙니다.</p>
+</div>
+
+</body>
+</html>
