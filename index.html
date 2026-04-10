@@ -159,6 +159,28 @@ body {
   border-radius: 20px;
   letter-spacing: 1px;
 }
+.badge-weekly {
+  font-size: 10px;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+.weekly-card {
+  background: linear-gradient(180deg, #fdfcfa 0%, #faf7f0 100%);
+  border: 1px solid var(--gold-border);
+}
+.weekly-card .report-date {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 600;
+}
+.weekly-card:hover {
+  border-color: var(--gold);
+  background: var(--gold-bg);
+}
 
 /* ── 푸터 ── */
 .footer {
@@ -194,11 +216,11 @@ body {
 
 <div class="stats">
   <div class="stat-item">
-    <div class="stat-val">6</div>
+    <div class="stat-val">7</div>
     <div class="stat-label">Total Reports</div>
   </div>
   <div class="stat-item">
-    <div class="stat-val">2026.04.11</div>
+    <div class="stat-val">2026.04.10</div>
     <div class="stat-label">Latest</div>
   </div>
 </div>
@@ -208,23 +230,23 @@ body {
     <div class="week-group">
       <div class="week-label">4월 W15</div>
       <div class="week-reports">
-        <a href="reports/2026-04-11.html" class="report-card">
+        <a href="reports/weekly/2026-W15.html" class="report-card weekly-card">
           <div class="report-card-left">
-            <span class="badge-new">NEW</span>
-            <span class="report-date">2026.04.11</span>
-            <span class="report-weekday">토요일</span>
+            <span class="badge-weekly">주간</span>
+            <span class="report-date">W15 주간리포트</span>
+            <span class="report-weekday">04/06 ~ 04/12</span>
           </div>
           <div class="report-card-arrow">→</div>
         </a>
-        <a href="reports/2026-04-10.html" class="report-card">
+        <a href="reports/daily/2026-04-10.html" class="report-card">
           <div class="report-card-left">
-            
+            <span class="badge-new">NEW</span>
             <span class="report-date">2026.04.10</span>
             <span class="report-weekday">금요일</span>
           </div>
           <div class="report-card-arrow">→</div>
         </a>
-        <a href="reports/2026-04-09.html" class="report-card">
+        <a href="reports/daily/2026-04-09.html" class="report-card">
           <div class="report-card-left">
             
             <span class="report-date">2026.04.09</span>
@@ -232,7 +254,7 @@ body {
           </div>
           <div class="report-card-arrow">→</div>
         </a>
-        <a href="reports/2026-04-08.html" class="report-card">
+        <a href="reports/daily/2026-04-08.html" class="report-card">
           <div class="report-card-left">
             
             <span class="report-date">2026.04.08</span>
@@ -240,7 +262,7 @@ body {
           </div>
           <div class="report-card-arrow">→</div>
         </a>
-        <a href="reports/2026-04-07.html" class="report-card">
+        <a href="reports/daily/2026-04-07.html" class="report-card">
           <div class="report-card-left">
             
             <span class="report-date">2026.04.07</span>
@@ -248,11 +270,24 @@ body {
           </div>
           <div class="report-card-arrow">→</div>
         </a>
-        <a href="reports/2026-04-06.html" class="report-card">
+        <a href="reports/daily/2026-04-06.html" class="report-card">
           <div class="report-card-left">
             
             <span class="report-date">2026.04.06</span>
             <span class="report-weekday">월요일</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>
+      </div>
+    </div>
+    <div class="week-group">
+      <div class="week-label">3월 W14</div>
+      <div class="week-reports">
+        <a href="reports/weekly/2026-W14.html" class="report-card weekly-card">
+          <div class="report-card-left">
+            <span class="badge-weekly">주간</span>
+            <span class="report-date">W14 주간리포트</span>
+            <span class="report-weekday">03/30 ~ 04/05</span>
           </div>
           <div class="report-card-arrow">→</div>
         </a>

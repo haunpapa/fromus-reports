@@ -7,9 +7,11 @@
 """
 
 import os, re, glob
-from datetime import datetime
+from datetime import datetime, timedelta
 
 REPORTS_DIR = "reports"
+DAILY_DIR = "reports/daily"
+WEEKLY_DIR = "reports/weekly"
 OUTPUT_FILE = "index.html"
 
 WEEKDAY_KR = ["월", "화", "수", "목", "금", "토", "일"]
@@ -62,29 +64,57 @@ def extract_summary_from_html(filepath):
     return ""
 
 
+def parse_iso_week(filename):
+    """'2026-W15.html' → (2026, 15, 월요일 datetime)"""
+    m = re.search(r"(\d{4})-W(\d{2})", filename)
+    if not m:
+        return None
+    year, week = int(m.group(1)), int(m.group(2))
+    # ISO week → 해당 주 월요일
+    monday = datetime.fromisocalendar(year, week, 1)
+    return (year, week, monday)
+
+
 def scan_reports():
-    """reports/ 폴더를 스캔하여 리포트 목록 반환"""
-    reports = []
-    if not os.path.isdir(REPORTS_DIR):
-        print(f"⚠️  '{REPORTS_DIR}/' 폴더가 없습니다. 먼저 만들어주세요.")
-        return reports
+    """daily/ + weekly/ 폴더를 스캔하여 리포트 목록 반환"""
+    dailies, weeklies = [], []
 
-    for filepath in glob.glob(os.path.join(REPORTS_DIR, "*.html")):
-        date = extract_date_from_html(filepath)
-        if date is None:
-            print(f"  ⚠️  날짜 추출 실패, 건너뜀: {filepath}")
-            continue
-        summary = extract_summary_from_html(filepath)
-        reports.append({
-            "file": os.path.basename(filepath),
-            "date": date,
-            "date_str": date.strftime("%Y.%m.%d"),
-            "weekday": WEEKDAY_KR[date.weekday()],
-            "summary": summary,
-        })
+    # 데일리
+    if os.path.isdir(DAILY_DIR):
+        for filepath in glob.glob(os.path.join(DAILY_DIR, "*.html")):
+            date = extract_date_from_html(filepath)
+            if date is None:
+                print(f"  ⚠️  날짜 추출 실패, 건너뜀: {filepath}")
+                continue
+            dailies.append({
+                "file": f"daily/{os.path.basename(filepath)}",
+                "date": date,
+                "date_str": date.strftime("%Y.%m.%d"),
+                "weekday": WEEKDAY_KR[date.weekday()],
+                "type": "daily",
+            })
 
-    reports.sort(key=lambda x: x["date"], reverse=True)
-    return reports
+    # 주간
+    if os.path.isdir(WEEKLY_DIR):
+        for filepath in glob.glob(os.path.join(WEEKLY_DIR, "*.html")):
+            parsed = parse_iso_week(os.path.basename(filepath))
+            if parsed is None:
+                print(f"  ⚠️  주차 추출 실패 (YYYY-WNN 형식 필요), 건너뜀: {filepath}")
+                continue
+            year, week, monday = parsed
+            sunday = monday + timedelta(days=6)
+            weeklies.append({
+                "file": f"weekly/{os.path.basename(filepath)}",
+                "date": monday,
+                "year": year,
+                "week": week,
+                "range_str": f"{monday.strftime('%m/%d')} ~ {sunday.strftime('%m/%d')}",
+                "type": "weekly",
+            })
+
+    dailies.sort(key=lambda x: x["date"], reverse=True)
+    weeklies.sort(key=lambda x: (x["year"], x["week"]), reverse=True)
+    return dailies, weeklies
 
 
 def group_by_week(reports):
@@ -104,26 +134,40 @@ def group_by_week(reports):
     return weeks
 
 
-def generate_html(reports):
+def generate_html(dailies, weeklies):
     """index.html 생성"""
-    total = len(reports)
-    latest_date = reports[0]["date_str"] if reports else "-"
+    total = len(dailies) + len(weeklies)
+    latest_date = dailies[0]["date_str"] if dailies else "-"
 
-    # 주별 그룹핑
+    # 주별 그룹핑 (데일리 기준)
     weeks = {}
-    for r in reports:
+    for r in dailies:
         year, week_num, _ = r["date"].isocalendar()
         key = f"{year}-W{week_num:02d}"
         if key not in weeks:
-            mon = r["date"].month
             weeks[key] = {
-                "label": f"{mon}월 W{week_num}",
-                "reports": [],
+                "label": f"{r['date'].month}월 W{week_num}",
+                "weekly": None,
+                "dailies": [],
                 "sort_key": (year, week_num),
             }
-        weeks[key]["reports"].append(r)
+        weeks[key]["dailies"].append(r)
+
+    # 주간 리포트를 해당 주 그룹에 꽂아넣기
+    for w in weeklies:
+        key = f"{w['year']}-W{w['week']:02d}"
+        if key not in weeks:
+            weeks[key] = {
+                "label": f"{w['date'].month}월 W{w['week']}",
+                "weekly": w,
+                "dailies": [],
+                "sort_key": (w["year"], w["week"]),
+            }
+        else:
+            weeks[key]["weekly"] = w
 
     sorted_weeks = sorted(weeks.values(), key=lambda w: w["sort_key"], reverse=True)
+    latest_daily_file = dailies[0]["file"] if dailies else None
 
     # 리포트 카드 HTML 생성
     report_cards_html = ""
@@ -132,8 +176,23 @@ def generate_html(reports):
     <div class="week-group">
       <div class="week-label">{week["label"]}</div>
       <div class="week-reports">'''
-        for i, r in enumerate(week["reports"]):
-            is_new = (r == reports[0])  # 가장 최신이면 NEW 뱃지
+
+        # 주간 리포트가 있으면 맨 위에
+        if week["weekly"]:
+            w = week["weekly"]
+            report_cards_html += f'''
+        <a href="reports/{w["file"]}" class="report-card weekly-card">
+          <div class="report-card-left">
+            <span class="badge-weekly">주간</span>
+            <span class="report-date">W{w["week"]} 주간리포트</span>
+            <span class="report-weekday">{w["range_str"]}</span>
+          </div>
+          <div class="report-card-arrow">→</div>
+        </a>'''
+
+        # 데일리들
+        for r in week["dailies"]:
+            is_new = (r["file"] == latest_daily_file)
             new_badge = '<span class="badge-new">NEW</span>' if is_new else ""
             report_cards_html += f'''
         <a href="reports/{r["file"]}" class="report-card">
@@ -309,6 +368,28 @@ body {{
   border-radius: 20px;
   letter-spacing: 1px;
 }}
+.badge-weekly {{
+  font-size: 10px;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}}
+.weekly-card {{
+  background: linear-gradient(180deg, #fdfcfa 0%, #faf7f0 100%);
+  border: 1px solid var(--gold-border);
+}}
+.weekly-card .report-date {{
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 600;
+}}
+.weekly-card:hover {{
+  border-color: var(--gold);
+  background: var(--gold-bg);
+}}
 
 /* ── 푸터 ── */
 .footer {{
@@ -370,19 +451,23 @@ body {{
 
 def main():
     print("━━━ 프롬어스 리포트 인덱스 생성기 ━━━")
-    print(f"📂 스캔 폴더: {REPORTS_DIR}/")
+    print(f"📂 스캔 폴더: {DAILY_DIR}/, {WEEKLY_DIR}/")
 
-    reports = scan_reports()
-    if not reports:
+    dailies, weeklies = scan_reports()
+    if not dailies and not weeklies:
         print("❌ 리포트를 찾지 못했습니다.")
-        print(f"   '{REPORTS_DIR}/' 폴더에 HTML 파일을 넣어주세요.")
+        print(f"   '{DAILY_DIR}/' 또는 '{WEEKLY_DIR}/' 에 HTML 파일을 넣어주세요.")
         return
 
-    print(f"✅ {len(reports)}개 리포트 발견:")
-    for r in reports:
+    print(f"\n✅ 데일리 {len(dailies)}개:")
+    for r in dailies:
         print(f"   {r['date_str']} ({r['weekday']}) ← {r['file']}")
 
-    html = generate_html(reports)
+    print(f"\n✅ 주간 {len(weeklies)}개:")
+    for w in weeklies:
+        print(f"   {w['year']}-W{w['week']:02d} ({w['range_str']}) ← {w['file']}")
+
+    html = generate_html(dailies, weeklies)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(html)
 

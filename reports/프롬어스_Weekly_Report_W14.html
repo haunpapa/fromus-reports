@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light only">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>프롬어스 Weekly Report | W14 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light only;--bg:#faf8f5;--white:#fff;--surface:#fff;--surface-2:#f5f2ed;--surface-3:#eeebe5;--border:#e4dfd6;--border-light:#f0ece5;--gold:#b8860b;--gold-bg:#fef9ec;--gold-border:#f5e6b8;--blue:#2563eb;--blue-bg:#eff6ff;--blue-border:#bfdbfe;--red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;--green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;--purple:#7c3aed;--purple-bg:#f5f3ff;--purple-border:#ddd6fe;--text:#1a1612;--text-2:#4a4540;--text-3:#8a847a;--text-4:#b0a898}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background-color:#faf8f5 !important}
+@media (prefers-color-scheme:dark){html,body{background-color:#faf8f5 !important;color:#1a1612 !important}}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.85;-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',monospace}
+.cover{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 24px;position:relative;overflow:hidden;background:linear-gradient(180deg,#fdfcfa 0%,#f8f4ee 100%)}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 700px 500px at 25% 35%,rgba(184,134,11,.08),transparent),radial-gradient(ellipse 600px 600px at 75% 65%,rgba(22,163,74,.05),transparent)}
+.cover-content{position:relative;z-index:1}
+.cover-label{font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);margin-bottom:32px;font-weight:600}
+.cover-title{font-family:'Playfair Display',serif;font-size:clamp(38px,8vw,72px);font-weight:700;line-height:1.15;margin-bottom:20px}
+.cover-title em{font-style:italic;color:var(--gold)}
+.cover-sub{font-size:16px;color:var(--text-2);margin-bottom:48px;max-width:520px;line-height:1.8}
+.cover-meta{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.cover-meta-item .val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;color:var(--gold)}
+.cover-meta-item .lbl{font-size:11px;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.divider-gold{width:50px;height:2px;background:var(--gold);margin:36px auto;opacity:.5}
+.page{max-width:800px;margin:0 auto;padding:0 20px}
+.section{margin-bottom:56px;animation:fadeUp .5s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.section-header{display:flex;gap:16px;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid var(--border)}
+.section-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);opacity:.5}
+.section-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.section-subtitle{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:2px;margin-top:2px}
+.callout{padding:20px 24px;border-radius:14px;font-size:14px;line-height:1.9;margin-bottom:20px;border-left:4px solid}
+.callout.gold{background:var(--gold-bg);border-color:var(--gold)}
+.callout.blue{background:var(--blue-bg);border-color:var(--blue)}
+.callout.green{background:var(--green-bg);border-color:var(--green)}
+.callout.purple{background:var(--purple-bg);border-color:var(--purple)}
+.callout-icon{font-size:22px;margin-bottom:8px;display:block}
+.callout b{color:var(--text)}
+.temp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.temp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.temp-card .tb{position:absolute;top:0;left:0;right:0;height:3px}
+.tb.up{background:var(--red)}.tb.down{background:var(--blue)}.tb.warn{background:var(--gold)}.tb.good{background:var(--green)}
+.temp-label{font-size:12px;color:var(--text-3);margin-bottom:6px;font-weight:500}
+.temp-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600}
+.temp-chg{font-size:12px;margin-top:4px;font-weight:500}
+.temp-chg.up{color:var(--red)}.temp-chg.down{color:var(--blue)}.temp-chg.good{color:var(--green)}
+.temp-explain{margin-top:8px;font-size:12px;color:var(--text-3);line-height:1.6;padding-top:8px;border-top:1px dashed var(--border-light)}
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:8px;top:12px;bottom:12px;width:2px;background:linear-gradient(180deg,var(--red),var(--gold),var(--green));border-radius:1px}
+.tl-item{position:relative;padding:0 0 32px 28px}
+.tl-dot{position:absolute;left:-28px;top:8px;width:18px;height:18px;border-radius:50%;border:3px solid;background:var(--bg)}
+.tl-dot.crisis{border-color:var(--red)}.tl-dot.turn{border-color:var(--gold)}.tl-dot.hope{border-color:var(--green)}.tl-dot.info{border-color:var(--blue)}
+.tl-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);font-weight:600;margin-bottom:4px}
+.tl-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.tl-desc{font-size:14px;color:var(--text-2);line-height:1.85}
+.tl-impact{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.tl-tag{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600}
+.tl-tag.bad{background:var(--red-bg);color:var(--red)}
+.tl-tag.good{background:var(--green-bg);color:var(--green)}
+.tl-tag.neutral{background:var(--gold-bg);color:var(--gold)}
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.insight-top{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.insight-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0}
+.insight-name{font-weight:700;font-size:16px}
+.insight-role{font-size:11px;color:var(--text-3)}
+.insight-body{font-size:14.5px;color:var(--text-2);line-height:2}
+.insight-body b{color:var(--text)}
+.insight-quote{margin-top:18px;padding:16px 20px;background:var(--gold-bg);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;font-size:14px;color:var(--text-2);font-style:italic;line-height:1.8}
+.insight-bullets{margin:14px 0;list-style:none}
+.insight-bullets li{padding:8px 0 8px 28px;position:relative;font-size:14px;line-height:1.8;color:var(--text-2);border-bottom:1px solid var(--border-light)}
+.insight-bullets li:last-child{border-bottom:none}
+.insight-bullets li::before{position:absolute;left:0;top:8px}
+.insight-bullets li.buy::before{content:'📈'}.insight-bullets li.hold::before{content:'✋'}.insight-bullets li.cash::before{content:'💵'}.insight-bullets li.edu::before{content:'📚'}.insight-bullets li.news::before{content:'📰'}.insight-bullets li.chart::before{content:'📊'}
+.sector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.sector-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px}
+.sector-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sector-icon{font-size:28px;width:44px;height:44px;background:var(--surface-2);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.sector-name{font-size:15px;font-weight:700}
+.sector-name-sub{font-size:11px;color:var(--text-3)}
+.sector-stocks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.sector-stocks span{padding:4px 10px;background:var(--surface-2);border-radius:100px;font-size:11px;color:var(--text-2);font-family:'JetBrains Mono',monospace}
+.sector-note{font-size:13px;color:var(--text-3);line-height:1.8}
+.strategy-box{background:var(--surface);border:1px solid var(--gold-border);border-radius:18px;padding:32px;box-shadow:0 2px 12px rgba(184,134,11,.06)}
+.strat-row{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--border-light)}
+.strat-row:last-child{border-bottom:none}
+.strat-num{flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+.strat-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.strat-desc{font-size:14px;color:var(--text-2);line-height:1.9}
+.strat-why{margin-top:8px;padding:10px 14px;background:var(--surface-2);border-radius:8px;font-size:13px;color:var(--text-3)}
+.strat-why::before{content:'💡 왜? ';font-weight:600;color:var(--gold)}
+.checklist{display:grid;gap:10px}
+.check-item{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:14px}
+.check-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700}
+.check-icon.do{background:var(--green-bg);color:var(--green)}
+.check-icon.dont{background:var(--red-bg);color:var(--red)}
+.check-icon.watch{background:var(--gold-bg);color:var(--gold)}
+.edu-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px}
+.edu-tag{display:inline-block;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;margin-bottom:14px}
+.edu-tag.gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+.edu-tag.purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.edu-tag.blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.edu-title{font-size:18px;font-weight:700;margin-bottom:14px}
+.edu-body{font-size:14.5px;color:var(--text-2);line-height:2}
+.edu-body b{color:var(--text)}
+.edu-box{margin:14px 0;padding:16px 20px;border-radius:12px;font-size:13.5px;line-height:1.9}
+.edu-box.example{background:var(--surface-2);border:1px dashed var(--border)}
+.edu-box.tip{background:var(--green-bg);border:1px solid var(--green-border)}
+.weekly-quote{text-align:center;padding:48px 32px;background:var(--surface);border:1px solid var(--gold-border);border-radius:18px;margin-bottom:56px}
+.weekly-quote blockquote{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,30px);font-style:italic;color:var(--gold);line-height:1.6;max-width:550px;margin:0 auto 16px}
+.weekly-quote cite{font-style:normal;font-size:13px;color:var(--text-3)}
+.report-footer{text-align:center;padding:48px 24px 64px;font-size:12px;color:var(--text-3)}
+.report-footer .logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold);margin-bottom:8px}
+@media(max-width:600px){.cover-meta{gap:24px}.temp-grid{grid-template-columns:1fr 1fr}.sector-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-content">
+    <div class="cover-label">From Us · Weekly Report</div>
+    <h1 class="cover-title"><em>57.2조</em>와<br>휴전, 그리고 봄</h1>
+    <p class="cover-sub">D-Day 카운트다운에서 역사적 휴전까지 —<br>삼성전자 어닝 서프라이즈와 함께 맞이한 W14의 기록</p>
+    <div class="divider-gold"></div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="val">W14</div><div class="lbl">2026년 14주차</div></div>
+      <div class="cover-meta-item"><div class="val">4.6 — 10</div><div class="lbl">분석 기간</div></div>
+      <div class="cover-meta-item"><div class="val">929</div><div class="lbl">Messages</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<div class="section">
+  <div class="section-header"><div class="section-num">01</div><div><div class="section-title">금주의 시장 온도</div><div class="section-subtitle">Market Temperature · 한 주를 관통한 핵심 지표</div></div></div>
+  <div class="callout gold"><span class="callout-icon">🌡️</span>이번 주는 한 마디로 <b>"공포에서 환호로 갈아탄 한 주"</b>였어요. 월요일 D-Day 공포로 시작했지만, 화요일 삼성전자 <b>영업이익 57.2조원</b> 어닝 서프라이즈가 시장을 받쳐줬고, 수요일 새벽 트럼프의 <b>2주 휴전 합의</b>로 코스피가 단숨에 +6.87% 폭등했습니다. 목요일 조정봉을 거쳐 금요일 다시 5,800선 회복 — 4월 들어 코스피 누적 상승률은 무려 <b>+16%</b>입니다.</div>
+  <div class="temp-grid">
+    <div class="temp-card"><div class="tb good"></div><div class="temp-label">코스피</div><div class="temp-val">5,858</div><div class="temp-chg good">주간 +7.5%↑</div><div class="temp-explain">월요일 5,451 → 금요일 5,858. 화요일 +6.87% 역사적 폭등이 한 주를 끌어올렸어요.</div></div>
+    <div class="temp-card"><div class="tb good"></div><div class="temp-label">코스닥</div><div class="temp-val">1,093</div><div class="temp-chg good">5일만에 +4%</div><div class="temp-explain">반도체 소부장·2차전지가 주도. 외국인보다 기관·개인 매수가 두드러졌어요.</div></div>
+    <div class="temp-card"><div class="tb down"></div><div class="temp-label">WTI 유가</div><div class="temp-val">$99.22</div><div class="temp-chg down">고점 대비 -14%</div><div class="temp-explain">$115에서 휴전 발표 후 $94까지 급락했다가 $99로 반등. 호르무즈 통행 정상화가 관건.</div></div>
+    <div class="temp-card"><div class="tb down"></div><div class="temp-label">원/달러 환율</div><div class="temp-val">1,483</div><div class="temp-chg down">주간 -23원↓</div><div class="temp-explain">1,506→1,475→1,483. 휴전 효과 + WGBI 편입으로 외국인 자금 유입이 본격화됐어요.</div></div>
+    <div class="temp-card"><div class="tb down"></div><div class="temp-label">美 10년물 금리</div><div class="temp-val">4.28%</div><div class="temp-chg down">마지노선 4.5% ↓</div><div class="temp-explain">전쟁 리스크 프리미엄이 빠지면서 안정. 4.5% 마지노선과는 충분한 거리가 확보됐어요.</div></div>
+    <div class="temp-card"><div class="tb good"></div><div class="temp-label">공포·탐욕 지수</div><div class="temp-val">19 → 회복중</div><div class="temp-chg good">극단적 공포 탈출</div><div class="temp-explain">월요일 19까지 떨어졌던 심리가 휴전 발표 후 빠르게 회복. 헤지펀드는 2020년 이후 최대 속도로 숏커버링.</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-num">02</div><div><div class="section-title">이번 주, 무슨 일이 있었나요?</div><div class="section-subtitle">Weekly Timeline · 5일간의 극적 흐름</div></div></div>
+  <div class="callout blue"><span class="callout-icon">📖</span>월요일 D-Day 전야의 긴장 → 화요일 삼성전자 어닝 서프라이즈 → 수요일 새벽 극적 휴전 합의 → 목요일 조정 → 금요일 재반등. 이번 주는 <b>"버틴 사람만 받을 수 있었던 선물"</b>같은 한 주였어요.</div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-dot info"></div><div class="tl-date">4/6 (월) — D-Day 전야</div><div class="tl-title">🔵 트럼프 시한 1일 연기 + 삼성전자 기대감</div><div class="tl-desc">트럼프가 이란 공격 D-Day를 7일→8일로 하루 연기. 미국 3월 고용은 +17.8만명으로 서프라이즈. 삼성전자가 1분기 잠정실적 기대감(영업이익 50조원 전망까지!)에 +3.71% 상승하며 코스피 +1.37%를 혼자 끌어올렸어요. Axios·로이터가 "45일 휴전안 협상 중" "파키스탄 중재 이슬라마바드 협정 추진"을 잇달아 보도.</div><div class="tl-impact"><span class="tl-tag good">코스피 +1.37%</span><span class="tl-tag good">삼전 +3.71%</span><span class="tl-tag neutral">D-Day 1일 연기</span></div></div>
+    <div class="tl-item"><div class="tl-dot turn"></div><div class="tl-date">4/7 (화) — 어닝 서프라이즈</div><div class="tl-title">🟡 삼성전자 영업이익 57.2조원 — 컨센 +42% 상회</div><div class="tl-desc">장 시작 전 삼성전자가 매출 133조, <b>영업이익 57.2조원</b>(컨센 40.2조, YoY +755%)을 발표. HBM4·범용 메모리 쌍끌이 효과로 사상 최대 분기 실적. SK하이닉스도 1Q 영업이익 35조원 전망. 코스피는 +0.82%로 상승했지만 오후 트럼프가 "화요일은 시한 최종, 추가 연장 없다"며 압박 수위를 높여 코스닥은 -1.02% 하락.</div><div class="tl-impact"><span class="tl-tag good">삼전 영업익 57.2조</span><span class="tl-tag good">YoY +755%</span><span class="tl-tag bad">D-Day 압박</span></div></div>
+    <div class="tl-item"><div class="tl-dot hope"></div><div class="tl-date">4/8 (수) — 역사적 휴전</div><div class="tl-title">🟢 트럼프 "2주 휴전 합의" — 코스피 +6.87% 폭등</div><div class="tl-desc">오전 9시 시한을 1시간 앞두고 트럼프가 <b>"호르무즈 해협 개방 조건으로 2주간 폭격 유예"</b>를 발표! 파키스탄 총리 중재와 중국 막판 개입이 결정적이었어요. 이란 최고지도자가 승인하고 이스라엘도 동참. 코스피 +6.87%(올해 최대 일간 상승폭), 코스닥 +5.12%, SK하이닉스 +12.77%, 외국인+기관 쌍끌이 매수로 4조원 이상 순매수. 유가는 -16% 폭락했어요.</div><div class="tl-impact"><span class="tl-tag good">코스피 +6.87%</span><span class="tl-tag good">SK하이닉스 +12.77%</span><span class="tl-tag good">유가 -16%</span></div></div>
+    <div class="tl-item"><div class="tl-dot info"></div><div class="tl-date">4/9 (목) — 숨 고르기</div><div class="tl-title">🔵 이스라엘 레바논 공습 → 조정봉, 그러나 "큰 불은 꺼졌다"</div><div class="tl-desc">휴전 첫날 새벽 이스라엘이 레바논 100곳을 폭격(250여명 사망)하며 유가가 +3% 반등. 코스피는 -1.61% 조정. 하지만 골드만삭스 보고서가 "헤지펀드 공매도 청산이 2020년 이후 최대 속도"라고 발표 — 대표님은 "전쟁 종식의 시작"으로 해석했어요. 이란 대표단이 4/11 파키스탄 대면 회담을 확정하면서 외교 채널은 살아있음을 확인.</div><div class="tl-impact"><span class="tl-tag bad">코스피 -1.61%</span><span class="tl-tag good">숏커버링 역대급</span><span class="tl-tag good">대면회담 확정</span></div></div>
+    <div class="tl-item"><div class="tl-dot hope"></div><div class="tl-date">4/10 (금) — 재반등</div><div class="tl-title">🟢 외국인 1.1조 매수 + 이스라엘-레바논 직접 협상 시동</div><div class="tl-desc">새벽 네타냐후가 레바논과 직접 협상을 지시. 트럼프가 "종전 매우 낙관적, 이란 지도자들 합리적"이라 발언. CBS는 "휴전 협정을 중동 전체로 확장"이라 보도. 외국인이 코스피에서만 1.1조원을 쓸어담으며 +1.40%, 코스닥 +1.64% 동반 반등. TSMC 1Q 매출 +35% 서프라이즈로 AI 수요 견조 확인. 한은은 7연속 동결.</div><div class="tl-impact"><span class="tl-tag good">외국인 +1.1조</span><span class="tl-tag good">레바논 협상 개시</span><span class="tl-tag good">TSMC 서프라이즈</span></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-num">03</div><div><div class="section-title">프벤져스가 알려준 핵심</div><div class="section-subtitle">Team Insights · 우리 리더들은 뭐라고 했을까</div></div></div>
+
+  <div class="insight-card">
+    <div class="insight-top"><div class="insight-avatar" style="background:linear-gradient(135deg,#d4a84b,#b8922f)">혜</div><div><div class="insight-name">ㄱ 이혜나 대표</div><div class="insight-role">자산관리사 · 주간 350+건 발언 · 전략 총괄</div></div></div>
+    <div class="insight-body">이번 주 가장 많이 강조한 한 마디: <b>"큰 불은 이미 꺼졌습니다 😉 마음 졸이지 마시고 관망하세요🧡"</b><br><br>대표님은 월요일에는 <b>브라질채권 전량 매도</b>를 안내했어요. 4개월 만에 원금 3,000만원 기준 <b>비과세 509만원</b>(11~12%) 수익 달성. 매도 자금은 ① 원금 → NH 발행어음 ② 매매차익 → TQQQ 2분할 매수로 운용 안내했죠. 휴전 발표 이후엔 "2분기 나스닥 신고가 경신"을 전망하며 강한 상방 시나리오를 공유했습니다.</div>
+    <ul class="insight-bullets">
+      <li class="buy"><b>브라질채권 매도 → TQQQ 매수</b> — 매매차익 자금은 2분할로 TQQQ 진입. 적립을 멈추되 팔지 않는다</li>
+      <li class="hold"><b>2차전지 절대 정리 X</b> — "하반기에 더 좋아질 게 뻔히 보이는데 5~10% 먹고 정리하기엔 너무 아깝잖아요"</li>
+      <li class="buy"><b>방산은 무관심할 때 모은다</b> — 휴전 발표일 하락한 K방산. 사람들이 관심 끌 때가 아니라 무관심할 때가 매수 타이밍</li>
+      <li class="chart"><b>나스닥 22,500P 핵심 지지선</b> — 8개월 박스 하단 + 처음 TQQQ 적립 시작 자리. 22,700P 안착 시 신고가 가능성↑</li>
+      <li class="cash"><b>연금 포트 점검</b> — 종목 최소화 + 집중 + 잦은매매X + 금ETF 비중 추가 고려</li>
+    </ul>
+    <div class="insight-quote">"하락장일 때는 하락과 손실에만 집중하느라 정말 놓치면 안 될 큰 그림들이 잘 안 보이죠. 저는 2분기 나스닥이 신고가를 경신할 거라 봅니다. 우리 모두 같이 가보자고요!"</div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-top"><div class="insight-avatar" style="background:linear-gradient(135deg,#4a8fe7,#2563eb)">철</div><div><div class="insight-name">김병철</div><div class="insight-role">미장·테슬라·반도체 담당 · 주간 180+건 발언</div></div></div>
+    <div class="insight-body">이번 주 김병철님은 두 가지 큰 주제를 풀어주셨어요. 첫째는 월요일의 <b>터보퀀트 이슈</b>, 둘째는 <b>인텔-테라팹-스페이스X 삼위일체</b> 비전입니다.</div>
+    <ul class="insight-bullets">
+      <li class="edu"><b>터보퀀트 = 노이즈일 뿐</b> — "일 잘하면 회사에서 일을 덜 주나요? 더 줍니다." AI 효율화 → 더 많은 작업 부여 → 메모리 수요 오히려 증가</li>
+      <li class="news"><b>인텔 7거래일 +50% 폭등</b> — 구글·테슬라와의 협력 호재. "소 잃고 외양간 고치실 분은 지금부터 인텔 공부 시작🐮"</li>
+      <li class="chart"><b>D램 가격 체감</b> — DDR5 16GB 32만원(2026) vs DDR4 8GB 2.3만원(2023). "PC 지금이 제일 싼 것 같긴 합니다"</li>
+      <li class="news"><b>테슬라 모델YL 가격 인상</b> — 출시 한 달 만에 인상. "메모리만 싯가가 아닙니다"</li>
+    </ul>
+    <div class="insight-quote">"투자가 도파민 터지면 뭔가 잘못된 거고, 슴슴하니 노잼을 외쳐야 잘 하고 있는 거에요. 2026년은 AI시대 초입일 뿐입니다."</div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-top"><div class="insight-avatar" style="background:linear-gradient(135deg,#9b7ae8,#7c5ccc)">팀</div><div><div class="insight-name">밝쌤 · 탱이 · 황유정 · 김은지 · 문지영 · 임희성</div><div class="insight-role">시황 · 교육 · 뉴스 · 리서치 · 실시간 서포트</div></div></div>
+    <ul class="insight-bullets">
+      <li class="news"><b>밝쌤</b> — 새벽 6시부터 나스닥 추세전환 시그널 포착 + WGBI 편입 90조원 자금 유입 분석. "대장은 미국(나스닥, M7)이다"</li>
+      <li class="edu"><b>탱이</b> — 삼전 실적 비유("월급 300만원이 갑자기 2,200만원"), CFD 개념, 한은 동결 = 스태그플레이션 느낌 진단, 리튬 가격 = 2차전지 선행지표</li>
+      <li class="chart"><b>김은지</b> — 신한 리서치 "전쟁은 전술적 조정", 한투 어닝 Preview, 대신 "5월 이전 종전 + 코스피 PER 7.12 = Deep Value"</li>
+      <li class="news"><b>문지영</b> — 매일 마감 시황 + 외인/기관 TOP10. "악재 정점은 이미 통과, 실적 시즌이 반등 전환점"</li>
+      <li class="news"><b>황유정</b> — 키움 한지영 "버팀목" 시황 + Bloomberg "꼭 알아야 할 5가지" 매일 공유</li>
+      <li class="news"><b>임희성</b> — 휴전 속보 최초 공유 + 삼성전기 그록3 LPU 공급, HBM4 AMD 승인, K전력 기회의 장 등 핵심 종목 뉴스</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-num">04</div><div><div class="section-title">우리가 주목하는 섹터</div><div class="section-subtitle">Key Sectors · 이번 주 대화에서 가장 많이 나온 영역</div></div></div>
+  <div class="callout green"><span class="callout-icon">💡</span>휴전이 가시화되면서 "무엇을 살 것인가"가 다시 중요해졌어요. 프벤져스가 이번 주 집중 언급한 섹터를 정리했습니다.</div>
+  <div class="sector-grid">
+    <div class="sector-card"><div class="sector-head"><div class="sector-icon">💾</div><div><div class="sector-name">반도체</div><div class="sector-name-sub">실적이 증명한 주도주</div></div></div><div class="sector-stocks"><span>삼성전자</span><span>SK하이닉스</span><span>한미반도체</span><span>마이크론</span></div><div class="sector-note">삼성전자 1Q 영업이익 <b>57.2조원</b>(YoY +755%), SK하이닉스도 35조원 전망. HBM 물량은 올해 사실상 완판, 글로벌 빅테크들이 선입금 계약까지 감수 중. KB는 "36만전자" 제시. 메모리 공급 계약이 1년 → 3~5년 LTA로 전환되는 구조적 변화.</div></div>
+    <div class="sector-card"><div class="sector-head"><div class="sector-icon">🔋</div><div><div class="sector-name">이차전지</div><div class="sector-name-sub">"꽉쟙햐♥️"</div></div></div><div class="sector-stocks"><span>삼성SDI</span><span>LG엔솔</span><span>에코프로비엠</span><span>포스코홀딩스</span></div><div class="sector-note">시장이 조정받을 때도 역행 상승. 포스코홀딩스가 아르헨티나 리튬 광권 추가 확보(전기차 7,000만대분), 엘앤에프 하이니켈 양극재 경쟁력 강화. 이혜나 대표님 삼성SDI 유증 물량 +250% 수익 공유.</div></div>
+    <div class="sector-card"><div class="sector-head"><div class="sector-icon">🏗️</div><div><div class="sector-name">건설 / 종전 수혜</div><div class="sector-name-sub">중동 재건 모멘텀</div></div></div><div class="sector-stocks"><span>삼성E&A</span><span>현대건설</span><span>대우건설</span></div><div class="sector-note">휴전 당일 건설 업종 <b>+19.4%</b>로 상승률 1위. 트럼프가 "이란 재건 경제 협력" 언급. 중동 재건 + 호르무즈 정상화 + 신재생/원전 수요까지 겹치며 주목받는 섹터예요.</div></div>
+    <div class="sector-card"><div class="sector-head"><div class="sector-icon">🤖</div><div><div class="sector-name">로보틱스 / 자율주행</div><div class="sector-name-sub">2026 Investor Day 시즌</div></div></div><div class="sector-stocks"><span>현대차</span><span>기아</span><span>테슬라</span><span>두산로보틱스</span></div><div class="sector-note">기아가 2029년 미국 조지아 공장에 아틀라스 휴머노이드 투입 발표. 현대차는 엔비디아와 '데이터 연합' 결성, 도심 자율주행 2029년 목표. 테슬라 사이버캡 양산 개시 — 60대가 텍사스 기가팩토리에서 목격됐어요.</div></div>
+    <div class="sector-card"><div class="sector-head"><div class="sector-icon">⚡</div><div><div class="sector-name">AI 인프라 / 전력</div><div class="sector-name-sub">"미국 역사상 가장 큰 인프라 사이클"</div></div></div><div class="sector-stocks"><span>LS일렉트릭</span><span>한전기술</span><span>APLD</span></div><div class="sector-note">Applied Digital 어닝콜에서 "미국 역사상 가장 큰 인프라 투자 사이클" 확인. 전력 수요 폭증 → 인프라 병목 → 데이터센터 공급 부족 지속. 한국 SMP(전력도매가)도 47% 폭등.</div></div>
+    <div class="sector-card"><div class="sector-head"><div class="sector-icon">💄</div><div><div class="sector-name">K뷰티</div><div class="sector-name-sub">"무엇을 상상하든 그 이상"</div></div></div><div class="sector-stocks"><span>에이피알</span><span>메디큐브</span></div><div class="sector-note">에이피알 1Q26 영업이익 전망 <b>+160%</b>↑, 컨센서스 16~19% 상회 예상. 유럽 진출 확대로 글로벌 성장 가속. 밝쌤 曰: "리포트 제목 보고 그냥 지나칠 수가 없네요"</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-num">05</div><div><div class="section-title">이번 주 투자 전략</div><div class="section-subtitle">Action Plan · 지금 우리는 이렇게 합니다</div></div></div>
+  <div class="callout gold"><span class="callout-icon">🎯</span>핵심 원칙: <b>"찡찡할 시간에 걍 모읍니다." (이혜나 대표)</b><br>휴전 발표 후 시장이 빠르게 반등하면서, 이제는 "팔 때"가 아니라 "원칙대로 모을 때"입니다.</div>
+  <div class="strategy-box">
+    <div class="strat-row"><div class="strat-num" style="background:var(--green-bg);color:var(--green)">①</div><div><div class="strat-title">📈 TQQQ 일적립 + 분할매수 지속</div><div class="strat-desc">TQQQ는 적립 시작 부근까지 회복 — 전고점까지 약 -5%만 남았어요. 일적립 멈추지 않고, 브라질채권 매도 매매차익은 2분할로 TQQQ 진입. 22,700P 안착 시 신고가 시나리오.</div><div class="strat-why">하락 구간에 모은 평균 단가가 반등 시 수익으로 직결돼요. 적립을 멈추는 게 가장 큰 손해입니다.</div></div></div>
+    <div class="strat-row"><div class="strat-num" style="background:var(--gold-bg);color:var(--gold)">②</div><div><div class="strat-title">💵 브라질채권 매도 자금 운용법</div><div class="strat-desc">원금 → <b>NH 원화발행어음</b>(외화발행어음 아님!)에 안전하게 보관. 이자+매매차익 → TQQQ. 환율 280원 이하 시 발행어음 매도 후 브채 재진입(5~6월 예상).</div><div class="strat-why">원금은 지키면서, 차익은 다음 기회에 베팅하는 구조. 4개월 비과세 11~12% 수익을 안전하게 이어가는 방법이에요.</div></div></div>
+    <div class="strat-row"><div class="strat-num" style="background:var(--blue-bg);color:var(--blue)">③</div><div><div class="strat-title">✋ 2차전지 보유 유지 + 방산 모으기</div><div class="strat-desc">2차전지는 <b>"하반기에 더 좋아질 게 뻔히 보이는" 종목</b>. 5~10% 수익에 정리하지 마세요. 방산은 휴전 발표일 하락 — 지금 무관심할 때가 모아둘 타이밍입니다.</div><div class="strat-why">에너지 안보 위기 + AI ESS 수요로 2차전지 업황 회복 시그널 곳곳에 포착. 미래에셋 전망에 따르면 4개 핵심 섹터(반도체·전력기기·조선·방산) 모두 2026년 실적 우상향.</div></div></div>
+    <div class="strat-row"><div class="strat-num" style="background:var(--red-bg);color:var(--red)">④</div><div><div class="strat-title">🚨 이것만은 절대 하지 마세요</div><div class="strat-desc"><b>× 급등한 날 FOMO 추격매수</b> — 휴전 발표 다음 날처럼 조정이 옵니다.<br><b>× 휴전 뉴스 한두 건에 전량 매수/매도</b> — 협상 과정 노이즈 불가피.<br><b>× 브채 매도 자금으로 몰래 다른 주식 사기</b> — "대표님이 보고 계십니다👀"</div></div></div>
+  </div>
+
+  <div style="margin-top:28px">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:14px">📋 이번 주 프로미 할 일 체크리스트</h3>
+    <div class="checklist">
+      <div class="check-item"><div class="check-icon do">✓</div><div><b>브라질채권 매도</b> 완료 확인 → 원금은 원화발행어음, 차익은 TQQQ 2분할</div></div>
+      <div class="check-item"><div class="check-icon do">✓</div><div><b>연금계좌 점검</b> — 종목 최소화, 금ETF 비중 추가 고려</div></div>
+      <div class="check-item"><div class="check-icon do">✓</div><div><b>2차전지 보유 유지</b> — 에너지 안보 + AI ESS 회복 시그널</div></div>
+      <div class="check-item"><div class="check-icon watch">👁</div><div><b>5/17 오프라인 강의</b> — 일요일(4/12) 오전 10시 링크 오픈, 550석 4분 컷 예상</div></div>
+      <div class="check-item"><div class="check-icon watch">👁</div><div><b>코루(코코레)</b> 변동성 큰 종목 — 절반 이상 차익실현 권장 (대응 어려운 분 한정)</div></div>
+      <div class="check-item"><div class="check-icon dont">✕</div><div>휴전 뉴스 한두 건에 <b>전량 매매</b> 하지 않기</div></div>
+      <div class="check-item"><div class="check-icon dont">✕</div><div>유가 부담만 보고 <b>과도한 비관</b> 금지</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-num">06</div><div><div class="section-title">Easy Economics</div><div class="section-subtitle"> 이번 주 배운 것</div></div></div>
+  <div class="callout purple"><span class="callout-icon">👩‍🏫</span>이번 주 대화에서 나온 어려운 용어들, 한 번에 정리해드릴게요!</div>
+
+  <div class="edu-card">
+    <div class="edu-tag gold">💾 철이쌤의 한 마디</div>
+    <div class="edu-title">터보퀀트가 뭐길래 메모리주가 떨어졌나요?</div>
+    <div class="edu-body"><b>한 줄 요약:</b> 구글이 AI의 "메모장(KV캐시)"을 1/6로 압축하면서도 정확도를 유지하는 기술이에요. 시장은 "메모리 덜 필요하면 삼전·하이닉스 큰일!"이라며 일시 과민반응했죠.
+    <div class="edu-box example"><b>🤔 김병철님의 반박</b><br><br>"일 잘하면 회사에서 일을 덜 주나요? 더 줍니다." 10시간 걸릴 일을 2시간 만에 해치우는 직원에게 사장은 더 많은 일을 시킵니다. AI도 마찬가지 — 효율적이 되면 더 많은 작업을 시키고, 결국 메모리 수요는 <b>오히려 늘어나요</b>.<br><br>2000년대 mp3·jpeg(파일 압축 기술) 나왔을 때 음악·사진 업계가 망했나요? 아이팟과 아이폰이 나왔죠.</div>
+    💡 딥시크(2025초) → TPU(2025하반기) → 터보퀀트(2026)… 매번 "메모리 끝났다" 노이즈가 나왔지만 결과는 그저 시장 조정의 재료였을 뿐. <b>AI시대 메모리 수요는 이제 시작</b>이에요.</div>
+  </div>
+
+  <div class="edu-card">
+    <div class="edu-tag blue">📊 탱이쌤의 한 마디</div>
+    <div class="edu-title">CFD(차액결제거래) — 주식 없이 주가로 돈 버는 법?</div>
+    <div class="edu-body"><b>한 줄 요약:</b> 실제 주식을 사지 않고, "가격 차이"만으로 수익을 얻는 거래 방식이에요.
+    <div class="edu-box example"><b>🛒 쉬운 예시</b><br><br>삼성전자를 30만원에 CFD 매수해두고 → 40만원이 되면? <b>주식을 갖고 있지 않아도 10만원 차익</b>!<br>반대로 30만원에 CFD 매도(숏)해두고 → 20만원이 되면? 역시 10만원 차익!</div>
+    <b>📊 CFD 매수잔고율</b>이 높다는 건 = "이 기업의 상승에 베팅한 돈이 많다"는 뜻. 이번 주 CFD 신규매수 1위는 <b>삼성전자</b>(133.64억). 상위 1% 고수들도 삼전에 집중 중이에요. 단, 탱이쌤 조언: <b>"시장 방향 확인하시고, 기업 체크 정도만 하세요."</b></div>
+  </div>
+
+  <div class="edu-card">
+    <div class="edu-tag purple">🇰🇷 탱이쌤의 두마디</div>
+    <div class="edu-title">한국 = 스태그플레이션 느낌? 한은이 7번째 동결한 이유</div>
+    <div class="edu-body"><b>금리 = 돈의 값.</b> 한은이 4/10 기준금리를 연 2.50%로 7회 연속 동결했어요. 탱이쌤은 한국이 지금 <b>"이러지도 저러지도 못하는 진퇴양난"</b>이라고 진단했습니다.
+    <div class="edu-box tip"><b>🤯 왜 동결만 할까?</b><br><br><b>인하 못함</b> → 환율·유가·물가 불안. 금리 내리면 환율이 더 오르고 수입물가 폭등<br><b>인상 못함</b> → 미국 눈치 + 가계부채 부담. 올리면 경기가 죽어버림<br><br>다행히 수출(반도체·조선·방산)이 받쳐주고 있어서 당장은 인하가 급하지 않은 상태예요.</div>
+    💡 <b>리튬 가격 = 2차전지 선행지표.</b> 2022년 12월 리튬 최고치 → 2023년 여름 포스코홀딩스 정점. 최근 리튬이 다시 상승세 → "2022년 냄새가 솔솔" 난다는 신호입니다.</div>
+  </div>
+</div>
+
+<div class="weekly-quote">
+  <blockquote>"큰 불은 이미 꺼졌습니다 😉"</blockquote>
+  <cite>— 이혜나 대표, 4월 9일</cite>
+  <div class="divider-gold"></div>
+  <p style="font-size:14px;color:var(--text-3);max-width:520px;margin:0 auto;line-height:1.9">"끊임없는 엎치락뒤치락 트럼프의 말바꾸기, 전시 상황 변동으로<br>심리적으로 매우 불편할 수 있는 시장입니다.<br>그럼 우리가 해야 할 건 뭐다? 큰 그림을 보고 갑시다."<br><br><span style="font-size:12px">우리 프로미는 이번에도 함께 견뎌냈고, 그 인내가 보상받았습니다 💛</span></p>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-num">07</div><div><div class="section-title">다음 주 이것만은 꼭!</div><div class="section-subtitle">Next Week Preview · W15에 주목할 포인트</div></div></div>
+  <div class="strategy-box">
+    <div class="strat-row"><div class="strat-num" style="background:var(--red-bg);color:var(--red)">⚡</div><div><div class="strat-title">주말 미-이란 대면 협상 (4/11~12)</div><div class="strat-desc">이슬라마바드에서 이란 대표단과 미국이 대면 회담. 이란이 제시한 10개 조건에 기초한 진지한 회담. 결과에 따라 월요일 시초가가 크게 좌우될 수 있어요.</div></div></div>
+    <div class="strat-row"><div class="strat-num" style="background:var(--green-bg);color:var(--green)">📊</div><div><div class="strat-title">미국 3월 CPI 발표</div><div class="strat-desc">컨센서스 헤드라인 3.4%(전월 2.4%) 급등 예상이지만, 이미 시장이 반영한 부분이 많아 컨센 부합 시 중립적 영향. 에너지 가격 반영분이 핵심 변수.</div></div></div>
+    <div class="strat-row"><div class="strat-num" style="background:var(--blue-bg);color:var(--blue)">🏛️</div><div><div class="strat-title">4/16 케빈 워시 차기 연준의장 청문회</div><div class="strat-desc">비둘기파 vs 양적긴축 매파 성향 확인. 발언 톤에 따라 채권·달러 방향이 결정될 가능성이 높아요.</div></div></div>
+    <div class="strat-row"><div class="strat-num" style="background:var(--purple-bg);color:var(--purple)">🎫</div><div><div class="strat-title">5/17 오프라인 강의 신청 (4/12 오전 10시)</div><div class="strat-desc">일요일 오전 10시 링크 오픈. <b>550석 4분 컷</b> 예상! 미리 알람 맞춰두세요.</div></div></div>
+  </div>
+</div>
+
+</div>
+
+<div class="report-footer">
+  <div class="logo">From Us</div>
+  <p>프롬어스 Weekly Report · W14 · 2026.04.06 — 04.10</p>
+  <p style="margin-top:8px">카카오톡 대화 분석 기반 · 프로미를 위한 주간 리포트</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--text-4)">본 리포트는 프롬어스 내부 대화를 분석하여 생성되었으며, 투자 권유가 아닙니다.</p>
+</div>
+
+</body>
+</html>
