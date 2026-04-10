@@ -1,0 +1,32 @@
+name: Build Index
+
+on:
+  push:
+    paths:
+      - 'reports/**'
+      - 'build_index.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run build_index.py
+        run: python build_index.py
+
+      - name: Commit and push index.html
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'auto: rebuild index.html'
+          file_pattern: 'index.html'
