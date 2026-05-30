@@ -444,8 +444,8 @@ def aggregate(reports, window_days=31):
             for raw in sec["stocks"]:
                 nm, ann = split_stock_token(raw)
                 nm = normalize_stock(nm)
-                if not nm or nm in STOCK_STOPWORDS or len(nm) < 2:
-                    continue
+                if not nm or nm in STOCK_STOPWORDS or len(nm) < 2 or nm[0].isdigit():
+                    continue   # 날짜·숫자 토큰(예: '27일') 제거
                 T = stocks.setdefault(nm, {"name": nm, "mentions": [], "sectors": set(),
                                            "themes": set(), "supply_tags": set(),
                                            "targets": [], "count": 0,
