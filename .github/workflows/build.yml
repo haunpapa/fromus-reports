@@ -1,10 +1,19 @@
+# ───────────────────────────────────────────────────────────────
+#  Build Index + Knowledge Hub  (기존 build.yml 대체본)
+#  기존 동작(아카이브 index.html 생성)은 그대로 두고,
+#  지식 허브(hub.html + knowledge_base.json) 생성 단계만 추가했습니다.
+#  → 워크플로 1개가 둘을 한 번에 커밋 = 동시 푸시 경합/무한루프 없음.
+#  설치: 기존 .github/workflows/build.yml 을 이 내용으로 교체.
+# ───────────────────────────────────────────────────────────────
 name: Build Index
 
 on:
   push:
     paths:
-      - 'reports/**'
-      - 'build_index.py'
+      - 'reports/**'          # 새 리포트가 올라오면
+      - 'build_index.py'      # 아카이브 생성기 변경 시
+      - 'build_hub.py'        # 허브 생성기 변경 시
+      - 'hub_template.html'   # 허브 UI 변경 시
   workflow_dispatch:
 
 permissions:
@@ -22,11 +31,17 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run build_index.py
+      - name: Install deps (knowledge hub)
+        run: pip install beautifulsoup4 lxml
+
+      - name: Run build_index.py (아카이브 목록 — 기존 그대로)
         run: python build_index.py
 
-      - name: Commit and push index.html
+      - name: Run build_hub.py (지식 허브)
+        run: python build_hub.py --src . --out hub.html --json knowledge_base.json
+
+      - name: Commit and push (index + hub 한 번에)
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'auto: rebuild index.html'
-          file_pattern: 'index.html'
+          commit_message: 'auto: rebuild index + knowledge hub'
+          file_pattern: 'index.html hub.html knowledge_base.json'
