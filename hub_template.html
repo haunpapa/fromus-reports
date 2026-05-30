@@ -112,7 +112,14 @@ mark{background:var(--gold-bg);color:var(--gold);padding:0 2px;border-radius:3px
 .core-why{font-size:12.5px;color:var(--text-2);line-height:1.65;}
 .core-why .lbl{color:var(--gold);font-weight:700;}
 .core-meta{margin-top:7px;font-size:11px;color:var(--text-4);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.core-chip{font-size:10.5px;padding:2px 7px;border-radius:100px;background:var(--surface-2);color:var(--text-3);font-family:'JetBrains Mono',monospace;}
+.core-chip{font-size:10.5px;padding:2px 7px;border-radius:100px;background:var(--surface-2);color:var(--text-3);font-family:'JetBrains Mono',monospace;cursor:pointer;}
+.rep-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);}
+.core-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px;}
+/* 지수 3분할 차트 */
+.idx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:10px;}
+.idx-h{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:6px;}
+.idx-h i{display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;}
+.idx-chart{position:relative;height:180px;}
 
 /* ── SECTOR CARDS ── */
 .cluster{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
@@ -250,7 +257,10 @@ const srcLink = id => (id&&FILE[id]) ? `<a class="src" href="${esc(FILE[id])}" t
 const fmtDate = d => !d?'' : (/^\d{4}-W/.test(d) ? d.replace('-',' ') : (d.length>=10? d.slice(5).replace('-','/'):d));
 const RECENT_LABEL = (()=>{const rf=(D.build&&D.build.recent_from)||''; return rf? ('최근 1개월 · '+fmtDate(rf)+'~ 기준 · 언급순') : '최근 1개월 · 언급순';})();
 // 섹터의 '근거' = note 있는 최신 멘션
-function sectorWhy(s){const ms=(s.mentions||[]);for(let i=ms.length-1;i>=0;i--){if(ms[i].note&&ms[i].note.length>12)return ms[i];}return ms.length?ms[ms.length-1]:null;}
+function sectorWhy(s){const ms=(s.mentions||[]);
+  for(let i=ms.length-1;i>=0;i--){const n=ms[i].note||'';if(n.length>12&&(n.includes('대표님')||n.includes('이혜나')))return ms[i];}  // 대표님 언급 근거 우선
+  for(let i=ms.length-1;i>=0;i--){if(ms[i].note&&ms[i].note.length>12)return ms[i];}
+  return ms.length?ms[ms.length-1]:null;}
 
 /* ───────── TABS ───────── */
 const TABS=['home','sectors','stocks','strategy','glossary'];
@@ -272,7 +282,9 @@ function renderHome(){
   const topStocks=(D.stocks||[]).slice(0,10);
   const latest=(D.stance||[]).slice(-1)[0]||{};
   const topPrin=(D.principles||[]).slice(0,4);
-  const coreSectors=(D.sectors||[]).map(s=>({s,why:sectorWhy(s)})).filter(x=>x.why).slice(0,3);
+  const REP_W=2;  // 대표님 직접 언급 가중치
+  const coreSectors=(D.sectors||[]).map(s=>({s,why:sectorWhy(s),score:(s.count||0)+REP_W*(s.rep||0)}))
+    .filter(x=>x.why).sort((a,b)=>(b.score-a.score)||(b.s.count-a.s.count)).slice(0,5);
   $('#view-home').innerHTML = `
     <div class="hero"><div class="hero-content">
       <div class="label">From Us · Knowledge Hub</div>
@@ -287,30 +299,33 @@ function renderHome(){
       <div class="stat"><div class="v">${(D.sectors||[]).length}</div><div class="l">섹터·1M</div></div>
       <div class="stat"><div class="v">${(D.glossary||[]).length}</div><div class="l">용어</div></div>
     </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="sec-title" style="margin:0 0 4px;font-size:17px">📉 지수 추이</div>
-        <div class="sec-sub">KOSPI · KOSDAQ — 데일리 종가(자동 추출)</div>
-        <div class="chart-wrap"><canvas id="trend"></canvas></div>
-        <div class="chart-legend" id="trendLegend"></div>
+    <div class="card">
+      <div class="sec-title" style="margin:0 0 4px;font-size:17px">📉 지수 추이</div>
+      <div class="sec-sub">KOSPI · KOSDAQ · 나스닥 — 데일리 종가(자동 추출 · 전체 기간) · 독립 3분할</div>
+      <div class="idx-grid">
+        <div class="idx-cell"><div class="idx-h"><i style="background:#dc2626"></i>KOSPI</div><div class="idx-chart"><canvas id="cKOSPI"></canvas></div></div>
+        <div class="idx-cell"><div class="idx-h"><i style="background:#2563eb"></i>KOSDAQ</div><div class="idx-chart"><canvas id="cKOSDAQ"></canvas></div></div>
+        <div class="idx-cell"><div class="idx-h"><i style="background:#7c3aed"></i>나스닥</div><div class="idx-chart"><canvas id="cNAS"></canvas></div></div>
       </div>
-      <div class="card">
-        <div class="sec-title" style="margin:0 0 4px;font-size:17px">🧭 지금 살아있는 전략</div>
-        <div class="sec-sub">최신 스탠스 · 반복 강화된 원칙</div>
-        <div class="now-strat">
-          <div class="q">“${esc((latest.quote||latest.report_quote||'').slice(0,160))}”</div>
-          <cite>— ${esc(latest.name||'프벤져스')}, ${esc(fmtDate(latest.date))} · ${esc(latest.headline||'')}</cite>
-        </div>
-        <div style="margin-top:14px">
-          ${topPrin.map(p=>`<span class="chip" data-go="strategy">${p.icon} ${esc(p.principle.split(' — ')[0])} <span class="n">${p.count}</span></span>`).join('')}
-        </div>
-        <div class="core-head">🎯 프벤져스 코어 섹터 <span style="font-weight:400;color:var(--text-4)">· ${RECENT_LABEL.replace(' · 언급순','')} 강조 빈도순 · 근거 포함</span></div>
-        ${coreSectors.map((x,i)=>{const s=x.s,w=x.why; const note=(w.note||''); const short=note.length>180?note.slice(0,178)+'…':note; const chips=(s.stocks||[]).slice(0,4).map(n=>`<span class="core-chip" data-stock="${esc(n)}">${esc(n)}</span>`).join(''); return `
-          <div class="core-sec">
-            <div class="core-top"><span class="core-rank">${i+1}</span><span class="core-name">${esc(s.theme)}</span><span class="count-badge">${s.count}회</span></div>
-            <div class="core-why"><span class="lbl">근거</span> ${esc(short)}</div>
-            <div class="core-meta">${esc(fmtDate(w.date))} 기준 ${srcLink(w.id)} ${chips}</div>
-          </div>`;}).join('') || '<div style="font-size:12px;color:var(--text-4);margin-top:8px">근거 있는 섹터 데이터가 아직 없습니다.</div>'}
+    </div>
+    <div class="card">
+      <div class="sec-title" style="margin:0 0 4px;font-size:17px">🧭 지금 살아있는 전략</div>
+      <div class="sec-sub">최신 스탠스 · 반복 강화된 원칙 · 프벤져스 코어 섹터</div>
+      <div class="now-strat">
+        <div class="q">“${esc((latest.quote||latest.report_quote||'').slice(0,160))}”</div>
+        <cite>— ${esc(latest.name||'프벤져스')}, ${esc(fmtDate(latest.date))} · ${esc(latest.headline||'')}</cite>
+      </div>
+      <div style="margin-top:14px">
+        ${topPrin.map(p=>`<span class="chip" data-go="strategy">${p.icon} ${esc(p.principle.split(' — ')[0])} <span class="n">${p.count}</span></span>`).join('')}
+      </div>
+      <div class="core-head">🎯 프벤져스 코어 섹터 TOP 5 <span style="font-weight:400;color:var(--text-4)">· ${RECENT_LABEL.replace(' · 언급순','')} 강조 · 대표님 직접 언급 가중 · 근거 포함</span></div>
+      <div class="core-grid">
+      ${coreSectors.map((x,i)=>{const s=x.s,w=x.why; const note=(w.note||''); const short=note.length>200?note.slice(0,198)+'…':note; const chips=(s.stocks||[]).slice(0,4).map(n=>`<span class="core-chip" data-stock="${esc(n)}">${esc(n)}</span>`).join(''); const repBadge=(s.rep||0)>0?`<span class="rep-badge">👑 대표님 강조 ${s.rep}</span>`:''; return `
+        <div class="core-sec">
+          <div class="core-top"><span class="core-rank">${i+1}</span><span class="core-name">${esc(s.theme)}</span><span class="count-badge">${s.count}회</span>${repBadge}</div>
+          <div class="core-why"><span class="lbl">근거</span> ${esc(short)}</div>
+          <div class="core-meta">${esc(fmtDate(w.date))} 기준 ${srcLink(w.id)} ${chips}</div>
+        </div>`;}).join('') || '<div style="font-size:12px;color:var(--text-4);margin-top:8px">근거 있는 섹터 데이터가 아직 없습니다.</div>'}
       </div>
     </div>
     <div class="card">
@@ -324,25 +339,24 @@ function renderHome(){
   drawTrend();
 }
 function drawTrend(){
-  const S=D.series||{}, k=S['코스피']||[], k2=S['코스닥']||[];
-  const legend=$('#trendLegend');
-  if(!window.Chart || !k.length){
-    const last=k.slice(-1)[0], last2=k2.slice(-1)[0];
-    $('#trend').outerHTML=`<div class="empty">코스피 ${last?last.value.toLocaleString():'-'} · 코스닥 ${last2?last2.value.toLocaleString():'-'}<br><span style="font-size:11px">(차트 표시 불가 — 오프라인)</span></div>`;
+  const S=D.series||{};
+  miniChart('cKOSPI', S['코스피'], '#dc2626');
+  miniChart('cKOSDAQ', S['코스닥'], '#2563eb');
+  miniChart('cNAS', S['나스닥'], '#7c3aed');
+}
+function miniChart(id, data, color){
+  const el=document.getElementById(id); if(!el) return;
+  if(!window.Chart || !data || data.length<2){
+    const wrap=el.closest('.idx-chart');
+    const last=(data&&data.length)?data[data.length-1].value.toLocaleString():null;
+    if(wrap) wrap.innerHTML=`<div class="empty" style="padding:28px 8px;font-size:12px">데이터 부족<br><span style="font-size:10.5px;color:var(--text-4)">${last?('최근값 '+last):'리포트에 종가 미기재일 多'}</span></div>`;
     return;
   }
-  const labels=k.map(p=>fmtDate(p.date));
-  new Chart($('#trend'),{type:'line',
-    data:{labels,datasets:[
-      {label:'KOSPI',data:k.map(p=>p.value),borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,.06)',tension:.3,fill:true,yAxisID:'y',pointRadius:2},
-      {label:'KOSDAQ',data:k2.map(p=>p.value),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.05)',tension:.3,fill:true,yAxisID:'y1',pointRadius:2}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false}},
-      scales:{y:{position:'left',grid:{color:'#f0ece5'},ticks:{font:{family:'JetBrains Mono',size:10},color:'#dc2626'}},
-              y1:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{family:'JetBrains Mono',size:10},color:'#2563eb'}},
-              x:{grid:{display:false},ticks:{font:{family:'JetBrains Mono',size:10},color:'#8a847a',maxRotation:0,autoSkip:true,maxTicksLimit:8}}}}});
-  legend.innerHTML=`<span><i style="background:#dc2626"></i>KOSPI</span><span><i style="background:#2563eb"></i>KOSDAQ</span>`;
+  new Chart(el,{type:'line',
+    data:{labels:data.map(p=>fmtDate(p.date)),datasets:[{data:data.map(p=>p.value),borderColor:color,backgroundColor:color+'14',tension:.3,fill:true,pointRadius:2,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{grid:{color:'#f0ece5'},ticks:{font:{family:'JetBrains Mono',size:9},color:color}},
+              x:{grid:{display:false},ticks:{font:{family:'JetBrains Mono',size:9},color:'#8a847a',maxRotation:0,autoSkip:true,maxTicksLimit:5}}}}});
 }
 
 /* ───────── SECTORS ───────── */

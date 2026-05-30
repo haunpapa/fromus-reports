@@ -78,6 +78,10 @@ SECTOR_THEME = [
     (("은(", "은銀", "안전자산", "원자재"), "원자재·안전자산"),
     (("삼성그룹", "삼성그룹 동반"), "삼성그룹"),
 ]
+# 테마 → 키워드 역매핑 (대표님 직접 언급 가중 판정용)
+THEME_KEYS = {}
+for _keys, _theme in SECTOR_THEME:
+    THEME_KEYS.setdefault(_theme, _keys)
 
 # 수급(스마트머니) 카드 식별 — 테마 섹터와 분리
 def is_supply_card(name):
@@ -427,16 +431,29 @@ def aggregate(reports, window_days=31):
     supply_days = []   # 날짜별 스마트머니 TOP
     for r in recent:
         label = r.get("date") or r.get("id")
+        # 이혜나 대표님 발언 텍스트(인용·핵심메시지·불릿) — 섹터 가중 판정용
+        rep_text = ""
+        for _i in r["insights"]:
+            if "이혜나" in _i.get("name", ""):
+                rep_text += " " + (_i.get("quote") or "")
+                rep_text += " " + " ".join((k.get("title","")+" "+k.get("desc","")) for k in _i.get("key_messages", []))
+                rep_text += " " + " ".join((b.get("text") or "") for b in _i.get("bullets", []))
+        rep_text = rep_text.lower()
         for sec in r["sectors"]:
             supply = is_supply_card(sec["name"])
             theme = sector_theme(sec["name"])
             if not supply:
                 S = sectors.setdefault(theme, {"theme": theme, "names": set(), "mentions": [],
-                                               "stocks": set(), "count": 0})
+                                               "stocks": set(), "count": 0, "rep": 0})
                 S["names"].add(sec["name"]); S["count"] += 1
                 S["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
                                       "name": sec["name"], "sub": sec["sub"],
                                       "stocks": sec["stocks"], "note": sec["note"]})
+                # 대표님 직접 언급 가중: 섹터 노트에 대표님/이혜나 또는 대표님 발언에 테마 키워드
+                note_l = sec["note"] or ""
+                kws = THEME_KEYS.get(theme, (theme,))
+                if ("대표님" in note_l) or ("이혜나" in note_l) or any(kw and kw.lower() in rep_text for kw in kws):
+                    S["rep"] += 1
             else:
                 supply_days.append({"date": label, "rtype": r["type"], "id": r["id"],
                                     "label": sec["name"], "who": supply_tag(sec["name"]),
@@ -562,12 +579,14 @@ def aggregate(reports, window_days=31):
             continue
         for canon, match in CANON:
             for ind in r["indicators"]:
-                if match(ind["label"]):
-                    v = parse_num(ind["value"])
-                    if v is not None:
-                        series[canon].append({"date": r["date"], "value": v,
-                                              "change": ind["change"]})
-                        break
+                if not match(ind["label"]):
+                    continue
+                if "%" in (ind["value"] or ""):     # 등락률(%) 값은 종가 레벨이 아님 → 제외
+                    continue
+                v = parse_num(ind["value"])
+                if v is not None:
+                    series[canon].append({"date": r["date"], "value": v, "change": ind["change"]})
+                    break
     series = {k: v for k, v in series.items() if v}
 
     return {
