@@ -301,7 +301,7 @@ function renderHome(){
     </div>
     <div class="card">
       <div class="sec-title" style="margin:0 0 4px;font-size:17px">📉 지수 추이</div>
-      <div class="sec-sub">KOSPI · KOSDAQ · 나스닥 — 데일리 종가(자동 추출 · 전체 기간) · 독립 3분할</div>
+      <div class="sec-sub">KOSPI · KOSDAQ · 나스닥 — 일별 종가 · 독립 3분할 · ${(b.index_source==='yfinance')?'야후 파이낸스 연동(정확·무오차)':'리포트 추출값'}</div>
       <div class="idx-grid">
         <div class="idx-cell"><div class="idx-h"><i style="background:#dc2626"></i>KOSPI</div><div class="idx-chart"><canvas id="cKOSPI"></canvas></div></div>
         <div class="idx-cell"><div class="idx-h"><i style="background:#2563eb"></i>KOSDAQ</div><div class="idx-chart"><canvas id="cKOSDAQ"></canvas></div></div>

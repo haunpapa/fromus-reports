@@ -688,6 +688,40 @@ def inject_hub_button(index_path):
             f.write(html)
         print(f"→ {index_path} 에 지식 허브 버튼 주입 완료")
 
+# ─────────────────────────────────────────────────────────────────────────
+# 지수 시계열 — 야후 파이낸스(yfinance) 정확 일별 종가로 연동 (MCP와 동일 소스)
+#   리포트 스크랩값의 오차/누락(특히 나스닥)을 무오차 데이터로 대체. 실패 시 폴백.
+# ─────────────────────────────────────────────────────────────────────────
+INDEX_TICKERS = [("코스피", "^KS11"), ("코스닥", "^KQ11"), ("나스닥", "^IXIC")]
+
+def fetch_index_series(reports):
+    try:
+        import yfinance as yf
+    except Exception as e:
+        print(f"ℹ️ yfinance 미설치 — 리포트 추출 시계열 사용 ({repr(e)[:80]})")
+        return {}
+    dates = [r["sort_date"] for r in reports if r.get("sort_date") and r["sort_date"] <= "9999"]
+    if not dates:
+        return {}
+    lo = min(datetime.date.fromisoformat(d) for d in dates) - datetime.timedelta(days=4)
+    hi = max(datetime.date.fromisoformat(d) for d in dates) + datetime.timedelta(days=2)
+    out = {}
+    for name, tk in INDEX_TICKERS:
+        try:
+            h = yf.Ticker(tk).history(start=lo.isoformat(), end=hi.isoformat(), interval="1d")
+            pts = []
+            for idx, row in h.iterrows():
+                v = float(row["Close"])
+                if v != v or v <= 0:      # NaN/이상치 제외
+                    continue
+                pts.append({"date": idx.date().isoformat(), "value": round(v, 2), "change": ""})
+            if len(pts) >= 2:
+                out[name] = pts
+                print(f"  ✓ 지수 {name}({tk}) {len(pts)}일 (야후)")
+        except Exception as e:
+            print(f"  ✗ 지수 {name}({tk}) 실패: {repr(e)[:100]}")
+    return out
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", default=".", help="리포트 탐색 루트 폴더")
@@ -713,6 +747,9 @@ def main():
             print(f"  ✗ {os.path.basename(p)}  ({e})")
     reports.sort(key=lambda r: r["sort_date"])
     agg = aggregate(reports)
+    idx_series = fetch_index_series(reports)      # 야후 정확 지수로 시계열 덮어쓰기
+    if idx_series:
+        agg["series"].update(idx_series)
     search = build_search(reports, agg)
 
     daily = [r for r in reports if r["type"] == "daily"]
@@ -722,7 +759,8 @@ def main():
                   "reports": len(reports), "daily": len(daily), "weekly": len(weekly),
                   "from": daily[0]["date"] if daily else (reports[0]["id"] if reports else ""),
                   "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else ""),
-                  "recent_from": agg.get("recent_from", ""), "recent_reports": agg.get("recent_reports", 0)},
+                  "recent_from": agg.get("recent_from", ""), "recent_reports": agg.get("recent_reports", 0),
+                  "index_source": "yfinance" if idx_series else "report"},
         "reports": reports, "search": search, **agg,
     }
     with open(args.json, "w", encoding="utf-8") as f:
