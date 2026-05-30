@@ -289,7 +289,7 @@ function renderHome(){
     <div class="hero"><div class="hero-content">
       <div class="label">From Us · Knowledge Hub</div>
       <h1>흩어진 리포트를<br><em>하나의 전략</em>으로</h1>
-      <p>${esc(b.from||'')} ~ ${esc(b.to||'')} 데일리·위클리 리포트를 구조화해, 섹터·종목·전략·용어를 한곳에서 검색하고 점검합니다.</p>
+      <p>데일리·위클리 리포트를 구조화해, 섹터·종목·전략·용어를 한곳에서 검색하고 점검합니다.</p>
     </div></div>
     <div class="statrow">
       <div class="stat"><div class="v">${b.reports||0}</div><div class="l">리포트</div></div>
@@ -318,7 +318,7 @@ function renderHome(){
       <div style="margin-top:14px">
         ${topPrin.map(p=>`<span class="chip" data-go="strategy">${p.icon} ${esc(p.principle.split(' — ')[0])} <span class="n">${p.count}</span></span>`).join('')}
       </div>
-      <div class="core-head">🎯 프벤져스 코어 섹터 TOP 5 <span style="font-weight:400;color:var(--text-4)">· ${RECENT_LABEL.replace(' · 언급순','')} 강조 · 대표님 직접 언급 가중 · 근거 포함</span></div>
+      <div class="core-head">🎯 프벤져스 코어 섹터 TOP 5 <span style="font-weight:400;color:var(--text-4)">· 최근 1개월 기준</span></div>
       <div class="core-grid">
       ${coreSectors.map((x,i)=>{const s=x.s,w=x.why; const note=(w.note||''); const short=note.length>200?note.slice(0,198)+'…':note; const chips=(s.stocks||[]).slice(0,4).map(n=>`<span class="core-chip" data-stock="${esc(n)}">${esc(n)}</span>`).join(''); const repBadge=(s.rep||0)>0?`<span class="rep-badge">👑 대표님 강조 ${s.rep}</span>`:''; return `
         <div class="core-sec">
