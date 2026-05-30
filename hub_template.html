@@ -238,6 +238,7 @@ const FILE = {};
 (D.reports||[]).forEach(r=>{ if(r.id&&r.file) FILE[r.id]=r.file; });
 const srcLink = id => (id&&FILE[id]) ? `<a class="src" href="${esc(FILE[id])}" target="_blank" rel="noopener">원문↗</a>` : '';
 const fmtDate = d => !d?'' : (/^\d{4}-W/.test(d) ? d.replace('-',' ') : (d.length>=10? d.slice(5).replace('-','/'):d));
+const RECENT_LABEL = (()=>{const rf=(D.build&&D.build.recent_from)||''; return rf? ('최근 1개월 · '+fmtDate(rf)+'~ 기준 · 언급순') : '최근 1개월 · 언급순';})();
 
 /* ───────── TABS ───────── */
 const TABS=['home','sectors','stocks','strategy','glossary'];
@@ -269,8 +270,8 @@ function renderHome(){
       <div class="stat"><div class="v">${b.reports||0}</div><div class="l">리포트</div></div>
       <div class="stat"><div class="v">${b.daily||0}</div><div class="l">데일리</div></div>
       <div class="stat"><div class="v">${b.weekly||0}</div><div class="l">위클리</div></div>
-      <div class="stat"><div class="v">${(D.stocks||[]).length}</div><div class="l">종목</div></div>
-      <div class="stat"><div class="v">${(D.sectors||[]).length}</div><div class="l">섹터·테마</div></div>
+      <div class="stat"><div class="v">${(D.stocks||[]).length}</div><div class="l">종목·1M</div></div>
+      <div class="stat"><div class="v">${(D.sectors||[]).length}</div><div class="l">섹터·1M</div></div>
       <div class="stat"><div class="v">${(D.glossary||[]).length}</div><div class="l">용어</div></div>
     </div>
     <div class="grid2">
@@ -294,7 +295,7 @@ function renderHome(){
     </div>
     <div class="card">
       <div class="sec-title" style="margin:0 0 4px;font-size:17px">🔥 최다 등장 섹터·종목</div>
-      <div class="sec-sub">3주간 빈도 상위 — 클릭하면 해당 탭으로</div>
+      <div class="sec-sub">${RECENT_LABEL} 빈도 상위 — 클릭하면 해당 탭으로</div>
       <div style="margin-bottom:6px;font-size:12px;color:var(--text-3)">섹터·테마</div>
       <div>${topSectors.map(s=>`<span class="chip" data-go="sectors" data-sector="${esc(s.theme)}">${esc(s.theme)} <span class="n">${s.count}</span></span>`).join('')}</div>
       <div style="margin:12px 0 6px;font-size:12px;color:var(--text-3)">종목</div>
@@ -329,7 +330,7 @@ function renderSectors(){
   const secs=D.sectors||[];
   $('#view-sectors').innerHTML=`
     <div class="sec-title">🧩 섹터·테마 클러스터 <span class="count-badge">${secs.length}</span></div>
-    <div class="sec-sub">3주간 등장 빈도순 · 카드를 누르면 시점별 전개</div>
+    <div class="sec-sub">${RECENT_LABEL} · 카드를 누르면 시점별 전개</div>
     <div class="cluster">${secs.map((s,i)=>sectorCard(s,i)).join('')}</div>`;
 }
 function sectorCard(s,i){
@@ -354,7 +355,7 @@ let stockSort='count', stockQuery='';
 function renderStocks(){
   $('#view-stocks').innerHTML=`
     <div class="sec-title">📈 종목 유니버스 <span class="count-badge">${(D.stocks||[]).length}</span></div>
-    <div class="sec-sub">리포트에 등장한 모든 종목 · 테마/수급 출처와 시점</div>
+    <div class="sec-sub">${RECENT_LABEL} · 테마/수급 출처와 시점</div>
     <div class="controls">
       <input id="stockq" type="text" placeholder="종목명 검색…" value="${esc(stockQuery)}">
       <div class="seg" id="stockSort">
@@ -408,7 +409,7 @@ function renderStrategy(){
     <div class="sec-sub">대표님·팀의 관점이 어떻게 움직였나 — <span class="toggle" id="ord">▾ 시간순/역순 전환</span></div>
     <div id="stanceWrap"></div>
     <div class="sec-title">💡 살아있는 전략 원칙 <span class="count-badge">${(D.principles||[]).length}</span></div>
-    <div class="sec-sub">3주간 반복·강화된 핵심 원칙 — 카드를 누르면 근거</div>
+    <div class="sec-sub">전체 기간 반복·강화된 핵심 원칙 — 카드를 누르면 근거</div>
     <div id="prinWrap"></div>`;
   $('#ord').addEventListener('click',()=>{stanceOrder=stanceOrder==='asc'?'desc':'asc';drawStance();});
   drawStance();
@@ -449,7 +450,7 @@ let glossQuery='';
 function renderGlossary(){
   $('#view-glossary').innerHTML=`
     <div class="sec-title">📚 경제 용어 사전 <span class="count-badge">${(D.glossary||[]).length}</span></div>
-    <div class="sec-sub">리포트 '경제 교실'에서 다룬 용어 아카이브</div>
+    <div class="sec-sub">리포트의 교육·용어 카드 전체 누적 (경제 교실·쉬운 설명·심화·암기·신조어 등)</div>
     <div class="controls"><input id="glossq" type="text" placeholder="용어 검색… (예: ADR, 멀티플, 레버리지)" value="${esc(glossQuery)}"></div>
     <div id="glossList"></div>`;
   $('#glossq').addEventListener('input',e=>{glossQuery=e.target.value;drawGloss();});

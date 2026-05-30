@@ -227,6 +227,24 @@ def section_kind(title):
     return "other"
 
 # ─────────────────────────────────────────────────────────────────────────
+# 용어(교육) vs 리서치/뉴스 카드 분류 — 용어 사전 누락 방지(교육성 카드 폭넓게 수집)
+# ─────────────────────────────────────────────────────────────────────────
+EDU_STRONG = ("용어", "경제 교실", "쉬운 설명", "쉽게", "암기", "심화", "직관",
+              "신조어", "한 장", "이해", "뭔데", "해설", "기초", "풀이", "개념")
+RESEARCH_MARKERS = ("증권", "투자증권", "리서치", "보고서", "산업노트", "기업분석",
+                    "탑픽", "Exhibit", "한국경제 1면", "한경 1면", "인터뷰", "일정",
+                    "신규 ETF", "실적", "FY2", "Premier", "큐레이션", "보도",
+                    "골드만", "JP모건", "모건스탠리", "바클레이즈", "다올", "Vol.")
+def card_is_glossary(tag, title):
+    """교육·용어 카드면 True(용어 사전), 증권사 리서치·실적·뉴스면 False(자료)."""
+    s = (tag or "") + " " + (title or "")
+    if any(m in s for m in EDU_STRONG):
+        return True
+    if any(m in s for m in RESEARCH_MARKERS):
+        return False
+    return True   # 기본 포함 — 사용자 요청: 누락 줄이고 더 많이 아카이빙
+
+# ─────────────────────────────────────────────────────────────────────────
 # 단일 리포트 파싱
 # ─────────────────────────────────────────────────────────────────────────
 def parse_report(path):
@@ -332,8 +350,9 @@ def parse_report(path):
         for e in sec.select(".edu-card"):
             item = {"tag": txt(e.select_one(".edu-tag")),
                     "title": txt(e.select_one(".edu-title")),
-                    "body": txt(e.select_one(".edu-body"))[:1200]}
-            (glossary if kind == "glossary" else readings).append(item)
+                    "body": txt(e.select_one(".edu-body"))[:1600]}
+            # 섹션 위치가 아니라 카드 유형으로 라우팅
+            (glossary if card_is_glossary(item["tag"], item["title"]) else readings).append(item)
         for ci in sec.select(".check-item"):
             ic = ci.select_one(".check-icon")
             cl = classes(ic) if ic else set()
@@ -390,12 +409,23 @@ def split_stock_token(span):
     annotation = " ".join(x for x in [extra, ann] if x).strip()
     return name, annotation
 
-def aggregate(reports):
+def aggregate(reports, window_days=31):
     reports = sorted(reports, key=lambda r: r["sort_date"])
+    # 섹터·테마·종목·수급 = '최근 1개월' 윈도우만 집계. 전략·용어·시계열 = 전체.
+    valid = [r["sort_date"] for r in reports if r.get("sort_date") and r["sort_date"] <= "9999"]
+    recent, recent_from = reports, (reports[0]["sort_date"] if reports else "")
+    if valid:
+        try:
+            max_d = max(datetime.date.fromisoformat(d) for d in valid)
+            cutoff = (max_d - datetime.timedelta(days=window_days)).isoformat()
+            recent = [r for r in reports if r.get("sort_date", "") >= cutoff]
+            recent_from = cutoff
+        except Exception:
+            pass
     stocks = {}
     sectors = {}
     supply_days = []   # 날짜별 스마트머니 TOP
-    for r in reports:
+    for r in recent:
         label = r.get("date") or r.get("id")
         for sec in r["sectors"]:
             supply = is_supply_card(sec["name"])
@@ -498,15 +528,16 @@ def aggregate(reports):
     principles.sort(key=lambda p: (-p["count"], p["last_seen"]), reverse=False)
     principles.sort(key=lambda p: p["count"], reverse=True)
 
-    # ── 용어집 ──
+    # ── 용어집 (교육성 카드 전체 누적, 같은 용어 재등장 시 최신본으로 갱신) ──
     glossary = {}
-    for r in reports:
-        for g in r["glossary"] + [x for x in r["readings"] if "경제 교실" in x.get("tag", "")]:
-            term = g["title"]
-            if term and term not in glossary:
-                glossary[term] = {"term": term, "tag": g.get("tag", ""),
-                                  "body": g["body"], "date": r.get("date") or r.get("id"),
-                                  "id": r["id"]}
+    for r in reports:   # 전체 기간 누적
+        for g in r["glossary"]:
+            term = (g.get("title") or "").strip()
+            if not term:
+                continue
+            glossary[term] = {"term": term, "tag": g.get("tag", ""),
+                              "body": g["body"], "date": r.get("date") or r.get("id"),
+                              "id": r["id"]}
 
     # ── 이벤트/촉매 (참고용) ──
     events = []
@@ -543,6 +574,9 @@ def aggregate(reports):
         "stocks": sorted(stocks.values(), key=lambda x: (-x["count"], x["name"])),
         "sectors": sorted(sectors.values(), key=lambda x: -x["count"]),
         "supply_days": supply_days,
+        "recent_from": recent_from,
+        "recent_reports": len(recent),
+        "window_days": window_days,
         "stance": stance,
         "principles": principles,
         "glossary": sorted(glossary.values(), key=lambda x: x["date"], reverse=True),
@@ -605,6 +639,36 @@ def discover(src):
                 found.append(os.path.join(root, fn))
     return sorted(found)
 
+# ─────────────────────────────────────────────────────────────────────────
+# 아카이브 index.html 에 '지식 허브' 버튼 주입 (build_index.py 미수정, 안전)
+# ─────────────────────────────────────────────────────────────────────────
+HUB_BTN_CSS = ("\n.hub-btn{display:inline-block;margin-top:22px;padding:11px 24px;"
+               "border:1px solid var(--gold-border);border-radius:100px;background:var(--gold-bg);"
+               "color:var(--gold);text-decoration:none;font-size:14px;font-weight:600;"
+               "transition:all .2s ease}\n"
+               ".hub-btn:hover{background:var(--gold);color:#fff;transform:translateY(-1px);"
+               "box-shadow:0 4px 14px rgba(184,134,11,.2)}\n")
+HUB_BTN_HTML = '\n  <a href="hub.html" class="hub-btn">📊 지식 허브 — 검색·섹터·종목·전략 →</a>'
+
+def inject_hub_button(index_path):
+    if not os.path.exists(index_path):
+        print(f"ℹ️ index.html 없음({index_path}) — 허브 버튼 주입 생략")
+        return
+    with open(index_path, encoding="utf-8") as f:
+        html = f.read()
+    if "hub-btn" in html:
+        return  # 이미 주입됨
+    changed = False
+    if "</style>" in html:
+        html = html.replace("</style>", HUB_BTN_CSS + "</style>", 1); changed = True
+    m = re.search(r'(<p class="header-sub">.*?</p>)', html, re.S)
+    if m:
+        html = html[:m.end()] + HUB_BTN_HTML + html[m.end():]; changed = True
+    if changed:
+        with open(index_path, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"→ {index_path} 에 지식 허브 버튼 주입 완료")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", default=".", help="리포트 탐색 루트 폴더")
@@ -612,6 +676,7 @@ def main():
     ap.add_argument("--out", default="hub.html", help="허브 출력 파일")
     ap.add_argument("--json", default="knowledge_base.json", help="구조화 데이터 출력")
     ap.add_argument("--template", default=None, help="허브 템플릿 경로(기본: 스크립트 옆 hub_template.html)")
+    ap.add_argument("--index", default=None, help="아카이브 index.html 경로(허브 버튼 주입 대상)")
     args = ap.parse_args()
 
     files = args.files if args.files else discover(args.src)
@@ -637,7 +702,8 @@ def main():
         "build": {"generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
                   "reports": len(reports), "daily": len(daily), "weekly": len(weekly),
                   "from": daily[0]["date"] if daily else (reports[0]["id"] if reports else ""),
-                  "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else "")},
+                  "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else ""),
+                  "recent_from": agg.get("recent_from", ""), "recent_reports": agg.get("recent_reports", 0)},
         "reports": reports, "search": search, **agg,
     }
     with open(args.json, "w", encoding="utf-8") as f:
@@ -662,10 +728,14 @@ def main():
     else:
         print(f"⚠ 템플릿 없음({tpl}) — JSON만 생성했습니다.")
 
+    # 아카이브 index.html 에 허브 버튼 주입
+    index_path = args.index or os.path.join(os.path.dirname(args.out) or ".", "index.html")
+    inject_hub_button(index_path)
+
     # 요약
-    print(f"\n[요약] 종목 {len(agg['stocks'])} · 섹터테마 {len(agg['sectors'])} · "
-          f"스탠스 {len(agg['stance'])} · 원칙 {len(agg['principles'])} · "
-          f"용어 {len(agg['glossary'])} · 검색항목 {len(search)}")
+    print(f"\n[요약] 종목 {len(agg['stocks'])}(최근 {agg.get('recent_reports','?')}개 리포트) · "
+          f"섹터테마 {len(agg['sectors'])} · 스탠스 {len(agg['stance'])} · 원칙 {len(agg['principles'])} · "
+          f"용어 {len(agg['glossary'])} · 검색항목 {len(search)} · 최근기준 {agg.get('recent_from','?')}~")
 
 if __name__ == "__main__":
     main()
