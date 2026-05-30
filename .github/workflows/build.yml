@@ -32,7 +32,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install deps (knowledge hub)
-        run: pip install beautifulsoup4 lxml
+        run: pip install beautifulsoup4 lxml yfinance
 
       - name: Run build_index.py (아카이브 목록 — 기존 그대로)
         run: python build_index.py
