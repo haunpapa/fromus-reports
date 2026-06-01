@@ -296,29 +296,6 @@ mark{background:var(--gold-bg);color:var(--gold);padding:0 2px;border-radius:3px
 .pv-note .pvd{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--gold);font-weight:600;}
 .pv-foot{margin-top:8px;font-size:10.5px;color:var(--text-4);font-family:'JetBrains Mono',monospace;}
 .pv-spark{width:100%;height:34px;display:block;margin:2px 0 8px;}
-
-/* ═══════════ V3.1: 원문 리포트 모달 뷰어 ═══════════ */
-.rmodal{position:fixed;inset:0;z-index:120;display:none;}
-.rmodal.open{display:block;}
-.rmodal-bd{position:absolute;inset:0;background:rgba(20,17,13,.55);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s;}
-.rmodal.open .rmodal-bd{opacity:1;}
-.rmodal-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-46%);width:min(980px,94vw);height:88vh;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.4);display:flex;flex-direction:column;overflow:hidden;opacity:0;transition:opacity .2s,transform .2s;}
-.rmodal.open .rmodal-box{opacity:1;transform:translate(-50%,-50%);}
-.rmodal-head{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface-2);}
-.rmodal-kind{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:100px;background:var(--gold-bg);color:var(--gold);flex-shrink:0;}
-.rmodal-title{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-.rmodal-title .rm-date{color:var(--text-3);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;margin-left:8px;}
-.rmodal-jump{font-size:11px;color:var(--gold);background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:4px 9px;flex-shrink:0;display:none;align-items:center;gap:4px;}
-.rmodal-jump.show{display:inline-flex;}
-.rmodal-open{font-size:12px;color:var(--text-3);text-decoration:none;flex-shrink:0;border:1px solid var(--border);border-radius:8px;padding:5px 10px;transition:.15s;}
-.rmodal-open:hover{border-color:var(--gold);color:var(--gold);}
-.rmodal-close{flex-shrink:0;width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;font-size:15px;line-height:1;transition:.15s;}
-.rmodal-close:hover{border-color:var(--red);color:var(--red);}
-.rmodal-body{flex:1;position:relative;background:#fff;}
-.rmodal-frame{width:100%;height:100%;border:0;display:block;}
-.rmodal-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;background:var(--surface);z-index:1;}
-.rmodal-load.hide{display:none;}
-@media(max-width:640px){.rmodal-box{width:100vw;height:100vh;height:100dvh;border-radius:0;top:0;left:0;transform:none;}.rmodal.open .rmodal-box{transform:none;}.rmodal-open{display:none;}}
 </style>
 </head>
 <body>
@@ -370,22 +347,6 @@ mark{background:var(--gold-bg);color:var(--gold);padding:0 2px;border-radius:3px
 
 <div id="popover"></div>
 <div class="graph-tip" id="graphTip"></div>
-<div class="rmodal" id="reportModal" role="dialog" aria-modal="true">
-  <div class="rmodal-bd" data-rclose></div>
-  <div class="rmodal-box">
-    <div class="rmodal-head">
-      <span class="rmodal-kind">원문 리포트</span>
-      <span class="rmodal-title" id="rmTitle"></span>
-      <span class="rmodal-jump" id="rmJump">📍 해당 부분</span>
-      <a class="rmodal-open" id="rmOpen" href="#" target="_blank" rel="noopener">새 탭 ↗</a>
-      <button class="rmodal-close" id="rmClose" aria-label="닫기" data-rclose>✕</button>
-    </div>
-    <div class="rmodal-body">
-      <div class="rmodal-load" id="rmLoad">리포트를 불러오는 중…</div>
-      <iframe class="rmodal-frame" id="rmFrame" title="원문 리포트"></iframe>
-    </div>
-  </div>
-</div>
 
 <script id="kb-data">
 window.DATA = /*DATA*/{"build":{"reports":0,"daily":0,"weekly":0,"from":"","to":"","generated":""},"reports":[],"search":[],"stocks":[],"sectors":[],"supply_days":[],"stance":[],"principles":[],"glossary":[],"series":{}}/*ENDDATA*/;
@@ -400,7 +361,7 @@ const esc = s => (s==null?'':(''+s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 // id → 원문 파일 매핑
 const FILE = {};
 (D.reports||[]).forEach(r=>{ if(r.id&&r.file) FILE[r.id]=r.file; });
-const srcLink = (id,q) => (id&&FILE[id]) ? `<a class="src" href="${esc(FILE[id])}" data-report="${esc(id)}"${q?` data-q="${esc(q)}"`:''}>원문↗</a>` : '';
+const srcLink = id => (id&&FILE[id]) ? `<a class="src" href="${esc(FILE[id])}" target="_blank" rel="noopener">원문↗</a>` : '';
 const fmtDate = d => !d?'' : (/^\d{4}-W/.test(d) ? d.replace('-',' ') : (d.length>=10? d.slice(5).replace('-','/'):d));
 const RECENT_LABEL = (()=>{const rf=(D.build&&D.build.recent_from)||''; return rf? ('최근 1개월 · '+fmtDate(rf)+'~ 기준 · 언급순') : '최근 1개월 · 언급순';})();
 // 섹터의 '근거' = note 있는 최신 멘션
@@ -695,7 +656,7 @@ function runSearch(){
      ${kinds.map(k=>`<span class="sp-filter ${searchFilter===k?'on':''}" data-f="${esc(k)}">${esc(k)}</span>`).join('')}</div>`;
   const body= top.length? top.map(x=>{
       const it=x.it;
-      return `<button class="sr" ${it.id&&FILE[it.id]?`data-report="${esc(it.id)}" data-q="${esc(it.title||'')}"`:''}>
+      return `<button class="sr" ${it.id&&FILE[it.id]?`onclick="window.open('${esc(FILE[it.id])}','_blank')"`:''}>
         <div class="sr-top"><span class="sr-kind">${esc(it.kind)}</span><span class="sr-title">${hl(it.title,tokens)}</span><span class="sr-date">${esc(fmtDate(it.date))}</span></div>
         <div class="sr-snip">${hl(it.snippet,tokens)}</div></button>`;
     }).join('') : '<div class="sr-empty">결과가 없습니다.</div>';
@@ -1061,96 +1022,6 @@ document.addEventListener('mouseout',e=>{
   clearTimeout(popTimer); popHideTimer=setTimeout(hidePopover,140);
 });
 window.addEventListener('scroll',hidePopover,true);
-
-/* ═══════════ V3.1: 원문 리포트 모달 ═══════════ */
-const REPORT_BY_ID={}; (D.reports||[]).forEach(r=>{ if(r.id) REPORT_BY_ID[r.id]=r; });
-const RM={modal:$('#reportModal'),frame:$('#rmFrame'),title:$('#rmTitle'),open:$('#rmOpen'),
-  jump:$('#rmJump'),load:$('#rmLoad')};
-let rmQuery='', rmHit=null, rmBodyOverflow='';
-
-function rmKindLabel(id){const r=REPORT_BY_ID[id]; if(!r)return '원문 리포트';
-  return r.type==='weekly'?'주간 리포트':'데일리 리포트';}
-function deriveQuery(el){
-  const pick=(sel,c)=>{const n=c&&c.querySelector(sel);return n?n.textContent.trim():'';};
-  let c;
-  if(c=el.closest('.strow')) return pick('.strow-name',c);
-  if(c=el.closest('.scard'))  return pick('.scard-name',c);
-  if(c=el.closest('.evcard')) return pick('.et',c);
-  if(c=el.closest('.gcard'))  return pick('.gterm',c);
-  if(c=el.closest('.stl-item')) return pick('.stl-head',c)||pick('.stl-quote',c);
-  if(c=el.closest('.core-meta')){const n=c.parentElement&&c.parentElement.querySelector('.core-name'); if(n)return n.textContent.trim();}
-  if(c=el.closest('.mention')) {const sp=c.querySelector('span:last-child'); if(sp)return sp.textContent.replace('원문↗','').trim();}
-  return '';
-}
-function highlightInFrame(doc, q){
-  rmHit=null; if(!doc||!doc.body||!q) return false;
-  const norm=s=>(s||'').replace(/\s+/g,'').toLowerCase();
-  const full=norm(q);
-  const toks=q.split(/[\s,./·…"'"“”()\[\]\-—:?!]+/).filter(t=>t.length>=2).sort((a,b)=>b.length-a.length);
-  const cands=[full,...toks.map(norm)].filter((v,i,a)=>v&&a.indexOf(v)===i).slice(0,6);
-  let nodes=[]; try{ const w=doc.createTreeWalker(doc.body,NodeFilter.SHOW_TEXT,null,false);
-    let n; while(n=w.nextNode()){ const t=n.parentElement&&n.parentElement.tagName; if(t==='SCRIPT'||t==='STYLE')continue; if(n.nodeValue&&n.nodeValue.trim().length>1) nodes.push(n);} }catch(e){return false;}
-  for(const cand of cands){
-    for(const tn of nodes){
-      if(norm(tn.nodeValue).includes(cand)){
-        const el=tn.parentElement; if(!el)continue;
-        rmHit=el;
-        const prevBg=el.style.backgroundColor, prevRad=el.style.borderRadius;
-        el.style.transition='background-color .35s'; el.style.backgroundColor='rgba(245,200,80,.55)'; el.style.borderRadius='4px';
-        try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){el.scrollIntoView();}
-        setTimeout(()=>{ el.style.backgroundColor=prevBg||''; }, 2800);
-        return true;
-      }
-    }
-  }
-  return false;
-}
-let rmFrameBusy=false;
-RM.frame.addEventListener('load',()=>{
-  if(!RM.modal.classList.contains('open')) return;
-  if((RM.frame.getAttribute('src')||'')==='about:blank') return;
-  RM.load.classList.add('hide');
-  // 같은 출처(깃허브 페이지)면 내부 접근 가능 → 해당 부분으로 스크롤
-  try{
-    const doc=RM.frame.contentDocument;
-    const found=rmQuery?highlightInFrame(doc,rmQuery):false;
-    RM.jump.classList.toggle('show',!!found);
-  }catch(e){ RM.jump.classList.remove('show'); }
-  rmFrameBusy=false;
-});
-function openReport(id,q){
-  const file=FILE[id]; if(!file)return;
-  rmQuery=q||''; rmHit=null;
-  const r=REPORT_BY_ID[id];
-  $('.rmodal-kind').textContent=rmKindLabel(id);
-  RM.title.innerHTML=r?`${esc(r.headline||file)}<span class="rm-date">${esc(fmtDate(r.date))}</span>`:esc(file);
-  RM.open.href=file;
-  RM.jump.classList.remove('show');
-  RM.load.classList.remove('hide');
-  rmFrameBusy=true;
-  RM.frame.setAttribute('src',file);
-  RM.modal.classList.add('open');
-  rmBodyOverflow=document.body.style.overflow; document.body.style.overflow='hidden';
-  const sp=$('#searchPanel'); if(sp)sp.classList.remove('open');
-}
-function closeReport(){
-  if(!RM.modal.classList.contains('open'))return;
-  RM.modal.classList.remove('open');
-  setTimeout(()=>{ if(!RM.modal.classList.contains('open')) RM.frame.setAttribute('src','about:blank'); },220);
-  document.body.style.overflow=rmBodyOverflow||'';
-  rmHit=null; rmQuery='';
-}
-RM.jump.addEventListener('click',()=>{ if(rmHit){try{rmHit.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
-  else if(rmQuery){try{highlightInFrame(RM.frame.contentDocument,rmQuery);}catch(_){}}});
-$$('[data-rclose]').forEach(el=>el.addEventListener('click',closeReport));
-/* 전역: 모든 원문 링크/검색결과 클릭을 모달로 가로채기 (새 탭 단축키는 허용) */
-document.addEventListener('click',e=>{
-  const a=e.target.closest('[data-report]'); if(!a)return;
-  if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return; // 새 탭/창은 그대로
-  e.preventDefault();
-  openReport(a.dataset.report, a.dataset.q || deriveQuery(a));
-});
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&RM.modal.classList.contains('open')){e.stopPropagation();closeReport();} },true);
 
 /* ───────── INIT ───────── */
 renderHome();renderSectors();renderStocks();renderStrategy();renderGlossary();renderGraph();
