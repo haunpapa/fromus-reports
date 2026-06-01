@@ -1085,34 +1085,25 @@ function deriveQuery(el){
 function highlightInFrame(doc, q){
   rmHit=null; if(!doc||!doc.body||!q) return false;
   const norm=s=>(s||'').replace(/\s+/g,'').toLowerCase();
-  const STOP=new Set(['ai','ess','etf','tp','per','pbr','roe','it','us','상승','하락','기대','전망','대표','대표님','관련','종목','오늘','이번','시장','코스피','코스닥','지수','발표','예정','분석','공유','뉴스','이슈']);
   const full=norm(q);
-  let toks=q.split(/[\s,./·…"'"“”()\[\]\-—:;?!%+~|]+/).map(t=>t.trim())
-            .filter(t=>t.length>=2 && !STOP.has(t.toLowerCase()) && !/^\d+$/.test(t));
-  toks=[...new Set(toks)].map(norm).filter(Boolean);
+  const toks=q.split(/[\s,./·…"'"“”()\[\]\-—:?!]+/).filter(t=>t.length>=2).sort((a,b)=>b.length-a.length);
+  const cands=[full,...toks.map(norm)].filter((v,i,a)=>v&&a.indexOf(v)===i).slice(0,6);
   let nodes=[]; try{ const w=doc.createTreeWalker(doc.body,NodeFilter.SHOW_TEXT,null,false);
-    let n; while(n=w.nextNode()){ const t=n.parentElement&&n.parentElement.tagName; if(t==='SCRIPT'||t==='STYLE')continue;
-      const v=n.nodeValue; if(v&&v.trim().length>1) nodes.push(n);} }catch(e){return false;}
-  const total=nodes.length||1;
-  let best=null,bestScore=0;
-  nodes.forEach((tn,i)=>{
-    const t=norm(tn.nodeValue); if(t.length<2)return;
-    let score=0;
-    if(full.length>=4 && t.includes(full)) score+=80+Math.min(full.length,24);
-    let hit=0; for(const tk of toks){ if(t.includes(tk)){ score+=(tk.length>=3?14:6); hit++; } }
-    if(hit>=2) score+=20;                            // 여러 키워드 동시 등장 = 강한 신호
-    const frac=i/total; if(frac<0.10) score*=0.5;    // 표지·머리말 구간 감점
-    const len=tn.nodeValue.trim().length; if(len>=40 && len<=600) score+=4; // 본문 문단 가점
-    if(score>bestScore){bestScore=score;best=tn;}
-  });
-  if(!best || bestScore<14) return false;            // 충분히 분명할 때만 점프(아니면 맨 위에서 열림)
-  const el=best.parentElement; if(!el) return false;
-  rmHit=el;
-  const prevBg=el.style.backgroundColor;
-  el.style.transition='background-color .35s'; el.style.backgroundColor='rgba(245,200,80,.55)'; el.style.borderRadius='4px';
-  try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){el.scrollIntoView();}
-  setTimeout(()=>{ el.style.backgroundColor=prevBg||''; }, 2800);
-  return true;
+    let n; while(n=w.nextNode()){ const t=n.parentElement&&n.parentElement.tagName; if(t==='SCRIPT'||t==='STYLE')continue; if(n.nodeValue&&n.nodeValue.trim().length>1) nodes.push(n);} }catch(e){return false;}
+  for(const cand of cands){
+    for(const tn of nodes){
+      if(norm(tn.nodeValue).includes(cand)){
+        const el=tn.parentElement; if(!el)continue;
+        rmHit=el;
+        const prevBg=el.style.backgroundColor, prevRad=el.style.borderRadius;
+        el.style.transition='background-color .35s'; el.style.backgroundColor='rgba(245,200,80,.55)'; el.style.borderRadius='4px';
+        try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){el.scrollIntoView();}
+        setTimeout(()=>{ el.style.backgroundColor=prevBg||''; }, 2800);
+        return true;
+      }
+    }
+  }
+  return false;
 }
 let rmFrameBusy=false;
 RM.frame.addEventListener('load',()=>{
