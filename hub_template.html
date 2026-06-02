@@ -319,6 +319,83 @@ mark{background:var(--gold-bg);color:var(--gold);padding:0 2px;border-radius:3px
 .rmodal-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;background:var(--surface);z-index:1;}
 .rmodal-load.hide{display:none;}
 @media(max-width:640px){.rmodal-box{width:100vw;height:100vh;height:100dvh;border-radius:0;top:0;left:0;transform:none;}.rmodal.open .rmodal-box{transform:none;}.rmodal-open{display:none;}}
+
+/* ═══════════ V4: Executive UX / 비교·탐색 고도화 ═══════════ */
+:root{--focus:0 0 0 3px rgba(184,134,11,.22);--glass:rgba(255,255,255,.72);}
+:root[data-theme="dark"]{--glass:rgba(31,27,21,.72);}
+button,input,a{ -webkit-tap-highlight-color:transparent; }
+button:focus-visible,input:focus-visible,a:focus-visible,.chip:focus-visible{outline:none;box-shadow:var(--focus);}
+.topbar{box-shadow:0 1px 0 var(--border),0 10px 30px rgba(0,0,0,.03);}
+.searchbox{min-height:48px;}
+.searchbox::after{content:'Ctrl K';font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-4);border:1px solid var(--border);border-radius:7px;padding:2px 6px;background:var(--surface-2);}
+@media(max-width:640px){.searchbox::after{content:'/';}.brand .meta{width:100%;margin-left:0}.topbar-inner{padding-top:10px}.tabs .tab{padding:9px 12px;font-size:13px}}
+
+.pulse-grid{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px;margin:0 0 16px;}
+.pulse-card{background:linear-gradient(180deg,var(--surface),var(--surface-2));border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 2px 10px var(--shadow);min-width:0;}
+.pulse-card.primary{background:linear-gradient(135deg,var(--gold-bg),var(--surface));border-color:var(--gold-border);}
+.pulse-k{font-size:11px;color:var(--text-3);letter-spacing:1.1px;text-transform:uppercase;font-weight:800;margin-bottom:8px;}
+.pulse-h{font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1.35;margin-bottom:7px;}
+.pulse-desc{font-size:12.5px;color:var(--text-2);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.pulse-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.pulse-metric{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);font-weight:800;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:99px;padding:3px 8px;}
+.pulse-mini{font-size:11px;color:var(--text-4);}
+@media(max-width:900px){.pulse-grid{grid-template-columns:1fr;}.pulse-card{padding:16px}}
+
+.stock-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-6px 0 14px;}
+.check-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);border-radius:100px;padding:6px 11px;font-size:12px;color:var(--text-2);cursor:pointer;user-select:none;transition:.13s;}
+.check-chip:hover{border-color:var(--gold-border);color:var(--gold);}
+.check-chip input{accent-color:var(--gold);}
+.stock-meta-line{font-size:11.5px;color:var(--text-3);margin-left:auto;font-family:'JetBrains Mono',monospace;}
+.cmp-add{border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-2);font-size:11px;font-weight:700;padding:5px 8px;cursor:pointer;white-space:nowrap;transition:.13s;}
+.cmp-add:hover,.cmp-add.on{border-color:var(--gold-border);background:var(--gold-bg);color:var(--gold);}
+@media(max-width:760px){.strow-head{align-items:flex-start;flex-wrap:wrap}.strow-name{min-width:88px}.strow-spark{order:5;width:100%;height:30px}.stock-meta-line{margin-left:0;width:100%;}}
+
+.cmp-tray{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(120%);z-index:95;display:flex;align-items:center;gap:10px;max-width:min(860px,calc(100vw - 24px));background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:0 14px 44px rgba(0,0,0,.18);border-radius:18px;padding:10px 12px;transition:transform .24s ease;}
+.cmp-tray.on{transform:translateX(-50%) translateY(0);}
+.cmp-title{font-size:12px;font-weight:800;color:var(--text-2);white-space:nowrap;}
+.cmp-items{display:flex;gap:6px;flex-wrap:wrap;min-width:0;}
+.cmp-pill{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:5px 8px;font-size:11.5px;color:var(--text-2);}
+.cmp-pill button{border:none;background:none;color:var(--text-4);cursor:pointer;font-size:12px;line-height:1;}
+.cmp-act{border:1px solid var(--gold-border);background:var(--gold);color:#fff;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.cmp-clear{border:1px solid var(--border);background:var(--surface);color:var(--text-3);border-radius:10px;padding:7px 9px;font-size:12px;cursor:pointer;}
+.cmp-modal{position:fixed;inset:0;z-index:130;display:none;}
+.cmp-modal.open{display:block;}
+.cmp-back{position:absolute;inset:0;background:rgba(20,17,13,.55);backdrop-filter:blur(3px);}
+.cmp-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1020px,94vw);max-height:88vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.42);}
+.cmp-head{position:sticky;top:0;z-index:1;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:14px 16px;}
+.cmp-head h3{font-size:16px;margin:0;flex:1;}
+.cmp-close{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;}
+.cmp-body{padding:16px;}
+.cmp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.cmp-card{border:1px solid var(--border);border-radius:16px;padding:15px;background:var(--surface);}
+.cmp-name{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;margin-bottom:8px;}
+.cmp-spark{width:100%;height:44px;display:block;margin:4px 0 10px;background:var(--surface-2);border-radius:10px;}
+.cmp-kv{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0;}
+.cmp-kv div{background:var(--surface-2);border:1px solid var(--border-light);border-radius:10px;padding:8px;}
+.cmp-kv b{display:block;font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:15px;}
+.cmp-kv span{font-size:10.5px;color:var(--text-3);}
+.cmp-note{font-size:12px;color:var(--text-2);line-height:1.6;border-top:1px dashed var(--border);padding-top:9px;margin-top:9px;}
+.cmp-themes{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+@media(max-width:640px){.cmp-tray{left:10px;right:10px;transform:translateY(120%);max-width:none;justify-content:space-between}.cmp-tray.on{transform:translateY(0)}.cmp-title{display:none}.cmp-box{width:100vw;height:100vh;max-height:100vh;border-radius:0}.cmp-head{padding-top:calc(14px + env(safe-area-inset-top));}}
+
+.cmdk{position:fixed;inset:0;z-index:125;display:none;}
+.cmdk.open{display:block;}
+.cmdk-back{position:absolute;inset:0;background:rgba(20,17,13,.50);backdrop-filter:blur(3px);}
+.cmdk-box{position:absolute;top:10vh;left:50%;transform:translateX(-50%);width:min(720px,92vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.38);overflow:hidden;}
+.cmdk-search{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);}
+.cmdk-search input{flex:1;border:none;outline:none;background:transparent;color:var(--text);font-size:16px;font-family:inherit;}
+.cmdk-list{max-height:min(62vh,560px);overflow:auto;padding:8px;}
+.cmdk-item{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border:none;background:transparent;border-radius:12px;padding:10px 11px;cursor:pointer;color:var(--text);font-family:inherit;}
+.cmdk-item:hover,.cmdk-item.active{background:var(--gold-bg);}
+.cmdk-kind{font-size:10px;font-weight:800;color:var(--gold);border:1px solid var(--gold-border);border-radius:99px;padding:2px 7px;min-width:46px;text-align:center;background:var(--surface);}
+.cmdk-main{font-size:14px;font-weight:700;line-height:1.35;}
+.cmdk-sub{font-size:11.5px;color:var(--text-3);line-height:1.4;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+.cmdk-empty{padding:28px;text-align:center;color:var(--text-3);font-size:13px;}
+.cmdk-foot{display:flex;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border-light);padding:9px 14px;color:var(--text-4);font-size:11px;font-family:'JetBrains Mono',monospace;}
+@media(max-width:640px){.cmdk-box{top:6vh;width:94vw}.cmdk-search input{font-size:15px}}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}}
+
 </style>
 </head>
 <body>
@@ -548,7 +625,7 @@ function sectorCard(s,i){
 }
 
 /* ───────── STOCKS ───────── */
-let stockSort='count', stockQuery='';
+let stockSort='count', stockQuery='', stockOnlyWatch=false, stockHotOnly=false, stockSupplyOnly=false;
 function renderStocks(){
   $('#view-stocks').innerHTML=`
     <div class="sec-title">📈 종목 유니버스 <span class="count-badge">${(D.stocks||[]).length}</span></div>
@@ -561,15 +638,30 @@ function renderStocks(){
         <button data-s="name" class="${stockSort==='name'?'on':''}">이름순</button>
       </div>
     </div>
+    <div class="stock-tools">
+      <label class="check-chip"><input id="stockWatchOnly" type="checkbox" ${stockOnlyWatch?'checked':''}> 워치만</label>
+      <label class="check-chip"><input id="stockHotOnly" type="checkbox" ${stockHotOnly?'checked':''}> 뜨거운 종목</label>
+      <label class="check-chip"><input id="stockSupplyOnly" type="checkbox" ${stockSupplyOnly?'checked':''}> 수급 있음</label>
+      <button class="cmp-add" id="stockReset">필터 초기화</button>
+      <span class="stock-meta-line" id="stockResultMeta"></span>
+    </div>
     <div id="stockList"></div>`;
   $('#stockq').addEventListener('input',e=>{stockQuery=e.target.value;drawStockList();});
   $('#stockSort').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;stockSort=b.dataset.s;$$('#stockSort button').forEach(x=>x.classList.toggle('on',x===b));drawStockList();});
+  $('#stockWatchOnly').addEventListener('change',e=>{stockOnlyWatch=e.target.checked;drawStockList();});
+  $('#stockHotOnly').addEventListener('change',e=>{stockHotOnly=e.target.checked;drawStockList();});
+  $('#stockSupplyOnly').addEventListener('change',e=>{stockSupplyOnly=e.target.checked;drawStockList();});
+  $('#stockReset').addEventListener('click',()=>{stockQuery='';stockOnlyWatch=false;stockHotOnly=false;stockSupplyOnly=false;stockSort='count';renderStocks();});
   drawStockList();
 }
 function drawStockList(){
   let list=(D.stocks||[]).slice();
   const q=stockQuery.trim().toLowerCase();
   if(q) list=list.filter(s=>s.name.toLowerCase().includes(q));
+  if(stockOnlyWatch) list=list.filter(s=>isWatched('stock',s.name));
+  if(stockHotOnly) list=list.filter(s=>{const m=momentumOf(s.mentions); return m && (m.cls==='mo-hot'||m.cls==='mo-warm');});
+  if(stockSupplyOnly) list=list.filter(s=>(s.supply_count||0)>0);
+  const meta=$('#stockResultMeta'); if(meta) meta.textContent=`${list.length.toLocaleString()} / ${(D.stocks||[]).length.toLocaleString()} 종목`;
   if(stockSort==='name') list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
   else if(stockSort==='supply') list.sort((a,b)=>(b.supply_count-a.supply_count)||(b.count-a.count));
   else list.sort((a,b)=>(b.count-a.count)||a.name.localeCompare(b.name,'ko'));
@@ -592,6 +684,7 @@ function stockRow(s){
       <span class="strow-name">${esc(s.name)}</span>
       <span class="strow-mini">${momentumChip(s)}${themes}${tags}${tp}</span>
       <canvas class="strow-spark" data-spark-name="${esc(s.name)}" width="156" height="52"></canvas>
+      <button class="cmp-add ${isComparePicked(s.name)?'on':''}" data-cmp="${esc(s.name)}" onclick="event.stopPropagation();toggleCompare('${esc(s.name)}')">${isComparePicked(s.name)?'비교중':'비교'}</button>
       <span class="strow-cnt">${s.count}회</span>
     </div>
     <div class="strow-detail">
@@ -1161,8 +1254,116 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&RM.modal.classList.contains('open')){e.stopPropagation();closeReport();} },true);
 
+
+
+/* ═══════════ V4: Executive UX / 비교·탐색 고도화 ═══════════ */
+function cleanLabel(s){return (s||'').replace(/\s+/g,' ').trim();}
+function latestMention(obj){const ms=(obj&&obj.mentions)||[];return ms.length?ms[ms.length-1]:null;}
+function injectMarketPulse(){
+  const anchor=$('#watchHome'); if(!anchor||$('#marketPulse'))return;
+  const hot=(D.sectors||[]).slice().map(s=>({s,m:momentumOf(s.mentions),why:sectorWhy(s)}))
+    .sort((a,b)=>((b.m&&b.m.cls==='mo-hot')-(a.m&&a.m.cls==='mo-hot'))||((b.s.rep||0)-(a.s.rep||0))||((b.s.count||0)-(a.s.count||0)))[0];
+  const supply=(D.stocks||[]).slice().filter(s=>(s.supply_count||0)>0).sort((a,b)=>(b.supply_count-a.supply_count)||(b.count-a.count))[0];
+  const event=(D.events||[]).slice().sort((a,b)=>(b.seen||'').localeCompare(a.seen||''))[0];
+  const h=hot&&hot.s, st=supply, ev=event;
+  anchor.insertAdjacentHTML('afterend',`<div class="pulse-grid" id="marketPulse">
+    <div class="pulse-card primary" ${h?`data-go="sectors" data-sector="${esc(h.theme)}" tabindex="0" role="button"`:''}>
+      <div class="pulse-k">Market Pulse</div>
+      <div class="pulse-h">${h?esc(h.theme):'핵심 섹터 대기 중'}</div>
+      <div class="pulse-desc">${h&&hot.why?esc((hot.why.note||hot.why.name||'').slice(0,170)):'최근 리포트의 섹터 언급이 누적되면 이곳에 가장 중요한 변화가 표시됩니다.'}</div>
+      <div class="pulse-row">${h?momentumChip(h):''}<span class="pulse-metric">${h?(h.count||0):0}회</span><span class="pulse-mini">대표님 강조 ${h?(h.rep||0):0}</span></div>
+    </div>
+    <div class="pulse-card" ${st?`data-stock="${esc(st.name)}" tabindex="0" role="button"`:''}>
+      <div class="pulse-k">Supply Radar</div>
+      <div class="pulse-h">${st?esc(st.name):'수급 포착 없음'}</div>
+      <div class="pulse-desc">${st?esc(((latestMention(st)||{}).annotation||(latestMention(st)||{}).label||(st.themes||[]).join(', ')||'최근 수급 포착 종목').slice(0,155)):'수급 카드에서 포착된 종목을 우선 표시합니다.'}</div>
+      <div class="pulse-row"><span class="pulse-metric">수급 ${st?(st.supply_count||0):0}</span><span class="pulse-mini">전체 ${st?(st.count||0):0}회 언급</span></div>
+    </div>
+    <div class="pulse-card" ${ev&&ev.id?`data-report="${esc(ev.id)}" data-q="${esc(ev.title||'')}" tabindex="0" role="button"`:''}>
+      <div class="pulse-k">Event Watch</div>
+      <div class="pulse-h">${ev?esc(ev.title):'일정 대기 중'}</div>
+      <div class="pulse-desc">${ev?esc((ev.desc||'').slice(0,160)):'리포트에서 추출된 일정·정책·실적 이벤트가 표시됩니다.'}</div>
+      <div class="pulse-row"><span class="pulse-metric">${ev?esc(fmtDate(ev.seen)):''}</span><span class="pulse-mini">원문에서 확인</span></div>
+    </div>
+  </div>`);
+}
+
+document.addEventListener('keydown',e=>{const el=e.target.closest('[role="button"][data-go],[role="button"][data-stock],[role="button"][data-report]'); if(el&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.click();}},true);
+
+let CMP=(()=>{try{return JSON.parse(localStorage.getItem('fu-compare')||'[]').slice(0,4);}catch(e){return [];}})();
+function isComparePicked(name){return CMP.includes(name);}
+function saveCompare(){try{localStorage.setItem('fu-compare',JSON.stringify(CMP));}catch(e){}}
+function toggleCompare(name){
+  if(!name)return; const i=CMP.indexOf(name); if(i>=0)CMP.splice(i,1); else { if(CMP.length>=4)CMP.shift(); CMP.push(name); }
+  saveCompare(); refreshCompareUI();
+}
+function setupCompareUI(){
+  if($('#compareTray'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div class="cmp-tray" id="compareTray" aria-live="polite"><span class="cmp-title">종목 비교</span><div class="cmp-items" id="cmpItems"></div><button class="cmp-act" id="cmpOpen">비교 보기</button><button class="cmp-clear" id="cmpClear">비우기</button></div><div class="cmp-modal" id="cmpModal" role="dialog" aria-modal="true"><div class="cmp-back" data-cmpclose></div><div class="cmp-box"><div class="cmp-head"><h3>종목 비교 보드</h3><button class="cmp-close" data-cmpclose aria-label="닫기">✕</button></div><div class="cmp-body" id="cmpBody"></div></div></div>`);
+  $('#cmpOpen').addEventListener('click',openCompareModal); $('#cmpClear').addEventListener('click',()=>{CMP=[];saveCompare();refreshCompareUI();});
+  $$('[data-cmpclose]').forEach(b=>b.addEventListener('click',()=>$('#cmpModal').classList.remove('open')));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#cmpModal')&&$('#cmpModal').classList.contains('open'))$('#cmpModal').classList.remove('open');});
+  refreshCompareUI();
+}
+function refreshCompareUI(){
+  const tray=$('#compareTray'), items=$('#cmpItems'); if(!tray||!items)return;
+  tray.classList.toggle('on',CMP.length>0);
+  items.innerHTML=CMP.map(n=>`<span class="cmp-pill">${esc(n)} <button aria-label="비교 제거" onclick="toggleCompare('${esc(n)}')">✕</button></span>`).join('');
+  $$('.cmp-add[data-cmp]').forEach(b=>{const on=isComparePicked(b.dataset.cmp); b.classList.toggle('on',on); b.textContent=on?'비교중':'비교';});
+}
+function compareCard(s){
+  const last=latestMention(s)||{}; const note=last.annotation||last.label||last.theme||last.note||'';
+  const themes=(s.themes||s.sectors||[]).slice(0,5).map(t=>`<span class="pill theme">${esc(t)}</span>`).join('');
+  return `<div class="cmp-card"><div class="cmp-name"><button class="star ${isWatched('stock',s.name)?'on':''}" data-watch="stock:${esc(s.name)}" onclick="toggleWatchEl(this)">${isWatched('stock',s.name)?'★':'☆'}</button>${esc(s.name)}</div><canvas class="cmp-spark" width="520" height="88" data-cspark="${esc(s.name)}"></canvas><div class="cmp-kv"><div><b>${s.count||0}</b><span>전체 언급</span></div><div><b>${s.supply_count||0}</b><span>수급 포착</span></div><div><b>${s.theme_count||0}</b><span>테마 언급</span></div><div><b>${esc(fmtDate(last.date)||'-')}</b><span>최근 등장</span></div></div><div class="cmp-themes">${themes||'<span class="pulse-mini">테마 정보 없음</span>'}</div>${note?`<div class="cmp-note">${esc(note.slice(0,180))} ${last.id?srcLink(last.id,s.name):''}</div>`:''}</div>`;
+}
+function openCompareModal(){
+  const list=CMP.map(n=>STOCK_BY_NAME[n]).filter(Boolean); const body=$('#cmpBody'); if(!body)return;
+  body.innerHTML=list.length?`<div class="cmp-grid">${list.map(compareCard).join('')}</div>`:'<div class="empty">비교할 종목을 먼저 담아주세요.</div>';
+  $('#cmpModal').classList.add('open');
+  setTimeout(()=>{$$('[data-cspark]').forEach(cv=>{const st=STOCK_BY_NAME[cv.dataset.cspark]; if(st)drawSpark(cv,weeklyCounts(st.mentions));});},30);
+}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cmp]'); if(!b)return; e.stopPropagation(); toggleCompare(b.dataset.cmp);});
+
+let CMD_ITEMS=[], cmdIndex=0;
+function setupCommandPalette(){
+  if($('#cmdk'))return;
+  document.body.insertAdjacentHTML('beforeend',`<div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-label="빠른 이동"><div class="cmdk-back" data-cmdclose></div><div class="cmdk-box"><div class="cmdk-search"><span>⌘K</span><input id="cmdInput" type="text" placeholder="빠른 이동: 종목·섹터·용어·리포트 검색"></div><div class="cmdk-list" id="cmdList"></div><div class="cmdk-foot"><span>↑↓ 이동</span><span>Enter 실행</span><span>Esc 닫기</span><span>/ 전역 검색</span></div></div></div>`);
+  CMD_ITEMS=buildCommandItems();
+  $('#cmdInput').addEventListener('input',()=>{cmdIndex=0;drawCommandList();});
+  $('#cmdInput').addEventListener('keydown',e=>{const rows=$$('.cmdk-item'); if(e.key==='ArrowDown'){e.preventDefault();cmdIndex=Math.min(rows.length-1,cmdIndex+1);drawCommandList();} if(e.key==='ArrowUp'){e.preventDefault();cmdIndex=Math.max(0,cmdIndex-1);drawCommandList();} if(e.key==='Enter'){e.preventDefault();const row=$$('.cmdk-item')[cmdIndex]; if(row)runCommand(row.dataset.idx);}});
+  $$('[data-cmdclose]').forEach(x=>x.addEventListener('click',closeCommand));
+  document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openCommand();} if(e.key==='Escape'&&$('#cmdk').classList.contains('open'))closeCommand();});
+}
+function buildCommandItems(){
+  const items=[
+    {kind:'이동',title:'개요',sub:'홈 대시보드',go:()=>showTab('home')},
+    {kind:'이동',title:'섹터·테마',sub:'테마 클러스터',go:()=>showTab('sectors')},
+    {kind:'이동',title:'종목 유니버스',sub:'필터와 비교',go:()=>showTab('stocks')},
+    {kind:'이동',title:'전략',sub:'스탠스와 원칙',go:()=>showTab('strategy')},
+    {kind:'이동',title:'관계망',sub:'섹터·종목 그래프',go:()=>showTab('graph')}
+  ];
+  (D.stocks||[]).slice(0,80).forEach(s=>items.push({kind:'종목',title:s.name,sub:`${s.count||0}회 · 수급 ${s.supply_count||0} · ${(s.themes||[]).slice(0,2).join(', ')}`,go:()=>{showTab('stocks');stockQuery=s.name;stockSort='count';renderStocks();}}));
+  (D.sectors||[]).slice(0,50).forEach(s=>items.push({kind:'섹터',title:s.theme,sub:`${s.count||0}회 · ${(s.stocks||[]).slice(0,4).join(', ')}`,go:()=>{showTab('sectors');setTimeout(()=>{const card=$$('#view-sectors .scard').find(c=>c.querySelector('.scard-name')?.textContent===s.theme); if(card){card.querySelector('.scard-detail').classList.add('open');card.scrollIntoView({behavior:'smooth',block:'center'});}},80);}}));
+  (D.glossary||[]).slice(0,80).forEach(g=>items.push({kind:'용어',title:g.term,sub:(g.body||'').slice(0,90),go:()=>{showTab('glossary');glossQuery=g.term;renderGlossary();}}));
+  (D.reports||[]).slice().reverse().slice(0,40).forEach(r=>items.push({kind:r.type==='weekly'?'주간':'데일리',title:r.headline||r.file,sub:`${fmtDate(r.date)} · ${r.subhead||''}`,go:()=>openReport(r.id,r.headline||'')}));
+  return items;
+}
+function openCommand(){const m=$('#cmdk');m.classList.add('open');$('#cmdInput').value='';cmdIndex=0;drawCommandList();setTimeout(()=>$('#cmdInput').focus(),20);}
+function closeCommand(){$('#cmdk').classList.remove('open');}
+function drawCommandList(){
+  const q=($('#cmdInput')?.value||'').toLowerCase().trim();
+  let res=CMD_ITEMS.map((it,i)=>({it,i,hay:(it.kind+' '+it.title+' '+it.sub).toLowerCase()})).filter(x=>!q||q.split(/\s+/).every(t=>x.hay.includes(t))).slice(0,40);
+  if(cmdIndex>=res.length)cmdIndex=Math.max(0,res.length-1);
+  $('#cmdList').innerHTML=res.length?res.map((x,n)=>`<button class="cmdk-item ${n===cmdIndex?'active':''}" data-idx="${x.i}"><span class="cmdk-kind">${esc(x.it.kind)}</span><span><div class="cmdk-main">${esc(x.it.title)}</div><div class="cmdk-sub">${esc(x.it.sub||'')}</div></span></button>`).join(''):'<div class="cmdk-empty">결과가 없습니다. 전역 검색(/)도 함께 활용해 보세요.</div>';
+  $$('.cmdk-item').forEach(b=>b.addEventListener('click',()=>runCommand(b.dataset.idx)));
+}
+function runCommand(idx){const it=CMD_ITEMS[+idx]; if(!it)return; closeCommand(); setTimeout(()=>it.go(),20);}
+function bootV4Enhancements(){setupCompareUI();setupCommandPalette();injectMarketPulse();refreshCompareUI();}
+
 /* ───────── INIT ───────── */
 renderHome();renderSectors();renderStocks();renderStrategy();renderGlossary();renderGraph();
+bootV4Enhancements();
 tabFromHash();
 </script>
 </body>
