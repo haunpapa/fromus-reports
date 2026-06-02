@@ -21,6 +21,17 @@ GitHub Actions에서 새 리포트 커밋 시 이 스크립트를 자동 실행�
 import argparse, json, os, re, sys, glob, datetime, html as _html, subprocess
 from collections import defaultdict, OrderedDict
 
+KST = datetime.timezone(datetime.timedelta(hours=9), "KST")
+
+def _now_kst():
+    return datetime.datetime.now(KST)
+
+def _today_kst():
+    return _now_kst().date()
+
+def _fmt_kst(fmt="%Y-%m-%d %H:%M"):
+    return _now_kst().strftime(fmt)
+
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -186,7 +197,7 @@ def detect_report(path, soup):
             mw2 = re.search(r"W(\d{1,2})", title)
             week = int(mw2.group(1)) if mw2 else 1
             my = re.search(r"(\d{4})", title)
-            year = int(my.group(1)) if my else datetime.date.today().year
+            year = int(my.group(1)) if my else _today_kst().year
         try:
             sort_date = datetime.date.fromisocalendar(year, week, 5)  # 금요일
         except Exception:
@@ -881,7 +892,7 @@ def _snapshot_market_momentum(name, meta, index_series):
         "relative_5d": round(rel1 * 100, 2),
         "amount_percentile": amount_pct,
         "source": "FinanceDataReader/KRX snapshot",
-        "updated": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "updated": _fmt_kst("%Y-%m-%d"),
     }
 
 
@@ -966,7 +977,7 @@ def _stock_market_momentum(name, meta, index_series, start_date):
         "relative_5d": round(rel5 * 100, 2),
         "high20_position": round(high_pos * 100, 1),
         "source": "FinanceDataReader/KRX",
-        "updated": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "updated": _fmt_kst("%Y-%m-%d"),
     }, None
 
 
@@ -1002,7 +1013,7 @@ def _aggregate_market_momentum(items, label="시장"):
         "warm_ratio": round(warm * 100, 1),
         "cool_ratio": round(cool * 100, 1),
         "source": "component-stocks",
-        "updated": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "updated": _fmt_kst("%Y-%m-%d"),
     }
 
 
@@ -1015,7 +1026,7 @@ def enrich_market_momentum(agg, index_series):
     if not ticker_map:
         return {"enabled": False, "reason": "no ticker map"}
 
-    start_date = (datetime.date.today() - datetime.timedelta(days=110)).isoformat()
+    start_date = (_today_kst() - datetime.timedelta(days=110)).isoformat()
     max_n = int(os.environ.get("MARKET_MOMENTUM_MAX_STOCKS", "140") or 140)
     history_n = int(os.environ.get("MARKET_MOMENTUM_HISTORY_STOCKS", "0") or 0)
     failures = []
@@ -1063,7 +1074,7 @@ def enrich_market_momentum(agg, index_series):
         "sector_covered": sum(1 for s in sectors if s.get("market_momentum")),
         "market_regime": _market_regime(index_series),
         "fallback": "시장 데이터가 없는 항목은 기존 14일 언급량 기준 사용",
-        "updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "updated": _fmt_kst(),
     }
     if failures:
         meta["unmatched_sample"] = failures[:20]
@@ -1104,7 +1115,7 @@ def main():
     daily = [r for r in reports if r["type"] == "daily"]
     weekly = [r for r in reports if r["type"] == "weekly"]
     data = {
-        "build": {"generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "build": {"generated": _fmt_kst(), "timezone": "Asia/Seoul", "timezone_label": "한국시간(KST)",
                   "reports": len(reports), "daily": len(daily), "weekly": len(weekly),
                   "from": daily[0]["date"] if daily else (reports[0]["id"] if reports else ""),
                   "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else ""),

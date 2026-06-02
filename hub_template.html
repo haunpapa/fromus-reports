@@ -502,7 +502,8 @@ window.addEventListener('hashchange',tabFromHash);
 /* ───────── HOME ───────── */
 function renderHome(){
   const b=D.build||{};
-  $('#buildMeta').textContent = `${b.from||''} ~ ${b.to||''} · 갱신 ${b.generated||''}`;
+  const tzLabel = b.timezone_label || '한국시간(KST)';
+  $('#buildMeta').textContent = `${b.from||''} ~ ${b.to||''} · 갱신 ${b.generated||''} ${tzLabel}`;
   const topSectors=(D.sectors||[]).slice(0,6);
   const topStocks=(D.stocks||[]).slice(0,10);
   const latest=(D.stance||[]).slice(-1)[0]||{};
