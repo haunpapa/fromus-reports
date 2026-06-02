@@ -1,6 +1,6 @@
 {
  "build": {
-  "generated": "2026-06-02 03:34",
+  "generated": "2026-06-02 03:35",
   "reports": 43,
   "daily": 38,
   "weekly": 5,
@@ -18,13 +18,13 @@
    "sector_covered": 17,
    "market_regime": {
     "state": "neutral",
-    "score": 50.5,
-    "kospi_5d": 6.78,
+    "score": 50.6,
+    "kospi_5d": 6.84,
     "kosdaq_5d": -12.83,
-    "avg_20d": 7.97
+    "avg_20d": 8.01
    },
    "fallback": "시장 데이터가 없는 항목은 기존 14일 언급량 기준 사용",
-   "updated": "2026-06-02 03:34",
+   "updated": "2026-06-02 03:35",
    "unmatched_sample": [
     "마이크론: ticker",
     "엔비디아: ticker",
@@ -31090,8 +31090,8 @@
    "market_momentum": {
     "state": "warm",
     "label": "↗ 시장 상승",
-    "score": 67.9,
-    "reason": "당일 +0.6%, 거래대금 분위 100, 코스피 대비 +2.8%p",
+    "score": 67.8,
+    "reason": "당일 +0.6%, 거래대금 분위 100, 코스피 대비 +2.7%p",
     "ticker": "005930",
     "market": "KOSPI",
     "last_close": 351000.0,
@@ -31099,7 +31099,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 2.79,
+    "relative_5d": 2.74,
     "amount_percentile": 100.0,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -31336,8 +31336,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 32.6,
-    "reason": "당일 -4.0%, 거래대금 분위 100, 코스피 대비 -1.8%p",
+    "score": 32.5,
+    "reason": "당일 -4.0%, 거래대금 분위 100, 코스피 대비 -1.9%p",
     "ticker": "000660",
     "market": "KOSPI",
     "last_close": 2268000.0,
@@ -31345,7 +31345,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.8,
+    "relative_5d": -1.85,
     "amount_percentile": 100.0,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -31552,8 +31552,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 21.4,
-    "reason": "당일 -5.5%, 거래대금 분위 100, 코스피 대비 -3.2%p",
+    "score": 21.3,
+    "reason": "당일 -5.5%, 거래대금 분위 100, 코스피 대비 -3.3%p",
     "ticker": "005380",
     "market": "KOSPI",
     "last_close": 709000.0,
@@ -31561,7 +31561,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.25,
+    "relative_5d": -3.3,
     "amount_percentile": 99.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -31928,7 +31928,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 11.9,
+    "score": 11.8,
     "reason": "당일 -6.7%, 거래대금 분위 100, 코스피 대비 -4.5%p",
     "ticker": "012330",
     "market": "KOSPI",
@@ -31937,7 +31937,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.48,
+    "relative_5d": -4.53,
     "amount_percentile": 99.6,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32068,7 +32068,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 17.54,
+    "relative_5d": 17.49,
     "amount_percentile": 99.7,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32397,8 +32397,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 13.9,
-    "reason": "당일 -6.4%, 거래대금 분위 99, 코스피 대비 -4.2%p",
+    "score": 13.7,
+    "reason": "당일 -6.4%, 거래대금 분위 99, 코스피 대비 -4.3%p",
     "ticker": "006400",
     "market": "KOSPI",
     "last_close": 610000.0,
@@ -32406,7 +32406,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.22,
+    "relative_5d": -4.27,
     "amount_percentile": 99.4,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32610,7 +32610,7 @@
     "state": "cool",
     "label": "❄ 시장 냉각",
     "score": 0,
-    "reason": "당일 -13.9%, 거래대금 분위 100, 코스피 대비 -11.7%p",
+    "reason": "당일 -13.9%, 거래대금 분위 100, 코스피 대비 -11.8%p",
     "ticker": "009150",
     "market": "KOSPI",
     "last_close": 1726000.0,
@@ -32618,7 +32618,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -11.7,
+    "relative_5d": -11.75,
     "amount_percentile": 99.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32707,8 +32707,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 15.2,
-    "reason": "당일 -6.2%, 거래대금 분위 98, 코스피 대비 -4.0%p",
+    "score": 15.1,
+    "reason": "당일 -6.2%, 거래대금 분위 98, 코스피 대비 -4.1%p",
     "ticker": "006800",
     "market": "KOSPI",
     "last_close": 57100.0,
@@ -32716,7 +32716,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.02,
+    "relative_5d": -4.07,
     "amount_percentile": 98.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32793,8 +32793,8 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 53.3,
-    "reason": "당일 -1.3%, 거래대금 분위 100, 코스피 대비 +0.9%p",
+    "score": 53.2,
+    "reason": "당일 -1.3%, 거래대금 분위 100, 코스피 대비 +0.8%p",
     "ticker": "373220",
     "market": "KOSPI",
     "last_close": 449000.0,
@@ -32802,7 +32802,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.9,
+    "relative_5d": 0.85,
     "amount_percentile": 99.6,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32877,7 +32877,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 16.0,
+    "score": 15.8,
     "reason": "당일 -6.2%, 거래대금 분위 100, 코스피 대비 -4.0%p",
     "ticker": "066570",
     "market": "KOSPI",
@@ -32886,7 +32886,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.96,
+    "relative_5d": -4.01,
     "amount_percentile": 99.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -32965,7 +32965,7 @@
     "state": "cool",
     "label": "❄ 시장 냉각",
     "score": 0,
-    "reason": "당일 -9.2%, 거래대금 분위 97, 코스피 대비 -7.0%p",
+    "reason": "당일 -9.2%, 거래대금 분위 97, 코스피 대비 -7.1%p",
     "ticker": "006260",
     "market": "KOSPI",
     "last_close": 423000.0,
@@ -32973,7 +32973,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -7.01,
+    "relative_5d": -7.06,
     "amount_percentile": 97.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -33048,8 +33048,8 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 53.7,
-    "reason": "당일 -1.3%, 거래대금 분위 100, 코스피 대비 +1.0%p",
+    "score": 53.6,
+    "reason": "당일 -1.3%, 거래대금 분위 100, 코스피 대비 +0.9%p",
     "ticker": "402340",
     "market": "KOSPI",
     "last_close": 1240000.0,
@@ -33057,7 +33057,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.95,
+    "relative_5d": 0.9,
     "amount_percentile": 99.5,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -33137,8 +33137,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 13.8,
-    "reason": "당일 -6.5%, 거래대금 분위 99, 코스피 대비 -4.2%p",
+    "score": 13.6,
+    "reason": "당일 -6.5%, 거래대금 분위 99, 코스피 대비 -4.3%p",
     "ticker": "034020",
     "market": "KOSPI",
     "last_close": 100000.0,
@@ -33146,7 +33146,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.23,
+    "relative_5d": -4.28,
     "amount_percentile": 99.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -33787,8 +33787,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 16.6,
-    "reason": "당일 -6.0%, 거래대금 분위 96, 코스피 대비 -3.8%p",
+    "score": 16.5,
+    "reason": "당일 -6.0%, 거래대금 분위 96, 코스피 대비 -3.9%p",
     "ticker": "086280",
     "market": "KOSPI",
     "last_close": 218500.0,
@@ -33796,7 +33796,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.8,
+    "relative_5d": -3.85,
     "amount_percentile": 96.4,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -33861,8 +33861,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 20.6,
-    "reason": "당일 -5.6%, 거래대금 분위 99, 코스피 대비 -3.3%p",
+    "score": 20.4,
+    "reason": "당일 -5.6%, 거래대금 분위 99, 코스피 대비 -3.4%p",
     "ticker": "329180",
     "market": "KOSPI",
     "last_close": 646000.0,
@@ -33870,7 +33870,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.34,
+    "relative_5d": -3.39,
     "amount_percentile": 98.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -33938,7 +33938,7 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 42.5,
+    "score": 42.3,
     "reason": "당일 -2.7%, 거래대금 분위 98, 코스피 대비 -0.5%p",
     "ticker": "000270",
     "market": "KOSPI",
@@ -33947,7 +33947,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.49,
+    "relative_5d": -0.54,
     "amount_percentile": 98.5,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -34090,7 +34090,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 16.0,
+    "score": 15.9,
     "reason": "당일 -6.1%, 거래대금 분위 96, 코스피 대비 -3.9%p",
     "ticker": "016360",
     "market": "KOSPI",
@@ -34099,7 +34099,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.88,
+    "relative_5d": -3.93,
     "amount_percentile": 96.4,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -34307,7 +34307,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 14.7,
+    "score": 14.6,
     "reason": "당일 -6.3%, 거래대금 분위 99, 코스피 대비 -4.1%p",
     "ticker": "042700",
     "market": "KOSPI",
@@ -34316,7 +34316,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.09,
+    "relative_5d": -4.14,
     "amount_percentile": 98.6,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -34383,8 +34383,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 14.6,
-    "reason": "당일 -6.3%, 거래대금 분위 99, 코스피 대비 -4.1%p",
+    "score": 14.5,
+    "reason": "당일 -6.3%, 거래대금 분위 99, 코스피 대비 -4.2%p",
     "ticker": "012450",
     "market": "KOSPI",
     "last_close": 1066000.0,
@@ -34392,7 +34392,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.11,
+    "relative_5d": -4.16,
     "amount_percentile": 98.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -34460,7 +34460,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 10.2,
+    "score": 10.1,
     "reason": "당일 -6.9%, 거래대금 분위 98, 코스피 대비 -4.7%p",
     "ticker": "042660",
     "market": "KOSPI",
@@ -34469,7 +34469,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.67,
+    "relative_5d": -4.72,
     "amount_percentile": 98.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -34620,7 +34620,7 @@
     "state": "cool",
     "label": "❄ 시장 냉각",
     "score": 0,
-    "reason": "당일 -22.2%, 거래대금 분위 100, 코스피 대비 -20.0%p",
+    "reason": "당일 -22.2%, 거래대금 분위 100, 코스피 대비 -20.1%p",
     "ticker": "011070",
     "market": "KOSPI",
     "last_close": 1190000.0,
@@ -34628,7 +34628,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -20.0,
+    "relative_5d": -20.05,
     "amount_percentile": 99.7,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35010,7 +35010,7 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 53.4,
+    "score": 53.3,
     "reason": "당일 -1.3%, 거래대금 분위 100, 코스피 대비 +0.9%p",
     "ticker": "005935",
     "market": "KOSPI",
@@ -35019,7 +35019,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.91,
+    "relative_5d": 0.86,
     "amount_percentile": 99.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35070,8 +35070,8 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 46.4,
-    "reason": "당일 -2.1%, 거래대금 분위 96, 코스피 대비 +0.1%p",
+    "score": 46.3,
+    "reason": "당일 -2.1%, 거래대금 분위 96, 코스피 대비 +0.0%p",
     "ticker": "003230",
     "market": "KOSPI",
     "last_close": 1141000.0,
@@ -35079,7 +35079,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.08,
+    "relative_5d": 0.03,
     "amount_percentile": 95.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35286,7 +35286,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 6.0,
+    "score": 6.1,
     "reason": "당일 -7.5%, 거래대금 분위 93, 코스닥 대비 -4.8%p",
     "ticker": "095610",
     "market": "KOSDAQ",
@@ -35419,8 +35419,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 14.0,
-    "reason": "당일 -6.4%, 거래대금 분위 97, 코스피 대비 -4.1%p",
+    "score": 13.8,
+    "reason": "당일 -6.4%, 거래대금 분위 97, 코스피 대비 -4.2%p",
     "ticker": "272210",
     "market": "KOSPI",
     "last_close": 95500.0,
@@ -35428,7 +35428,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.15,
+    "relative_5d": -4.2,
     "amount_percentile": 96.6,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35479,7 +35479,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 20.2,
+    "score": 20.1,
     "reason": "당일 -5.5%, 거래대금 분위 94, 코스피 대비 -3.3%p",
     "ticker": "004020",
     "market": "KOSPI",
@@ -35488,7 +35488,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.28,
+    "relative_5d": -3.33,
     "amount_percentile": 93.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35544,8 +35544,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 7.3,
-    "reason": "당일 -7.3%, 거래대금 분위 98, 코스피 대비 -5.0%p",
+    "score": 7.2,
+    "reason": "당일 -7.3%, 거래대금 분위 98, 코스피 대비 -5.1%p",
     "ticker": "298040",
     "market": "KOSPI",
     "last_close": 3534000.0,
@@ -35553,7 +35553,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.05,
+    "relative_5d": -5.1,
     "amount_percentile": 98.2,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35598,7 +35598,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 14.6,
+    "score": 14.5,
     "reason": "당일 -6.3%, 거래대금 분위 97, 코스피 대비 -4.1%p",
     "ticker": "009540",
     "market": "KOSPI",
@@ -35607,7 +35607,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.08,
+    "relative_5d": -4.13,
     "amount_percentile": 97.4,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35653,7 +35653,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 17.9,
+    "score": 17.8,
     "reason": "당일 -5.8%, 거래대금 분위 93, 코스피 대비 -3.6%p",
     "ticker": "443060",
     "market": "KOSPI",
@@ -35662,7 +35662,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.57,
+    "relative_5d": -3.62,
     "amount_percentile": 93.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35740,8 +35740,8 @@
    "market_momentum": {
     "state": "warm",
     "label": "↗ 시장 상승",
-    "score": 59.7,
-    "reason": "당일 -0.5%, 거래대금 분위 98, 코스피 대비 +1.8%p",
+    "score": 59.5,
+    "reason": "당일 -0.5%, 거래대금 분위 98, 코스피 대비 +1.7%p",
     "ticker": "105560",
     "market": "KOSPI",
     "last_close": 151400.0,
@@ -35749,7 +35749,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.76,
+    "relative_5d": 1.71,
     "amount_percentile": 97.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35827,8 +35827,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 27.0,
-    "reason": "당일 -4.7%, 거래대금 분위 99, 코스피 대비 -2.5%p",
+    "score": 26.9,
+    "reason": "당일 -4.7%, 거래대금 분위 99, 코스피 대비 -2.6%p",
     "ticker": "005490",
     "market": "KOSPI",
     "last_close": 393500.0,
@@ -35836,7 +35836,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -2.5,
+    "relative_5d": -2.55,
     "amount_percentile": 98.7,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -35991,8 +35991,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 38.1,
-    "reason": "당일 -2.8%, 거래대금 분위 74, 코스피 대비 -0.5%p",
+    "score": 38.0,
+    "reason": "당일 -2.8%, 거래대금 분위 74, 코스피 대비 -0.6%p",
     "ticker": "003540",
     "market": "KOSPI",
     "last_close": 29800.0,
@@ -36000,7 +36000,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.55,
+    "relative_5d": -0.6,
     "amount_percentile": 74.2,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36041,7 +36041,7 @@
     "state": "cool",
     "label": "❄ 시장 냉각",
     "score": 0,
-    "reason": "당일 -8.7%, 거래대금 분위 99, 코스피 대비 -6.4%p",
+    "reason": "당일 -8.7%, 거래대금 분위 99, 코스피 대비 -6.5%p",
     "ticker": "047040",
     "market": "KOSPI",
     "last_close": 22150.0,
@@ -36049,7 +36049,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -6.44,
+    "relative_5d": -6.49,
     "amount_percentile": 98.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36103,7 +36103,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -7.86,
+    "relative_5d": -7.91,
     "amount_percentile": 98.5,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36157,7 +36157,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -10.26,
+    "relative_5d": -10.31,
     "amount_percentile": 98.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36277,8 +36277,8 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 53.2,
-    "reason": "당일 -1.3%, 거래대금 분위 99, 코스피 대비 +0.9%p",
+    "score": 53.1,
+    "reason": "당일 -1.3%, 거래대금 분위 99, 코스피 대비 +0.8%p",
     "ticker": "028260",
     "market": "KOSPI",
     "last_close": 449000.0,
@@ -36286,7 +36286,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.9,
+    "relative_5d": 0.85,
     "amount_percentile": 99.0,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36332,7 +36332,7 @@
    "market_momentum": {
     "state": "hot",
     "label": "🔥 시장 과열",
-    "score": 98.1,
+    "score": 97.9,
     "reason": "당일 +4.5%, 거래대금 분위 99, 코스피 대비 +6.7%p",
     "ticker": "032830",
     "market": "KOSPI",
@@ -36341,7 +36341,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 6.73,
+    "relative_5d": 6.68,
     "amount_percentile": 98.7,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36387,8 +36387,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 21.3,
-    "reason": "당일 -5.4%, 거래대금 분위 98, 코스피 대비 -3.2%p",
+    "score": 21.2,
+    "reason": "당일 -5.4%, 거래대금 분위 98, 코스피 대비 -3.3%p",
     "ticker": "010140",
     "market": "KOSPI",
     "last_close": 26050.0,
@@ -36396,7 +36396,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.22,
+    "relative_5d": -3.27,
     "amount_percentile": 97.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36869,7 +36869,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 20.1,
+    "score": 20.0,
     "reason": "당일 -5.5%, 거래대금 분위 94, 코스피 대비 -3.3%p",
     "ticker": "039490",
     "market": "KOSPI",
@@ -36878,7 +36878,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.29,
+    "relative_5d": -3.34,
     "amount_percentile": 93.6,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -36960,8 +36960,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 38.0,
-    "reason": "당일 -3.2%, 거래대금 분위 96, 코스피 대비 -1.0%p",
+    "score": 37.9,
+    "reason": "당일 -3.2%, 거래대금 분위 96, 코스피 대비 -1.1%p",
     "ticker": "015760",
     "market": "KOSPI",
     "last_close": 37400.0,
@@ -36969,7 +36969,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.01,
+    "relative_5d": -1.06,
     "amount_percentile": 95.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37023,7 +37023,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -6.18,
+    "relative_5d": -6.23,
     "amount_percentile": 97.2,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37068,8 +37068,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 3.0,
-    "reason": "당일 -7.8%, 거래대금 분위 95, 코스피 대비 -5.5%p",
+    "score": 2.8,
+    "reason": "당일 -7.8%, 거래대금 분위 95, 코스피 대비 -5.6%p",
     "ticker": "082740",
     "market": "KOSPI",
     "last_close": 57000.0,
@@ -37077,7 +37077,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.55,
+    "relative_5d": -5.6,
     "amount_percentile": 95.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37117,8 +37117,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 16.0,
-    "reason": "당일 -6.1%, 거래대금 분위 97, 코스피 대비 -3.9%p",
+    "score": 15.8,
+    "reason": "당일 -6.1%, 거래대금 분위 97, 코스피 대비 -4.0%p",
     "ticker": "000720",
     "market": "KOSPI",
     "last_close": 130400.0,
@@ -37126,7 +37126,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.9,
+    "relative_5d": -3.95,
     "amount_percentile": 97.1,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37172,7 +37172,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 15.4,
+    "score": 15.2,
     "reason": "당일 -6.2%, 거래대금 분위 97, 코스피 대비 -4.0%p",
     "ticker": "064350",
     "market": "KOSPI",
@@ -37181,7 +37181,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.98,
+    "relative_5d": -4.03,
     "amount_percentile": 97.2,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37227,7 +37227,7 @@
     "state": "cool",
     "label": "❄ 시장 냉각",
     "score": 0,
-    "reason": "당일 -10.2%, 거래대금 분위 99, 코스피 대비 -8.0%p",
+    "reason": "당일 -10.2%, 거래대금 분위 99, 코스피 대비 -8.1%p",
     "ticker": "307950",
     "market": "KOSPI",
     "last_close": 842000.0,
@@ -37235,7 +37235,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -8.01,
+    "relative_5d": -8.06,
     "amount_percentile": 99.1,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37292,8 +37292,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 36.9,
-    "reason": "당일 -3.3%, 거래대금 분위 93, 코스피 대비 -1.1%p",
+    "score": 36.7,
+    "reason": "당일 -3.3%, 거래대금 분위 93, 코스피 대비 -1.2%p",
     "ticker": "001040",
     "market": "KOSPI",
     "last_close": 176900.0,
@@ -37301,7 +37301,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.11,
+    "relative_5d": -1.16,
     "amount_percentile": 93.4,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37332,8 +37332,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 12.0,
-    "reason": "당일 -6.6%, 거래대금 분위 97, 코스피 대비 -4.4%p",
+    "score": 11.9,
+    "reason": "당일 -6.6%, 거래대금 분위 97, 코스피 대비 -4.5%p",
     "ticker": "000990",
     "market": "KOSPI",
     "last_close": 169400.0,
@@ -37341,7 +37341,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.4,
+    "relative_5d": -4.45,
     "amount_percentile": 96.6,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37375,8 +37375,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 2.5,
-    "reason": "당일 -7.7%, 거래대금 분위 91, 코스피 대비 -5.5%p",
+    "score": 2.3,
+    "reason": "당일 -7.7%, 거래대금 분위 91, 코스피 대비 -5.6%p",
     "ticker": "071970",
     "market": "KOSPI",
     "last_close": 64400.0,
@@ -37384,7 +37384,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.52,
+    "relative_5d": -5.57,
     "amount_percentile": 90.7,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37444,7 +37444,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 3.3,
+    "score": 3.1,
     "reason": "당일 -7.8%, 거래대금 분위 98, 코스피 대비 -5.6%p",
     "ticker": "267260",
     "market": "KOSPI",
@@ -37453,7 +37453,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.57,
+    "relative_5d": -5.62,
     "amount_percentile": 98.1,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37530,8 +37530,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 11.0,
-    "reason": "당일 -6.7%, 거래대금 분위 95, 코스피 대비 -4.5%p",
+    "score": 10.9,
+    "reason": "당일 -6.7%, 거래대금 분위 95, 코스피 대비 -4.6%p",
     "ticker": "204320",
     "market": "KOSPI",
     "last_close": 58200.0,
@@ -37539,7 +37539,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.51,
+    "relative_5d": -4.56,
     "amount_percentile": 95.3,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37951,7 +37951,7 @@
     "state": "cool",
     "label": "❄ 시장 냉각",
     "score": 0,
-    "reason": "당일 -17.6%, 거래대금 분위 99, 코스피 대비 -15.3%p",
+    "reason": "당일 -17.6%, 거래대금 분위 99, 코스피 대비 -15.4%p",
     "ticker": "003550",
     "market": "KOSPI",
     "last_close": 136700.0,
@@ -37959,7 +37959,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -15.33,
+    "relative_5d": -15.38,
     "amount_percentile": 99.0,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -37993,7 +37993,7 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 44.2,
+    "score": 44.0,
     "reason": "당일 -2.5%, 거래대금 분위 98, 코스피 대비 -0.3%p",
     "ticker": "051910",
     "market": "KOSPI",
@@ -38002,7 +38002,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.26,
+    "relative_5d": -0.31,
     "amount_percentile": 98.1,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -38059,7 +38059,7 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 8.3,
+    "score": 8.1,
     "reason": "당일 -7.2%, 거래대금 분위 100, 코스피 대비 -5.0%p",
     "ticker": "035420",
     "market": "KOSPI",
@@ -38068,7 +38068,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.96,
+    "relative_5d": -5.01,
     "amount_percentile": 99.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -38155,7 +38155,7 @@
     "state": "hot",
     "label": "🔥 시장 과열",
     "score": 100,
-    "reason": "당일 +5.1%, 거래대금 분위 96, 코스피 대비 +7.3%p",
+    "reason": "당일 +5.1%, 거래대금 분위 96, 코스피 대비 +7.2%p",
     "ticker": "010950",
     "market": "KOSPI",
     "last_close": 110000.0,
@@ -38163,7 +38163,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 7.28,
+    "relative_5d": 7.23,
     "amount_percentile": 95.5,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -38194,7 +38194,7 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 54.2,
+    "score": 54.0,
     "reason": "당일 -1.1%, 거래대금 분위 94, 코스피 대비 +1.1%p",
     "ticker": "001740",
     "market": "KOSPI",
@@ -38203,7 +38203,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.13,
+    "relative_5d": 1.08,
     "amount_percentile": 93.8,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -38534,7 +38534,7 @@
     "state": "hot",
     "label": "🔥 시장 과열",
     "score": 100,
-    "reason": "당일 +7.8%, 거래대금 분위 97, 코스피 대비 +10.0%p",
+    "reason": "당일 +7.8%, 거래대금 분위 97, 코스피 대비 +9.9%p",
     "ticker": "020150",
     "market": "KOSPI",
     "last_close": 69300.0,
@@ -38542,7 +38542,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": 10.0,
+    "relative_5d": 9.95,
     "amount_percentile": 96.9,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -38807,7 +38807,7 @@
     "ret_5d": 0,
     "ret_20d": 0,
     "volume_ratio_5d_20d": 1,
-    "relative_5d": -8.08,
+    "relative_5d": -8.13,
     "amount_percentile": 96.7,
     "source": "FinanceDataReader/KRX snapshot",
     "updated": "2026-06-02"
@@ -40259,8 +40259,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 23.9,
-    "reason": "편입 14개 평균 점수 23.9, 당일 평균 -5.2%, 거래대금 분위 99, 과열 7%/냉각 86%",
+    "score": 23.8,
+    "reason": "편입 14개 평균 점수 23.8, 당일 평균 -5.2%, 거래대금 분위 99, 과열 7%/냉각 86%",
     "covered": 14,
     "hot_ratio": 7.1,
     "warm_ratio": 0.0,
@@ -40486,8 +40486,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 37.1,
-    "reason": "편입 6개 평균 점수 37.1, 당일 평균 -3.5%, 거래대금 분위 99, 과열 0%/냉각 67%",
+    "score": 37.0,
+    "reason": "편입 6개 평균 점수 37.0, 당일 평균 -3.5%, 거래대금 분위 99, 과열 0%/냉각 67%",
     "covered": 6,
     "hot_ratio": 0.0,
     "warm_ratio": 16.7,
@@ -40603,8 +40603,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 36.1,
-    "reason": "편입 5개 평균 점수 36.1, 당일 평균 -3.6%, 거래대금 분위 99, 과열 0%/냉각 60%",
+    "score": 36.0,
+    "reason": "편입 5개 평균 점수 36.0, 당일 평균 -3.6%, 거래대금 분위 99, 과열 0%/냉각 60%",
     "covered": 5,
     "hot_ratio": 0.0,
     "warm_ratio": 0.0,
@@ -40829,8 +40829,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 15.5,
-    "reason": "편입 9개 평균 점수 15.5, 당일 평균 -6.5%, 거래대금 분위 98, 과열 0%/냉각 89%",
+    "score": 15.4,
+    "reason": "편입 9개 평균 점수 15.4, 당일 평균 -6.5%, 거래대금 분위 98, 과열 0%/냉각 89%",
     "covered": 9,
     "hot_ratio": 0.0,
     "warm_ratio": 0.0,
@@ -40940,8 +40940,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 20.7,
-    "reason": "편입 12개 평균 점수 20.7, 당일 평균 -5.5%, 거래대금 분위 97, 과열 8%/냉각 92%",
+    "score": 20.5,
+    "reason": "편입 12개 평균 점수 20.5, 당일 평균 -5.5%, 거래대금 분위 97, 과열 8%/냉각 92%",
     "covered": 12,
     "hot_ratio": 8.3,
     "warm_ratio": 0.0,
@@ -41052,8 +41052,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 14.3,
-    "reason": "편입 2개 평균 점수 14.3, 당일 평균 -6.3%, 거래대금 분위 98, 과열 0%/냉각 100%",
+    "score": 14.2,
+    "reason": "편입 2개 평균 점수 14.2, 당일 평균 -6.3%, 거래대금 분위 98, 과열 0%/냉각 100%",
     "covered": 2,
     "hot_ratio": 0.0,
     "warm_ratio": 0.0,
@@ -41143,8 +41143,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 23.1,
-    "reason": "편입 4개 평균 점수 23.1, 당일 평균 -5.2%, 거래대금 분위 99, 과열 0%/냉각 75%",
+    "score": 23.0,
+    "reason": "편입 4개 평균 점수 23.0, 당일 평균 -5.2%, 거래대금 분위 99, 과열 0%/냉각 75%",
     "covered": 4,
     "hot_ratio": 0.0,
     "warm_ratio": 0.0,
@@ -41467,8 +41467,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 34.0,
-    "reason": "편입 2개 평균 점수 34.0, 당일 평균 -4.3%, 거래대금 분위 99, 과열 0%/냉각 50%",
+    "score": 33.9,
+    "reason": "편입 2개 평균 점수 33.9, 당일 평균 -4.3%, 거래대금 분위 99, 과열 0%/냉각 50%",
     "covered": 2,
     "hot_ratio": 0.0,
     "warm_ratio": 50.0,
@@ -41563,8 +41563,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 7.6,
-    "reason": "편입 2개 평균 점수 7.6, 당일 평균 -10.4%, 거래대금 분위 96, 과열 0%/냉각 100%",
+    "score": 7.5,
+    "reason": "편입 2개 평균 점수 7.5, 당일 평균 -10.4%, 거래대금 분위 96, 과열 0%/냉각 100%",
     "covered": 2,
     "hot_ratio": 0.0,
     "warm_ratio": 0.0,
@@ -41607,8 +41607,8 @@
    "market_momentum": {
     "state": "cool",
     "label": "❄ 시장 냉각",
-    "score": 13.1,
-    "reason": "편입 3개 평균 점수 13.1, 당일 평균 -6.5%, 거래대금 분위 96, 과열 0%/냉각 100%",
+    "score": 13.0,
+    "reason": "편입 3개 평균 점수 13.0, 당일 평균 -6.5%, 거래대금 분위 96, 과열 0%/냉각 100%",
     "covered": 3,
     "hot_ratio": 0.0,
     "warm_ratio": 0.0,
@@ -41799,8 +41799,8 @@
    "market_momentum": {
     "state": "flat",
     "label": "· 시장 유지",
-    "score": 47.0,
-    "reason": "편입 5개 평균 점수 47.0, 당일 평균 -3.3%, 거래대금 분위 99, 과열 20%/냉각 40%",
+    "score": 46.9,
+    "reason": "편입 5개 평균 점수 46.9, 당일 평균 -3.3%, 거래대금 분위 99, 과열 20%/냉각 40%",
     "covered": 5,
     "hot_ratio": 20.0,
     "warm_ratio": 20.0,
@@ -41881,8 +41881,8 @@
    "market_momentum": {
     "state": "hot",
     "label": "🔥 시장 과열",
-    "score": 98.1,
-    "reason": "편입 1개 평균 점수 98.1, 당일 평균 +4.5%, 거래대금 분위 99, 과열 100%/냉각 0%",
+    "score": 97.9,
+    "reason": "편입 1개 평균 점수 97.9, 당일 평균 +4.5%, 거래대금 분위 99, 과열 100%/냉각 0%",
     "covered": 1,
     "hot_ratio": 100.0,
     "warm_ratio": 0.0,
@@ -46073,7 +46073,7 @@
    },
    {
     "date": "2026-06-02",
-    "value": 8593.03,
+    "value": 8597.72,
     "change": ""
    }
   ],
@@ -46280,7 +46280,7 @@
    },
    {
     "date": "2026-06-02",
-    "value": 1022.13,
+    "value": 1022.12,
     "change": ""
    }
   ],
