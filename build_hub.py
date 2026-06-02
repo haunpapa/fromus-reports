@@ -852,13 +852,16 @@ def _snapshot_market_momentum(name, meta, index_series):
     amount_pct = _safe_float(meta.get("amount_percentile"), 50) or 50
     regime = _market_regime(index_series)
     regime_adj = 4 if regime["state"] == "risk_on" else -4 if regime["state"] == "risk_off" else 0
-    score = 50 + ret1 * 520 + rel1 * 250 + (amount_pct - 50) * 0.16 + regime_adj
+    # KRX snapshot is a same-day signal. Treat one-day weakness as cooling only when
+    # the drop is meaningful versus the market, so a broad red day does not mark most
+    # of the hub as cooled.
+    score = 50 + ret1 * 360 + rel1 * 300 + (amount_pct - 50) * 0.10 + regime_adj
     score = _clamp(score)
-    if ret1 >= 0.05 or (ret1 >= 0.03 and amount_pct >= 80) or score >= 75:
+    if ret1 >= 0.05 or (ret1 >= 0.03 and amount_pct >= 80) or score >= 76:
         state, label = "hot", "🔥 시장 과열"
-    elif ret1 >= 0.01 or score >= 58:
+    elif ret1 >= 0.012 or score >= 60:
         state, label = "warm", "↗ 시장 상승"
-    elif ret1 <= -0.03 or score <= 42:
+    elif (ret1 <= -0.07 and rel1 <= -0.03) or (ret1 <= -0.05 and rel1 <= -0.05) or (score <= 25 and rel1 <= -0.02):
         state, label = "cool", "❄ 시장 냉각"
     else:
         state, label = "flat", "· 시장 유지"
@@ -942,7 +945,7 @@ def _stock_market_momentum(name, meta, index_series, start_date):
         state, label = "hot", "🔥 시장 과열"
     elif score >= 58 and (ret5 >= 0.015 or ret20 >= 0.035 or rel5 >= 0.015):
         state, label = "warm", "↗ 시장 상승"
-    elif score <= 42 and (ret5 <= -0.03 or ret20 <= -0.06 or rel5 <= -0.03 or vol_ratio <= 0.65):
+    elif score <= 38 and ((ret5 <= -0.045 and rel5 <= -0.02) or ret20 <= -0.08 or vol_ratio <= 0.55):
         state, label = "cool", "❄ 시장 냉각"
     else:
         state, label = "flat", "· 시장 유지"
@@ -982,10 +985,10 @@ def _aggregate_market_momentum(items, label="시장"):
     avg_amount = sum(float(v.get("amount_percentile", 50)) for v in vals if v.get("amount_percentile") is not None) / max(1, sum(1 for v in vals if v.get("amount_percentile") is not None))
     if avg >= 72 or hot >= 0.35:
         state, text = "hot", "🔥 시장 과열"
-    elif avg <= 43 or cool >= 0.45:
-        state, text = "cool", "❄ 시장 냉각"
     elif avg >= 57 or (hot + warm) >= 0.45:
         state, text = "warm", "↗ 시장 상승"
+    elif avg <= 32 or cool >= 0.70:
+        state, text = "cool", "❄ 시장 냉각"
     else:
         state, text = "flat", "· 시장 유지"
     basis = f"당일 평균 {avg_ret1:+.1f}%, 거래대금 분위 {avg_amount:.0f}" if abs(avg_ret5) < 0.01 else f"5일 평균 {avg_ret5:+.1f}%, 거래량 {avg_vol:.1f}배"
