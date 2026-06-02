@@ -659,7 +659,7 @@ function drawStockList(){
   const q=stockQuery.trim().toLowerCase();
   if(q) list=list.filter(s=>s.name.toLowerCase().includes(q));
   if(stockOnlyWatch) list=list.filter(s=>isWatched('stock',s.name));
-  if(stockHotOnly) list=list.filter(s=>{const m=momentumOf(s.mentions); return m && (m.cls==='mo-hot'||m.cls==='mo-warm');});
+  if(stockHotOnly) list=list.filter(s=>{const m=momentumOf(s); return m && (m.cls==='mo-hot'||m.cls==='mo-warm');});
   if(stockSupplyOnly) list=list.filter(s=>(s.supply_count||0)>0);
   const meta=$('#stockResultMeta'); if(meta) meta.textContent=`${list.length.toLocaleString()} / ${(D.stocks||[]).length.toLocaleString()} 종목`;
   if(stockSort==='name') list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
@@ -861,7 +861,7 @@ function renderWatchHome(){
   host.innerHTML=`<div class="card"><div class="sec-title" style="margin:0 0 4px;font-size:17px">⭐ 내 워치리스트 <span class="count-badge">${items.length}</span></div><div class="sec-sub">클릭하면 해당 항목으로 이동 · 이 브라우저에 저장됩니다</div><div>${chips}</div></div>`;
 }
 
-/* ── 모멘텀(언급 최근성) ── */
+/* ── 모멘텀: 시장 데이터 우선, 없으면 언급 최근성 폴백 ── */
 function dnum(d){ if(!d)return null;
   let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
   if(m)return Math.floor(Date.UTC(+m[1],+m[2]-1,+m[3])/864e5);
@@ -869,18 +869,34 @@ function dnum(d){ if(!d)return null;
   if(m){const s=new Date(Date.UTC(+m[1],0,1+(+m[2]-1)*7));const dow=s.getUTCDay()||7; s.setUTCDate(s.getUTCDate()+1-dow); return Math.floor(s.getTime()/864e5);}
   return null;}
 const TO_DAY=(()=>{const t=dnum((D.build&&D.build.to)||''); return t||Math.floor(Date.now()/864e5);})();
-function momentumOf(mentions){
+function mentionMomentum(mentions){
   const days=(mentions||[]).map(m=>dnum(m.date)).filter(x=>x!=null);
   if(!days.length)return null;
   const rec=days.filter(x=>x>=TO_DAY-13).length;
   const pri=days.filter(x=>x<TO_DAY-13&&x>=TO_DAY-27).length;
-  if(rec>=3&&rec>pri*1.5) return {cls:'mo-hot',txt:'🔥 가열'};
-  if(rec>=2&&rec>pri)     return {cls:'mo-warm',txt:'↗ 상승'};
-  if(pri>=2&&rec<=pri*0.5) return {cls:'mo-cool',txt:'❄ 냉각'};
-  if(rec>=1)              return {cls:'mo-flat',txt:'· 유지'};
+  if(rec>=3&&rec>pri*1.5) return {cls:'mo-hot',txt:'🔥 언급 가열',reason:`최근 14일 ${rec}회 · 직전 14일 ${pri}회`};
+  if(rec>=2&&rec>pri)     return {cls:'mo-warm',txt:'↗ 언급 상승',reason:`최근 14일 ${rec}회 · 직전 14일 ${pri}회`};
+  if(pri>=2&&rec<=pri*0.5) return {cls:'mo-cool',txt:'❄ 언급 냉각',reason:`최근 14일 ${rec}회 · 직전 14일 ${pri}회`};
+  if(rec>=1)              return {cls:'mo-flat',txt:'· 언급 유지',reason:`최근 14일 ${rec}회 · 직전 14일 ${pri}회`};
   return null;
 }
-function momentumChip(o){const m=momentumOf(o&&o.mentions); return m?`<span class="mo-chip ${m.cls}">${m.txt}</span>`:'';}
+function marketMomentum(mm){
+  if(!mm||!mm.state)return null;
+  const cls={hot:'mo-hot',warm:'mo-warm',cool:'mo-cool',flat:'mo-flat'}[mm.state]||'mo-flat';
+  return {cls,txt:mm.label||({hot:'🔥 시장 과열',warm:'↗ 시장 상승',cool:'❄ 시장 냉각',flat:'· 시장 유지'}[mm.state]||'· 시장 유지'),reason:mm.reason||'',score:mm.score};
+}
+function momentumOf(o){
+  if(Array.isArray(o))return mentionMomentum(o);
+  const m=marketMomentum(o&&o.market_momentum);
+  if(m)return m;
+  return mentionMomentum(o&&o.mentions);
+}
+function momentumChip(o){
+  const m=momentumOf(o);
+  if(!m)return '';
+  const title=esc([m.reason,m.score!=null?`점수 ${m.score}`:''].filter(Boolean).join(' · '));
+  return `<span class="mo-chip ${m.cls}" title="${title}">${m.txt}</span>`;
+}
 const SECMAX=Math.max(1,...((D.sectors||[]).map(s=>s.count||0)));
 
 /* ── 스파크라인(주별 언급 빈도) ── */
@@ -1261,7 +1277,7 @@ function cleanLabel(s){return (s||'').replace(/\s+/g,' ').trim();}
 function latestMention(obj){const ms=(obj&&obj.mentions)||[];return ms.length?ms[ms.length-1]:null;}
 function injectMarketPulse(){
   const anchor=$('#watchHome'); if(!anchor||$('#marketPulse'))return;
-  const hot=(D.sectors||[]).slice().map(s=>({s,m:momentumOf(s.mentions),why:sectorWhy(s)}))
+  const hot=(D.sectors||[]).slice().map(s=>({s,m:momentumOf(s),why:sectorWhy(s)}))
     .sort((a,b)=>((b.m&&b.m.cls==='mo-hot')-(a.m&&a.m.cls==='mo-hot'))||((b.s.rep||0)-(a.s.rep||0))||((b.s.count||0)-(a.s.count||0)))[0];
   const supply=(D.stocks||[]).slice().filter(s=>(s.supply_count||0)>0).sort((a,b)=>(b.supply_count-a.supply_count)||(b.count-a.count))[0];
   const event=(D.events||[]).slice().sort((a,b)=>(b.seen||'').localeCompare(a.seen||''))[0];
