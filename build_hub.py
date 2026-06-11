@@ -67,6 +67,17 @@ STOCK_ALIASES.update({
     "dwave": "디웨이브", "nvidia": "엔비디아", "tesla": "테슬라", "google": "구글",
     "oracle": "오라클", "palantir": "팔란티어",
 })
+# 추가 정규화(영문/축약 → 단일 표기 통합) + 오인식 방지 — 고도화 패치
+STOCK_ALIASES.update({
+    "포스코홀딩스": "POSCO홀딩스", "naver": "네이버", "ionq": "아이온큐",
+    "rigetti": "리게티", "kai": "한국항공우주", "한올바이오파": "한올바이오파마",
+})
+STOCK_STOPWORDS.update({
+    "IT서비스", "전기·전자", "운송장비·부품", "전력", "통신", "지수", "시장",
+    "대만", "브라질", "한국", "미국", "중국", "일본", "유럽", "인도",
+    "미국채", "휴머노이드", "대형주", "중소형주", "기타",
+})
+
 # ETF 브랜드(접두) — 전체 명칭을 종목명으로 유지
 ETF_BRANDS = ("KODEX", "TIGER", "KBSTAR", "ARIRANG", "PLUS", "SOL", "ACE",
               "RISE", "KOSEF", "TIMEFOLIO", "HANARO", "KIWOOM", "WON")
@@ -173,6 +184,15 @@ def normalize_stock(name):
     n = name.strip()
     key = n.lower().replace(" ", "")
     return STOCK_ALIASES.get(key, n)
+
+_KNOWN_STOCKS = set(STOCK_ALIASES.values())
+def expand_stock_names(nm):
+    """'현대차·기아' 처럼 알려진 종목들이 '·'로 묶인 복합 표기를 개별 종목으로 분리."""
+    if "·" in nm:
+        parts = [normalize_stock(p.strip()) for p in nm.split("·") if p.strip()]
+        if len(parts) >= 2 and all(p in _KNOWN_STOCKS for p in parts):
+            return parts
+    return [nm]
 
 def sector_theme(name):
     low = name.lower()
@@ -415,6 +435,11 @@ def split_stock_token(span):
     if mperf:
         ann = (s[mperf.start():].strip() + " " + ann).strip()
         s = s[:mperf.start()].strip()
+    # 꼬리 금액 표기 분리 ('KODEX 레버리지 2,284억' → 'KODEX 레버리지' + '2,284억')
+    mamt = re.search(r"\s*[+\-]?\d[\d,\.]*\s*(?:조|억|만)\s*원?\s*$", s)
+    if mamt:
+        ann = (s[mamt.start():].strip() + " " + ann).strip()
+        s = s[:mamt.start()].strip()
     up = s.upper()
     if any(up.startswith(b) for b in ETF_BRANDS):           # ETF: 전체 명칭 유지
         return s.strip(), ann
@@ -470,32 +495,32 @@ def aggregate(reports, window_days=31):
                                     "label": sec["name"], "who": supply_tag(sec["name"]),
                                     "stocks": sec["stocks"], "note": sec["note"]})
             for raw in sec["stocks"]:
-                nm, ann = split_stock_token(raw)
-                nm = normalize_stock(nm)
-                if not nm or nm in STOCK_STOPWORDS or len(nm) < 2 or nm[0].isdigit():
-                    continue   # 날짜·숫자 토큰(예: '27일') 제거
-                T = stocks.setdefault(nm, {"name": nm, "mentions": [], "sectors": set(),
-                                           "themes": set(), "supply_tags": set(),
-                                           "targets": [], "count": 0,
-                                           "theme_count": 0, "supply_count": 0})
-                T["count"] += 1
-                tp = parse_target_prices(raw)
-                for t in tp:
-                    t2 = dict(t); t2["date"] = label; t2["context"] = raw
-                    T["targets"].append(t2)
-                if supply:
-                    T["supply_count"] += 1
-                    T["supply_tags"].add(supply_tag(sec["name"]))
-                    T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
-                                          "source": "수급", "label": supply_tag(sec["name"]),
-                                          "annotation": ann, "note": sec["note"][:160]})
-                else:
-                    T["theme_count"] += 1
-                    T["sectors"].add(sec["name"]); T["themes"].add(theme)
-                    S["stocks"].add(nm)
-                    T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
-                                          "source": "테마", "label": sec["name"], "theme": theme,
-                                          "annotation": ann, "note": sec["note"][:200]})
+                nm0, ann = split_stock_token(raw)
+                for nm in expand_stock_names(normalize_stock(nm0)):
+                    if not nm or nm in STOCK_STOPWORDS or len(nm) < 2 or nm[0].isdigit():
+                        continue   # 날짜·숫자 토큰(예: '27일') 제거
+                    T = stocks.setdefault(nm, {"name": nm, "mentions": [], "sectors": set(),
+                                               "themes": set(), "supply_tags": set(),
+                                               "targets": [], "count": 0,
+                                               "theme_count": 0, "supply_count": 0})
+                    T["count"] += 1
+                    tp = parse_target_prices(raw)
+                    for t in tp:
+                        t2 = dict(t); t2["date"] = label; t2["context"] = raw
+                        T["targets"].append(t2)
+                    if supply:
+                        T["supply_count"] += 1
+                        T["supply_tags"].add(supply_tag(sec["name"]))
+                        T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
+                                              "source": "수급", "label": supply_tag(sec["name"]),
+                                              "annotation": ann, "note": sec["note"][:160]})
+                    else:
+                        T["theme_count"] += 1
+                        T["sectors"].add(sec["name"]); T["themes"].add(theme)
+                        S["stocks"].add(nm)
+                        T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
+                                              "source": "테마", "label": sec["name"], "theme": theme,
+                                              "annotation": ann, "note": sec["note"][:200]})
     # set → list
     for S in sectors.values():
         S["names"] = sorted(S["names"]); S["stocks"] = sorted(S["stocks"])
@@ -574,6 +599,28 @@ def aggregate(reports, window_days=31):
             events.append({"title": n["title"], "desc": n["desc"],
                            "seen": r.get("date") or r.get("id"), "id": r["id"]})
 
+    # ── 센티멘트(리포트 톤) — 키워드 사전 기반 ──
+    POS_WORDS = ("상승", "급등", "강세", "반등", "돌파", "호재", "순매수", "상향", "개선",
+                 "기대", "수혜", "서프라이즈", "최고", "호조", "확대", "가속", "랠리", "신고가", "낙관")
+    NEG_WORDS = ("하락", "급락", "약세", "악재", "순매도", "하향", "이탈", "우려", "부진",
+                 "리스크", "경고", "쇼크", "공포", "불안", "축소", "둔화", "침체", "신저가", "비관")
+    sentiment = []
+    for r in reports:
+        if r["type"] != "daily":
+            continue
+        pool = [r.get("headline", ""), r.get("subhead", "")]
+        pool += [(i.get("quote") or "") for i in r["insights"]]
+        pool += [(ind.get("explain") or "") for ind in r["indicators"]]
+        pool += [(s.get("note") or "") for s in r["sectors"]]
+        pool.append(json.dumps(r.get("timeline", []), ensure_ascii=False))
+        text = " ".join(pool)
+        pos = sum(text.count(w) for w in POS_WORDS)
+        neg = sum(text.count(w) for w in NEG_WORDS)
+        tot = pos + neg
+        score = round(100 * (pos - neg) / tot) if tot else 0
+        sentiment.append({"date": r["date"], "id": r["id"], "score": score,
+                          "pos": pos, "neg": neg, "headline": r.get("headline", "")})
+
     # ── 지표 시계열 (데일리) — 라벨 표준화, 하루 1값 ──
     EXC = ("선물", "인버스", "레버리지", "저점", "거래대금")
     CANON = [
@@ -611,6 +658,7 @@ def aggregate(reports, window_days=31):
         "principles": principles,
         "glossary": sorted(glossary.values(), key=lambda x: x["date"], reverse=True),
         "events": events,
+        "sentiment": sentiment,
         "series": {k: v for k, v in series.items()},
     }
 
@@ -1112,6 +1160,16 @@ def main():
     market_momentum_meta = enrich_market_momentum(agg, agg.get("series", {}))
     search = build_search(reports, agg)
 
+    # AI 위클리 다이제스트 (ai_digest.py 산출물 — 없으면 무시)
+    ai_digest = None
+    try:
+        if os.path.exists("ai_digest.json"):
+            with open("ai_digest.json", encoding="utf-8") as f:
+                ai_digest = json.load(f)
+            print("ℹ️ ai_digest.json 반영")
+    except Exception as e:
+        print(f"ℹ️ ai_digest.json 읽기 실패 — 무시 ({e})")
+
     daily = [r for r in reports if r["type"] == "daily"]
     weekly = [r for r in reports if r["type"] == "weekly"]
     data = {
@@ -1122,7 +1180,7 @@ def main():
                   "recent_from": agg.get("recent_from", ""), "recent_reports": agg.get("recent_reports", 0),
                   "index_source": "yfinance" if idx_series else "report",
                   "market_momentum": market_momentum_meta},
-        "reports": reports, "search": search, **agg,
+        "reports": reports, "search": search, "ai_digest": ai_digest, **agg,
     }
     with open(args.json, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
