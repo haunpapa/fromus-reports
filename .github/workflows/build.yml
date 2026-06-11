@@ -1,19 +1,22 @@
 # ───────────────────────────────────────────────────────────────
-#  Build Index + Knowledge Hub  (기존 build.yml 대체본)
-#  기존 동작(아카이브 index.html 생성)은 그대로 두고,
-#  지식 허브(hub.html + knowledge_base.json) 생성 단계만 추가했습니다.
-#  → 워크플로 1개가 둘을 한 번에 커밋 = 동시 푸시 경합/무한루프 없음.
-#  설치: 기존 .github/workflows/build.yml 을 이 내용으로 교체.
+#  Build Index + Knowledge Hub + AI Digest
+#  1) build_index.py  → 아카이브 index.html
+#  2) build_hub.py    → knowledge_base.json (1차)
+#  3) ai_digest.py    → AI 위클리 다이제스트 (ANTHROPIC_API_KEY 시크릿 있을 때만)
+#  4) build_hub.py    → hub.html (2차 — 다이제스트 반영)
+#  AI 시크릿 설정: repo Settings → Secrets and variables → Actions
+#                  → New repository secret → 이름 ANTHROPIC_API_KEY
 # ───────────────────────────────────────────────────────────────
 name: Build Index
 
 on:
   push:
     paths:
-      - 'reports/**'          # 새 리포트가 올라오면
-      - 'build_index.py'      # 아카이브 생성기 변경 시
-      - 'build_hub.py'        # 허브 생성기 변경 시
-      - 'hub_template.html'   # 허브 UI 변경 시
+      - 'reports/**'
+      - 'build_index.py'
+      - 'build_hub.py'
+      - 'ai_digest.py'
+      - 'hub_template.html'
   workflow_dispatch:
 
 permissions:
@@ -34,14 +37,22 @@ jobs:
       - name: Install deps (knowledge hub)
         run: pip install beautifulsoup4 lxml yfinance
 
-      - name: Run build_index.py (아카이브 목록 — 기존 그대로)
+      - name: Run build_index.py (아카이브 목록)
         run: python build_index.py
 
-      - name: Run build_hub.py (지식 허브)
+      - name: Run build_hub.py (1차 — knowledge_base.json 생성)
         run: python build_hub.py --src . --out hub.html --json knowledge_base.json
 
-      - name: Commit and push (index + hub 한 번에)
+      - name: AI weekly digest (선택 — 시크릿 없으면 자동 생략)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python ai_digest.py || echo "AI 다이제스트 생략(실패 무시)"
+
+      - name: Run build_hub.py (2차 — 다이제스트 반영)
+        run: python build_hub.py --src . --out hub.html --json knowledge_base.json
+
+      - name: Commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'auto: rebuild index + knowledge hub'
-          file_pattern: 'index.html hub.html knowledge_base.json'
+          file_pattern: 'index.html hub.html knowledge_base.json ai_digest.json'
