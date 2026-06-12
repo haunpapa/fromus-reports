@@ -1,6 +1,6 @@
 {
  "build": {
-  "generated": "2026-06-12 23:52",
+  "generated": "2026-06-12 23:56",
   "timezone": "Asia/Seoul",
   "timezone_label": "한국시간(KST)",
   "reports": 49,
@@ -12,43 +12,8 @@
   "recent_reports": 23,
   "index_source": "yfinance",
   "market_momentum": {
-   "enabled": true,
-   "source": "FinanceDataReader/KRX snapshot + limited history + index series",
-   "covered_stocks": 94,
-   "historical_stocks": 0,
-   "candidate_stocks": 140,
-   "sector_covered": 15,
-   "market_regime": {
-    "state": "neutral",
-    "score": 47.9,
-    "kospi_5d": -0.45,
-    "kosdaq_5d": 2.65,
-    "avg_20d": -4.5
-   },
-   "fallback": "시장 데이터가 없는 항목은 기존 14일 언급량 기준 사용",
-   "updated": "2026-06-12 23:52",
-   "unmatched_sample": [
-    "마이크론: ticker",
-    "KODEX 레버리지: ticker",
-    "엔비디아: ticker",
-    "KODEX: ticker",
-    "디웨이브: ticker",
-    "리게티: ticker",
-    "스페이스X: ticker",
-    "아이온큐: ticker",
-    "테슬라: ticker",
-    "KODEX 200선물인버스2X: ticker",
-    "KODEX 반도체레버리지: ticker",
-    "LIG넥스원: ticker",
-    "TIGER 미국필라델피아: ticker",
-    "고스트로보틱스: ticker",
-    "로켓랩: ticker",
-    "마이크로소프트: ticker",
-    "샌디스크: ticker",
-    "알버말: ticker",
-    "오라클: ticker",
-    "코코레: ticker"
-   ]
+   "enabled": false,
+   "reason": "no ticker map"
   }
  },
  "reports": [
@@ -34793,37 +34758,37 @@
   }
  ],
  "ai_digest": {
-  "generated": "2026-06-12 23:52",
+  "generated": "2026-06-12 23:56",
   "range": "2026-06-05~2026-06-12",
   "model": "claude-sonnet-4-6",
   "digest": {
-   "title": "공포와 환희 사이, 실적으로 버텨라",
-   "summary": "이번 주 시장은 -22에서 +62로 급반등했다가 -41까지 재차 급락하는 등 센티멘트가 극단적으로 요동쳤다. 커뮤니티 스탠스는 단기 급등 구간에선 차익실현을 권고하고, 조정 국면에선 기업 가치 훼손 여부에 집중하는 원칙 중심 대응을 유지했다. 주 후반(+39)에는 트럼프發 협박을 합의 의지로 역독하며 반등 기대감이 커졌고, 코스피 1만 시대 가능성도 언급됐다. 코어 자산 적립은 유지하되 추가 상승분은 짧게 수익 실현하는 선택적 전략이 주를 이뤘다.",
+   "title": "공포와 환희 사이, 실적이 답이다",
+   "summary": "이번 주 시장은 -22에서 +62까지 극단적인 센티멘트 진폭을 보이며 하루 만에 공포를 되돌리는 급반등을 연출했다. 이후 6월 10일 다시 -41로 급락하며 차익실현과 현금 확보를 권고하는 보수적 스탠스로 전환됐고, 6월 12일에는 +39로 회복되며 한 주를 마무리했다. 커뮤니티 리더는 일관되게 '기업 가치 훼손 여부'를 판단 기준으로 강조하며 단기 변동성에 흔들리지 말 것을 주문했다. 코어 자산은 적립을 유지하되, 단기 급등 자산은 짧게 수익을 실현하는 투 트랙 접근이 이번 주 핵심 스탠스였다.",
    "themes": [
     {
      "name": "반도체·AI",
-     "note": "AI 사이클이 이제 시작점이라는 판단 아래 반도체를 코어로 유지하며, 원익IPS·HPSP·이오테크닉스 등 장비·소재 종목이 집중 언급됐다."
+     "note": "반도체 사이클이 멈추지 않았으며 AI 성장은 이제 시작점이라는 시각 하에 코어 섹터로 유지됐고, 원익IPS·HPSP·이오테크닉스 등 장비·소재 종목이 집중 언급됐다."
     },
     {
      "name": "2차전지·전력·신재생",
-     "note": "로봇 섹터 매도 이후 다음 수급 이동처로 2차전지와 전력·신재생이 지목되며 다음 주 주목 섹터로 부상했다."
+     "note": "반도체 다음 수급 로테이션 대상으로 2차전지와 전력·신재생·방산이 지목되며 다음 주도 섹터로 주목받았다."
     },
     {
-     "name": "차익실현 전략",
-     "note": "변동성이 극심한 한 주 동안 '더 가도 내꺼 아니다'는 원칙 아래 단기 익절과 현금 확보를 통한 3분기 하락장 대비 전략이 반복 강조됐다."
+     "name": "현금 관리·익절 전략",
+     "note": "변동성이 지속되는 구간에서 예수금 확보와 적정 익절을 최우선 덕목으로 강조하며 3분기 하락장 대비 현금 비중 확대가 반복적으로 권고됐다."
     }
    ],
    "stocks": [
     "원익IPS",
     "삼성전기",
     "HPSP",
-    "이오테크닉스",
-    "리노공업"
+    "삼성전자",
+    "이오테크닉스"
    ],
    "risks": [
-    "트럼프 발언 수위 변화에 따라 시장 센티멘트가 하루 만에 급반전할 수 있어 단기 변동성 리스크가 상존한다.",
-    "3분기 하락장 가능성이 내부적으로 언급된 만큼, 현금 비중 조절 없이 풀매수 상태를 유지할 경우 손실 방어가 어려울 수 있다.",
-    "외국인 수급 복귀 여부가 불확실한 상황에서 수급 공백 시 개별 종목의 상승 지속력이 약해질 수 있다."
+    "트럼프발 대외 변수(관세·협박 수위 상승)가 지속될 경우 펀더멘털이 양호한 기업도 단기 주가 독주가 어렵다.",
+    "센티멘트가 하루 만에 -41까지 급락할 만큼 변동성이 크며, 3분기 중 추가 하락장 가능성을 열어둬야 한다.",
+    "미-이란 협상 진전 여부 및 유가 방향성이 시장 전반의 리스크 온·오프를 좌우하는 핵심 변수로 작용하고 있다."
    ]
   }
  },
@@ -35033,24 +34998,7 @@
    "targets": [],
    "count": 19,
    "theme_count": 8,
-   "supply_count": 11,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 93.0,
-    "reason": "당일 +7.9%, 거래대금 분위 100, 코스피 대비 +3.2%p",
-    "ticker": "005930",
-    "market": "KOSPI",
-    "last_close": 322500.0,
-    "ret_1d": 7.86,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.23,
-    "amount_percentile": 100.0,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 11
   },
   {
    "name": "SK하이닉스",
@@ -35244,24 +35192,7 @@
    ],
    "count": 17,
    "theme_count": 7,
-   "supply_count": 10,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 56.5,
-    "reason": "당일 +2.3%, 거래대금 분위 100, 코스피 대비 -2.3%p",
-    "ticker": "000660",
-    "market": "KOSPI",
-    "last_close": 2150000.0,
-    "ret_1d": 2.33,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -2.3,
-    "amount_percentile": 100.0,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 10
   },
   {
    "name": "알테오젠",
@@ -35401,24 +35332,7 @@
    "targets": [],
    "count": 12,
    "theme_count": 5,
-   "supply_count": 7,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 26.1,
-    "reason": "당일 -2.9%, 거래대금 분위 98, 코스닥 대비 -6.1%p",
-    "ticker": "196170",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 337000.0,
-    "ret_1d": -2.88,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -6.1,
-    "amount_percentile": 97.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 7
   },
   {
    "name": "삼성전기",
@@ -35548,24 +35462,7 @@
    ],
    "count": 11,
    "theme_count": 2,
-   "supply_count": 9,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 7.8,
-    "reason": "당일 -5.0%, 거래대금 분위 100, 코스피 대비 -9.7%p",
-    "ticker": "009150",
-    "market": "KOSPI",
-    "last_close": 1714000.0,
-    "ret_1d": -5.04,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -9.67,
-    "amount_percentile": 99.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 9
   },
   {
    "name": "현대모비스",
@@ -35696,24 +35593,7 @@
    ],
    "count": 10,
    "theme_count": 6,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 76.6,
-    "reason": "당일 +5.4%, 거래대금 분위 100, 코스피 대비 +0.7%p",
-    "ticker": "012330",
-    "market": "KOSPI",
-    "last_close": 607000.0,
-    "ret_1d": 5.38,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.75,
-    "amount_percentile": 99.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "현대차",
@@ -35854,24 +35734,7 @@
    ],
    "count": 10,
    "theme_count": 9,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 52.2,
-    "reason": "당일 +1.7%, 거래대금 분위 100, 코스피 대비 -3.0%p",
-    "ticker": "005380",
-    "market": "KOSPI",
-    "last_close": 607000.0,
-    "ret_1d": 1.68,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -2.95,
-    "amount_percentile": 99.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "레인보우로보틱스",
@@ -35984,24 +35847,7 @@
    "targets": [],
    "count": 9,
    "theme_count": 6,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 65.8,
-    "reason": "당일 +3.1%, 거래대금 분위 97, 코스닥 대비 -0.1%p",
-    "ticker": "277810",
-    "market": "KOSDAQ",
-    "last_close": 624000.0,
-    "ret_1d": 3.14,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.08,
-    "amount_percentile": 97.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "삼성SDI",
@@ -36095,24 +35941,7 @@
    "targets": [],
    "count": 8,
    "theme_count": 2,
-   "supply_count": 6,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 94.6,
-    "reason": "당일 +8.1%, 거래대금 분위 99, 코스피 대비 +3.5%p",
-    "ticker": "006400",
-    "market": "KOSPI",
-    "last_close": 539000.0,
-    "ret_1d": 8.12,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.49,
-    "amount_percentile": 99.0,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 6
   },
   {
    "name": "SK스퀘어",
@@ -36193,24 +36022,7 @@
    "targets": [],
    "count": 7,
    "theme_count": 0,
-   "supply_count": 7,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +10.6%, 거래대금 분위 100, 코스피 대비 +6.0%p",
-    "ticker": "402340",
-    "market": "KOSPI",
-    "last_close": 1358000.0,
-    "ret_1d": 10.59,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 5.96,
-    "amount_percentile": 99.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 7
   },
   {
    "name": "마이크론",
@@ -36389,24 +36201,7 @@
    "targets": [],
    "count": 7,
    "theme_count": 3,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 61.1,
-    "reason": "당일 +2.4%, 거래대금 분위 99, 코스닥 대비 -0.8%p",
-    "ticker": "043260",
-    "market": "KOSDAQ",
-    "last_close": 46650.0,
-    "ret_1d": 2.41,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.81,
-    "amount_percentile": 98.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "원익IPS",
@@ -36489,24 +36284,7 @@
    "targets": [],
    "count": 7,
    "theme_count": 1,
-   "supply_count": 6,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +30.0%, 거래대금 분위 100, 코스닥 대비 +26.8%p",
-    "ticker": "240810",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 183300.0,
-    "ret_1d": 30.0,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 26.78,
-    "amount_percentile": 99.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 6
   },
   {
    "name": "이오테크닉스",
@@ -36590,24 +36368,7 @@
    "targets": [],
    "count": 7,
    "theme_count": 1,
-   "supply_count": 6,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +21.4%, 거래대금 분위 99, 코스닥 대비 +18.2%p",
-    "ticker": "039030",
-    "market": "KOSDAQ",
-    "last_close": 612000.0,
-    "ret_1d": 21.43,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 18.21,
-    "amount_percentile": 99.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 6
   },
   {
    "name": "제주반도체",
@@ -36691,24 +36452,7 @@
    "targets": [],
    "count": 7,
    "theme_count": 1,
-   "supply_count": 6,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 82.7,
-    "reason": "당일 +5.7%, 거래대금 분위 99, 코스닥 대비 +2.4%p",
-    "ticker": "080220",
-    "market": "KOSDAQ",
-    "last_close": 102500.0,
-    "ret_1d": 5.67,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 2.45,
-    "amount_percentile": 99.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 6
   },
   {
    "name": "LG전자",
@@ -36787,24 +36531,7 @@
    "targets": [],
    "count": 6,
    "theme_count": 2,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 39.6,
-    "reason": "당일 -0.2%, 거래대금 분위 100, 코스피 대비 -4.9%p",
-    "ticker": "066570",
-    "market": "KOSPI",
-    "last_close": 225500.0,
-    "ret_1d": -0.22,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.85,
-    "amount_percentile": 99.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "두산로보틱스",
@@ -36885,24 +36612,7 @@
    "targets": [],
    "count": 6,
    "theme_count": 5,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 47.6,
-    "reason": "당일 +1.0%, 거래대금 분위 98, 코스피 대비 -3.6%p",
-    "ticker": "454910",
-    "market": "KOSPI",
-    "last_close": 110400.0,
-    "ret_1d": 1.01,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.62,
-    "amount_percentile": 98.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "리노공업",
@@ -36977,24 +36687,7 @@
    "targets": [],
    "count": 6,
    "theme_count": 1,
-   "supply_count": 5,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 76.4,
-    "reason": "당일 +4.7%, 거래대금 분위 100, 코스닥 대비 +1.5%p",
-    "ticker": "058470",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 104500.0,
-    "ret_1d": 4.71,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.49,
-    "amount_percentile": 99.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 5
   },
   {
    "name": "테스",
@@ -37064,24 +36757,7 @@
    "targets": [],
    "count": 6,
    "theme_count": 0,
-   "supply_count": 6,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 90.1,
-    "reason": "당일 +6.8%, 거래대금 분위 98, 코스닥 대비 +3.6%p",
-    "ticker": "095610",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 182200.0,
-    "ret_1d": 6.8,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.58,
-    "amount_percentile": 98.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 6
   },
   {
    "name": "KODEX 레버리지",
@@ -37203,24 +36879,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 0,
-   "supply_count": 5,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 18.9,
-    "reason": "당일 -3.4%, 거래대금 분위 99, 코스피 대비 -8.0%p",
-    "ticker": "011070",
-    "market": "KOSPI",
-    "last_close": 1036000.0,
-    "ret_1d": -3.36,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -7.99,
-    "amount_percentile": 99.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 5
   },
   {
    "name": "기아",
@@ -37290,24 +36949,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 3,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 86.7,
-    "reason": "당일 +6.9%, 거래대금 분위 99, 코스피 대비 +2.3%p",
-    "ticker": "000270",
-    "market": "KOSPI",
-    "last_close": 166800.0,
-    "ret_1d": 6.92,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 2.29,
-    "amount_percentile": 99.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "네이버",
@@ -37373,24 +37015,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 1,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +10.3%, 거래대금 분위 100, 코스피 대비 +5.6%p",
-    "ticker": "035420",
-    "market": "KOSPI",
-    "last_close": 247000.0,
-    "ret_1d": 10.27,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 5.64,
-    "amount_percentile": 99.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "리가켐바이오",
@@ -37457,24 +37082,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 2,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 17.4,
-    "reason": "당일 -4.2%, 거래대금 분위 94, 코스닥 대비 -7.4%p",
-    "ticker": "141080",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 129200.0,
-    "ret_1d": -4.15,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -7.37,
-    "amount_percentile": 94.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "에코프로",
@@ -37539,24 +37147,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 1,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 86.9,
-    "reason": "당일 +6.3%, 거래대금 분위 97, 코스닥 대비 +3.1%p",
-    "ticker": "086520",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 115700.0,
-    "ret_1d": 6.34,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.12,
-    "amount_percentile": 97.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "엔비디아",
@@ -37688,24 +37279,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 0,
-   "supply_count": 5,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 56.5,
-    "reason": "당일 +1.7%, 거래대금 분위 98, 코스닥 대비 -1.5%p",
-    "ticker": "440110",
-    "market": "KOSDAQ",
-    "last_close": 101000.0,
-    "ret_1d": 1.71,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.51,
-    "amount_percentile": 98.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 5
   },
   {
    "name": "현대글로비스",
@@ -37775,24 +37349,7 @@
    "targets": [],
    "count": 5,
    "theme_count": 3,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 83.5,
-    "reason": "당일 +6.5%, 거래대금 분위 96, 코스피 대비 +1.9%p",
-    "ticker": "086280",
-    "market": "KOSPI",
-    "last_close": 208500.0,
-    "ret_1d": 6.49,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.86,
-    "amount_percentile": 95.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "HD현대중공업",
@@ -37849,24 +37406,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 1,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 45.1,
-    "reason": "당일 +0.6%, 거래대금 분위 99, 코스피 대비 -4.0%p",
-    "ticker": "329180",
-    "market": "KOSPI",
-    "last_close": 650000.0,
-    "ret_1d": 0.62,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.01,
-    "amount_percentile": 98.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "HPSP",
@@ -37922,24 +37462,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 1,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +30.0%, 거래대금 분위 100, 코스닥 대비 +26.8%p",
-    "ticker": "403870",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 71500.0,
-    "ret_1d": 30.0,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 26.78,
-    "amount_percentile": 99.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "LS",
@@ -37991,24 +37514,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 0,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 63.6,
-    "reason": "당일 +3.5%, 거래대금 분위 96, 코스피 대비 -1.2%p",
-    "ticker": "006260",
-    "market": "KOSPI",
-    "last_close": 386500.0,
-    "ret_1d": 3.48,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.15,
-    "amount_percentile": 95.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "디앤디파마텍",
@@ -38059,24 +37565,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 0,
-   "supply_count": 4,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 0,
-    "reason": "당일 -7.3%, 거래대금 분위 97, 코스닥 대비 -10.5%p",
-    "ticker": "347850",
-    "market": "KOSDAQ",
-    "last_close": 87500.0,
-    "ret_1d": -7.31,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -10.53,
-    "amount_percentile": 97.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 4
   },
   {
    "name": "미래에셋증권",
@@ -38136,24 +37625,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 3,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 56.4,
-    "reason": "당일 +2.4%, 거래대금 분위 98, 코스피 대비 -2.3%p",
-    "ticker": "006800",
-    "market": "KOSPI",
-    "last_close": 52300.0,
-    "ret_1d": 2.35,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -2.28,
-    "amount_percentile": 98.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "에이비엘바이오",
@@ -38208,24 +37680,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 1,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 30.5,
-    "reason": "당일 -2.1%, 거래대금 분위 94, 코스닥 대비 -5.4%p",
-    "ticker": "298380",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 91100.0,
-    "ret_1d": -2.15,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.37,
-    "amount_percentile": 93.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "주성엔지니어링",
@@ -38284,24 +37739,7 @@
    "targets": [],
    "count": 4,
    "theme_count": 2,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 6.3,
-    "reason": "당일 -5.9%, 거래대금 분위 100, 코스닥 대비 -9.1%p",
-    "ticker": "036930",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 231000.0,
-    "ret_1d": -5.91,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -9.13,
-    "amount_percentile": 99.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "KODEX",
@@ -38393,24 +37831,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 2,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 67.5,
-    "reason": "당일 +4.0%, 거래대금 분위 98, 코스피 대비 -0.6%p",
-    "ticker": "373220",
-    "market": "KOSPI",
-    "last_close": 400000.0,
-    "ret_1d": 4.03,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.6,
-    "amount_percentile": 97.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "대주전자재료",
@@ -38457,24 +37878,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 1,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 65.6,
-    "reason": "당일 +3.2%, 거래대금 분위 94, 코스닥 대비 -0.1%p",
-    "ticker": "078600",
-    "market": "KOSDAQ",
-    "last_close": 120800.0,
-    "ret_1d": 3.16,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.06,
-    "amount_percentile": 94.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "두산에너빌리티",
@@ -38523,24 +37927,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 2,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 74.5,
-    "reason": "당일 +5.1%, 거래대금 분위 99, 코스피 대비 +0.4%p",
-    "ticker": "034020",
-    "market": "KOSPI",
-    "last_close": 93100.0,
-    "ret_1d": 5.08,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.45,
-    "amount_percentile": 98.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "디웨이브",
@@ -38636,24 +38023,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 1,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +15.2%, 거래대금 분위 99, 코스닥 대비 +12.0%p",
-    "ticker": "108490",
-    "market": "KOSDAQ",
-    "last_close": 330000.0,
-    "ret_1d": 15.18,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 11.96,
-    "amount_percentile": 98.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "리게티",
@@ -38744,24 +38114,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 0,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 87.1,
-    "reason": "당일 +7.0%, 거래대금 분위 100, 코스피 대비 +2.3%p",
-    "ticker": "005935",
-    "market": "KOSPI",
-    "last_close": 207000.0,
-    "ret_1d": 6.98,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 2.35,
-    "amount_percentile": 99.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "삼성증권",
@@ -38810,24 +38163,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 3,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 81.9,
-    "reason": "당일 +6.3%, 거래대금 분위 95, 코스피 대비 +1.6%p",
-    "ticker": "016360",
-    "market": "KOSPI",
-    "last_close": 118800.0,
-    "ret_1d": 6.26,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.63,
-    "amount_percentile": 95.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "삼양식품",
@@ -38870,24 +38206,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 0,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 23.1,
-    "reason": "당일 -2.6%, 거래대금 분위 95, 코스피 대비 -7.3%p",
-    "ticker": "003230",
-    "market": "KOSPI",
-    "last_close": 1145000.0,
-    "ret_1d": -2.64,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -7.27,
-    "amount_percentile": 94.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "서진시스템",
@@ -38928,24 +38247,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 0,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 50.5,
-    "reason": "당일 +0.8%, 거래대금 분위 98, 코스닥 대비 -2.4%p",
-    "ticker": "178320",
-    "market": "KOSDAQ",
-    "last_close": 75100.0,
-    "ret_1d": 0.81,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -2.41,
-    "amount_percentile": 98.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "스페이스X",
@@ -39035,24 +38337,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 0,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 29.3,
-    "reason": "당일 -2.4%, 거래대금 분위 98, 코스닥 대비 -5.6%p",
-    "ticker": "222800",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 130100.0,
-    "ret_1d": -2.4,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.62,
-    "amount_percentile": 98.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "아이온큐",
@@ -39150,24 +38435,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 2,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 67.9,
-    "reason": "당일 +3.5%, 거래대금 분위 97, 코스닥 대비 +0.2%p",
-    "ticker": "247540",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 170000.0,
-    "ret_1d": 3.47,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.25,
-    "amount_percentile": 96.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "테슬라",
@@ -39266,24 +38534,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 2,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 45.6,
-    "reason": "당일 +0.2%, 거래대금 분위 91, 코스닥 대비 -3.1%p",
-    "ticker": "214450",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 289000.0,
-    "ret_1d": 0.17,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.05,
-    "amount_percentile": 91.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "한국항공우주",
@@ -39329,24 +38580,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 1,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 36.1,
-    "reason": "당일 -0.7%, 거래대금 분위 96, 코스피 대비 -5.3%p",
-    "ticker": "047810",
-    "market": "KOSPI",
-    "last_close": 140900.0,
-    "ret_1d": -0.7,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.33,
-    "amount_percentile": 96.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "한화에어로스페이스",
@@ -39393,24 +38627,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 1,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 82.6,
-    "reason": "당일 +6.3%, 거래대금 분위 98, 코스피 대비 +1.7%p",
-    "ticker": "012450",
-    "market": "KOSPI",
-    "last_close": 1078000.0,
-    "ret_1d": 6.31,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.68,
-    "amount_percentile": 98.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "현대제철",
@@ -39453,24 +38670,7 @@
    "targets": [],
    "count": 3,
    "theme_count": 0,
-   "supply_count": 3,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 98.1,
-    "reason": "당일 +8.7%, 거래대금 분위 95, 코스피 대비 +4.1%p",
-    "ticker": "004020",
-    "market": "KOSPI",
-    "last_close": 34950.0,
-    "ret_1d": 8.71,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 4.08,
-    "amount_percentile": 94.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 3
   },
   {
    "name": "HD현대일렉트릭",
@@ -39502,24 +38702,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +9.4%, 거래대금 분위 100, 코스피 대비 +4.8%p",
-    "ticker": "267260",
-    "market": "KOSPI",
-    "last_close": 1130000.0,
-    "ret_1d": 9.39,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 4.76,
-    "amount_percentile": 99.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "KB금융",
@@ -39551,24 +38734,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 83.2,
-    "reason": "당일 +6.4%, 거래대금 분위 98, 코스피 대비 +1.8%p",
-    "ticker": "105560",
-    "market": "KOSPI",
-    "last_close": 161200.0,
-    "ret_1d": 6.4,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.77,
-    "amount_percentile": 98.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "KODEX 200선물인버스2X",
@@ -39707,24 +38873,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 75.9,
-    "reason": "당일 +5.3%, 거래대금 분위 98, 코스피 대비 +0.7%p",
-    "ticker": "005490",
-    "market": "KOSPI",
-    "last_close": 377000.0,
-    "ret_1d": 5.31,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.68,
-    "amount_percentile": 97.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "TIGER 미국필라델피아",
@@ -39825,24 +38974,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 86.2,
-    "reason": "당일 +6.8%, 거래대금 분위 99, 코스피 대비 +2.2%p",
-    "ticker": "047040",
-    "market": "KOSPI",
-    "last_close": 21850.0,
-    "ret_1d": 6.85,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 2.22,
-    "amount_percentile": 99.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "두산",
@@ -39879,24 +39011,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +17.0%, 거래대금 분위 99, 코스피 대비 +12.3%p",
-    "ticker": "000150",
-    "market": "KOSPI",
-    "last_close": 1896000.0,
-    "ret_1d": 16.96,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 12.33,
-    "amount_percentile": 98.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "두산테스나",
@@ -39929,24 +39044,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +15.0%, 거래대금 분위 97, 코스닥 대비 +11.8%p",
-    "ticker": "131970",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 175000.0,
-    "ret_1d": 14.98,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 11.76,
-    "amount_percentile": 96.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "로켓랩",
@@ -40057,24 +39155,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 76.4,
-    "reason": "당일 +5.4%, 거래대금 분위 99, 코스피 대비 +0.7%p",
-    "ticker": "028260",
-    "market": "KOSPI",
-    "last_close": 432000.0,
-    "ret_1d": 5.37,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.74,
-    "amount_percentile": 98.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "삼성생명",
@@ -40112,24 +39193,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 2,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 77.9,
-    "reason": "당일 +5.6%, 거래대금 분위 97, 코스피 대비 +1.0%p",
-    "ticker": "032830",
-    "market": "KOSPI",
-    "last_close": 385500.0,
-    "ret_1d": 5.62,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.99,
-    "amount_percentile": 97.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "삼천당제약",
@@ -40166,24 +39230,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 41.1,
-    "reason": "당일 -0.6%, 거래대금 분위 96, 코스닥 대비 -3.8%p",
-    "ticker": "000250",
-    "market": "KOSDAQ",
-    "last_close": 261500.0,
-    "ret_1d": -0.57,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.79,
-    "amount_percentile": 95.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "샌디스크",
@@ -40294,24 +39341,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 5.8,
-    "reason": "당일 -5.9%, 거래대금 분위 95, 코스닥 대비 -9.1%p",
-    "ticker": "295310",
-    "market": "KOSDAQ",
-    "last_close": 103400.0,
-    "ret_1d": -5.91,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -9.13,
-    "amount_percentile": 95.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "오라클",
@@ -40380,24 +39410,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 19.6,
-    "reason": "당일 -3.7%, 거래대금 분위 86, 코스닥 대비 -6.9%p",
-    "ticker": "039200",
-    "market": "KOSDAQ",
-    "last_close": 39100.0,
-    "ret_1d": -3.69,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -6.91,
-    "amount_percentile": 85.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "코코레",
@@ -40466,24 +39479,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 90.6,
-    "reason": "당일 +6.9%, 거래대금 분위 100, 코스닥 대비 +3.6%p",
-    "ticker": "089030",
-    "market": "KOSDAQ",
-    "last_close": 65300.0,
-    "ret_1d": 6.87,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.65,
-    "amount_percentile": 99.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "티에스이",
@@ -40520,24 +39516,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 71.4,
-    "reason": "당일 +4.0%, 거래대금 분위 94, 코스닥 대비 +0.8%p",
-    "ticker": "131290",
-    "market": "KOSDAQ",
-    "last_close": 270500.0,
-    "ret_1d": 4.04,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 0.82,
-    "amount_percentile": 94.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "팔란티어",
@@ -40612,24 +39591,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 2,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 95.9,
-    "reason": "당일 +8.3%, 거래대금 분위 97, 코스피 대비 +3.7%p",
-    "ticker": "272210",
-    "market": "KOSPI",
-    "last_close": 96000.0,
-    "ret_1d": 8.35,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.72,
-    "amount_percentile": 97.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "한화오션",
@@ -40666,24 +39628,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 1,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 92.8,
-    "reason": "당일 +7.8%, 거래대금 분위 99, 코스피 대비 +3.2%p",
-    "ticker": "042660",
-    "market": "KOSPI",
-    "last_close": 112700.0,
-    "ret_1d": 7.85,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.22,
-    "amount_percentile": 98.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "현대건설",
@@ -40715,24 +39660,7 @@
    "targets": [],
    "count": 2,
    "theme_count": 0,
-   "supply_count": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +28.4%, 거래대금 분위 98, 코스피 대비 +23.7%p",
-    "ticker": "000720",
-    "market": "KOSPI",
-    "last_close": 157500.0,
-    "ret_1d": 28.36,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 23.73,
-    "amount_percentile": 97.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 2
   },
   {
    "name": "AMD",
@@ -40781,24 +39709,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 46.2,
-    "reason": "당일 +0.9%, 거래대금 분위 93, 코스피 대비 -3.8%p",
-    "ticker": "001040",
-    "market": "KOSPI",
-    "last_close": 174500.0,
-    "ret_1d": 0.87,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -3.76,
-    "amount_percentile": 93.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "DB하이텍",
@@ -40821,24 +39732,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +12.3%, 거래대금 분위 99, 코스피 대비 +7.7%p",
-    "ticker": "000990",
-    "market": "KOSPI",
-    "last_close": 174300.0,
-    "ret_1d": 12.31,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 7.68,
-    "amount_percentile": 99.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "HANARO Fn K-반도체",
@@ -40887,24 +39781,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 80.3,
-    "reason": "당일 +6.0%, 거래대금 분위 97, 코스피 대비 +1.4%p",
-    "ticker": "009540",
-    "market": "KOSPI",
-    "last_close": 398000.0,
-    "ret_1d": 5.99,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.36,
-    "amount_percentile": 96.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "HLB",
@@ -40930,24 +39807,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 26.6,
-    "reason": "당일 -2.7%, 거래대금 분위 93, 코스닥 대비 -6.0%p",
-    "ticker": "028300",
-    "market": "KOSDAQ",
-    "last_close": 46100.0,
-    "ret_1d": -2.74,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.96,
-    "amount_percentile": 93.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "HMM",
@@ -40973,24 +39833,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 82.5,
-    "reason": "당일 +6.4%, 거래대금 분위 94, 코스피 대비 +1.7%p",
-    "ticker": "011200",
-    "market": "KOSPI",
-    "last_close": 20050.0,
-    "ret_1d": 6.37,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 1.74,
-    "amount_percentile": 93.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "IBM",
@@ -41065,24 +39908,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +20.7%, 거래대금 분위 99, 코스닥 대비 +17.5%p",
-    "ticker": "095340",
-    "market": "KOSDAQ",
-    "last_close": 230000.0,
-    "ret_1d": 20.73,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 17.51,
-    "amount_percentile": 98.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "JYP",
@@ -41298,24 +40124,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 34.5,
-    "reason": "당일 -0.9%, 거래대금 분위 96, 코스피 대비 -5.6%p",
-    "ticker": "003550",
-    "market": "KOSPI",
-    "last_close": 106500.0,
-    "ret_1d": -0.93,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.56,
-    "amount_percentile": 95.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "LG씨엔에스",
@@ -41338,24 +40147,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 39.4,
-    "reason": "당일 -0.2%, 거래대금 분위 98, 코스피 대비 -4.9%p",
-    "ticker": "064400",
-    "market": "KOSPI",
-    "last_close": 92800.0,
-    "ret_1d": -0.22,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.85,
-    "amount_percentile": 97.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "LIG디펜스앤에어로",
@@ -41401,24 +40193,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 63.2,
-    "reason": "당일 +2.8%, 거래대금 분위 94, 코스닥 대비 -0.4%p",
-    "ticker": "218410",
-    "market": "KOSDAQ",
-    "last_close": 77000.0,
-    "ret_1d": 2.8,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.42,
-    "amount_percentile": 93.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "RF머트리얼즈",
@@ -41444,24 +40219,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 60.2,
-    "reason": "당일 +2.5%, 거래대금 분위 86, 코스닥 대비 -0.8%p",
-    "ticker": "327260",
-    "market": "KOSDAQ",
-    "last_close": 66600.0,
-    "ret_1d": 2.46,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.76,
-    "amount_percentile": 86.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "RISE 현대차고정피지컬AI",
@@ -41510,24 +40268,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +11.4%, 거래대금 분위 99, 코스피 대비 +6.8%p",
-    "ticker": "001740",
-    "market": "KOSPI",
-    "last_close": 13000.0,
-    "ret_1d": 11.4,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 6.77,
-    "amount_percentile": 99.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "SK텔레콤",
@@ -41550,24 +40291,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 60.7,
-    "reason": "당일 +3.0%, 거래대금 분위 98, 코스피 대비 -1.6%p",
-    "ticker": "017670",
-    "market": "KOSPI",
-    "last_close": 103000.0,
-    "ret_1d": 3.0,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.63,
-    "amount_percentile": 98.0,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "SOL 자동차TOP3플러스",
@@ -41763,24 +40487,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +14.5%, 거래대금 분위 99, 코스닥 대비 +11.2%p",
-    "ticker": "098460",
-    "market": "KOSDAQ",
-    "last_close": 39150.0,
-    "ret_1d": 14.47,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 11.25,
-    "amount_percentile": 99.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "구글",
@@ -41832,24 +40539,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 62.8,
-    "reason": "당일 +3.5%, 거래대금 분위 86, 코스피 대비 -1.1%p",
-    "ticker": "003540",
-    "market": "KOSPI",
-    "last_close": 29600.0,
-    "ret_1d": 3.5,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.13,
-    "amount_percentile": 86.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "대한광통신",
@@ -41875,24 +40565,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +11.5%, 거래대금 분위 99, 코스닥 대비 +8.3%p",
-    "ticker": "010170",
-    "market": "KOSDAQ",
-    "last_close": 19040.0,
-    "ret_1d": 11.54,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 8.32,
-    "amount_percentile": 99.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "대한전선",
@@ -41915,24 +40588,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 56.9,
-    "reason": "당일 +2.4%, 거래대금 분위 97, 코스피 대비 -2.2%p",
-    "ticker": "001440",
-    "market": "KOSPI",
-    "last_close": 37850.0,
-    "ret_1d": 2.44,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -2.19,
-    "amount_percentile": 97.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "대한해운",
@@ -41958,24 +40614,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 66.5,
-    "reason": "당일 +4.1%, 거래대금 분위 86, 코스피 대비 -0.6%p",
-    "ticker": "005880",
-    "market": "KOSPI",
-    "last_close": 2025.0,
-    "ret_1d": 4.06,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.57,
-    "amount_percentile": 85.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "동진쎄미켐",
@@ -41998,24 +40637,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 87.9,
-    "reason": "당일 +6.5%, 거래대금 분위 97, 코스닥 대비 +3.3%p",
-    "ticker": "005290",
-    "market": "KOSDAQ",
-    "last_close": 59000.0,
-    "ret_1d": 6.5,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 3.28,
-    "amount_percentile": 97.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "롯데관광개발",
@@ -42041,24 +40663,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 30.0,
-    "reason": "당일 -1.5%, 거래대금 분위 87, 코스피 대비 -6.1%p",
-    "ticker": "032350",
-    "market": "KOSPI",
-    "last_close": 17820.0,
-    "ret_1d": -1.49,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -6.12,
-    "amount_percentile": 87.1,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "리투오",
@@ -42107,24 +40712,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 1.4,
-    "reason": "당일 -6.5%, 거래대금 분위 91, 코스닥 대비 -9.7%p",
-    "ticker": "310210",
-    "market": "KOSDAQ",
-    "last_close": 193500.0,
-    "ret_1d": -6.52,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -9.74,
-    "amount_percentile": 90.8,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "보스턴다이내믹스",
@@ -42173,24 +40761,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +14.0%, 거래대금 분위 98, 코스닥 대비 +10.8%p",
-    "ticker": "089970",
-    "market": "KOSDAQ",
-    "last_close": 97000.0,
-    "ret_1d": 13.98,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 10.76,
-    "amount_percentile": 97.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "비츠로셀",
@@ -42213,24 +40784,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 60.6,
-    "reason": "당일 +2.4%, 거래대금 분위 94, 코스닥 대비 -0.8%p",
-    "ticker": "082920",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 46900.0,
-    "ret_1d": 2.4,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.82,
-    "amount_percentile": 94.5,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "산일전기",
@@ -42253,24 +40807,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 98.1,
-    "reason": "당일 +8.7%, 거래대금 분위 96, 코스피 대비 +4.1%p",
-    "ticker": "062040",
-    "market": "KOSPI",
-    "last_close": 231500.0,
-    "ret_1d": 8.69,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 4.06,
-    "amount_percentile": 96.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "삼성SDS",
@@ -42319,24 +40856,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +24.4%, 거래대금 분위 98, 코스닥 대비 +21.1%p",
-    "ticker": "357780",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 441500.0,
-    "ret_1d": 24.37,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 21.15,
-    "amount_percentile": 98.2,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "에스앤에스텍",
@@ -42359,24 +40879,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 54.3,
-    "reason": "당일 +1.4%, 거래대금 분위 95, 코스닥 대비 -1.8%p",
-    "ticker": "101490",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 63900.0,
-    "ret_1d": 1.43,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -1.79,
-    "amount_percentile": 94.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "에스엠",
@@ -42402,24 +40905,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 5.6,
-    "reason": "당일 -5.9%, 거래대금 분위 90, 코스닥 대비 -9.1%p",
-    "ticker": "041510",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 83600.0,
-    "ret_1d": -5.86,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -9.08,
-    "amount_percentile": 89.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "에이프릴바이오",
@@ -42442,24 +40928,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 18.6,
-    "reason": "당일 -3.8%, 거래대금 분위 85, 코스닥 대비 -7.1%p",
-    "ticker": "397030",
-    "market": "KOSDAQ",
-    "last_close": 41450.0,
-    "ret_1d": -3.83,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -7.05,
-    "amount_percentile": 85.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "엠케이전자",
@@ -42482,24 +40951,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 28.4,
-    "reason": "당일 -2.5%, 거래대금 분위 95, 코스닥 대비 -5.7%p",
-    "ticker": "033160",
-    "market": "KOSDAQ",
-    "last_close": 27300.0,
-    "ret_1d": -2.5,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -5.72,
-    "amount_percentile": 95.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "오리온홀딩스",
@@ -42522,24 +40974,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 0,
-    "reason": "당일 -7.3%, 거래대금 분위 85, 코스피 대비 -12.0%p",
-    "ticker": "001800",
-    "market": "KOSPI",
-    "last_close": 25900.0,
-    "ret_1d": -7.33,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -11.96,
-    "amount_percentile": 84.9,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "온코닉테라퓨틱스",
@@ -42562,24 +40997,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 36.4,
-    "reason": "당일 -1.1%, 거래대금 분위 81, 코스닥 대비 -4.3%p",
-    "ticker": "476060",
-    "market": "KOSDAQ",
-    "last_close": 15710.0,
-    "ret_1d": -1.07,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -4.29,
-    "amount_percentile": 81.4,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "올릭스",
@@ -42602,24 +41020,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "cool",
-    "label": "❄ 시장 냉각",
-    "score": 0,
-    "reason": "당일 -7.3%, 거래대금 분위 95, 코스닥 대비 -10.5%p",
-    "ticker": "226950",
-    "market": "KOSDAQ GLOBAL",
-    "last_close": 115200.0,
-    "ret_1d": -7.32,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -10.54,
-    "amount_percentile": 94.6,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "우리기술",
@@ -42642,24 +41043,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 0,
-   "supply_count": 1,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 100,
-    "reason": "당일 +30.0%, 거래대금 분위 96, 코스닥 대비 +26.7%p",
-    "ticker": "032820",
-    "market": "KOSDAQ",
-    "last_close": 17570.0,
-    "ret_1d": 29.96,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": 26.74,
-    "amount_percentile": 96.3,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 1
   },
   {
    "name": "유안타증권",
@@ -42685,24 +41069,7 @@
    "targets": [],
    "count": 1,
    "theme_count": 1,
-   "supply_count": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 65.4,
-    "reason": "당일 +4.0%, 거래대금 분위 82, 코스피 대비 -0.7%p",
-    "ticker": "003470",
-    "market": "KOSPI",
-    "last_close": 4985.0,
-    "ret_1d": 3.96,
-    "ret_5d": 0,
-    "ret_20d": 0,
-    "volume_ratio_5d_20d": 1,
-    "relative_5d": -0.67,
-    "amount_percentile": 81.7,
-    "source": "FinanceDataReader/KRX snapshot",
-    "updated": "2026-06-12"
-   }
+   "supply_count": 0
   },
   {
    "name": "유진테크",
@@ -43403,19 +41770,7 @@
     "현대차"
    ],
    "count": 9,
-   "rep": 7,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 71.5,
-    "reason": "편입 11개 평균 점수 71.5, 당일 평균 +5.5%, 거래대금 분위 98, 과열 64%/냉각 0%",
-    "covered": 11,
-    "hot_ratio": 63.6,
-    "warm_ratio": 9.1,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 7
   },
   {
    "theme": "반도체·메모리",
@@ -43556,19 +41911,7 @@
     "티에스이"
    ],
    "count": 8,
-   "rep": 5,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 75.3,
-    "reason": "편입 7개 평균 점수 75.3, 당일 평균 +12.8%, 거래대금 분위 99, 과열 71%/냉각 14%",
-    "covered": 7,
-    "hot_ratio": 71.4,
-    "warm_ratio": 14.3,
-    "cool_ratio": 14.3,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 5
   },
   {
    "theme": "우주항공·위성",
@@ -43673,19 +42016,7 @@
     "한화에어로스페이스"
    ],
    "count": 5,
-   "rep": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 61.3,
-    "reason": "편입 8개 평균 점수 61.3, 당일 평균 +2.9%, 거래대금 분위 94, 과열 50%/냉각 12%",
-    "covered": 8,
-    "hot_ratio": 50.0,
-    "warm_ratio": 25.0,
-    "cool_ratio": 12.5,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 2
   },
   {
    "theme": "2차전지",
@@ -43747,19 +42078,7 @@
     "코코레"
    ],
    "count": 3,
-   "rep": 3,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 78.6,
-    "reason": "편입 5개 평균 점수 78.6, 당일 평균 +5.5%, 거래대금 분위 98, 과열 100%/냉각 0%",
-    "covered": 5,
-    "hot_ratio": 100.0,
-    "warm_ratio": 0.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 3
   },
   {
    "theme": "바이오·제약",
@@ -43821,19 +42140,7 @@
     "파마리서치"
    ],
    "count": 3,
-   "rep": 2,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 35.0,
-    "reason": "편입 6개 평균 점수 35.0, 당일 평균 -1.4%, 거래대금 분위 94, 과열 17%/냉각 33%",
-    "covered": 6,
-    "hot_ratio": 16.7,
-    "warm_ratio": 0.0,
-    "cool_ratio": 33.3,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 2
   },
   {
    "theme": "자동차·현대차그룹",
@@ -43882,19 +42189,7 @@
     "현대차"
    ],
    "count": 2,
-   "rep": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 74.8,
-    "reason": "편입 4개 평균 점수 74.8, 당일 평균 +5.1%, 거래대금 분위 98, 과열 75%/냉각 0%",
-    "covered": 4,
-    "hot_ratio": 75.0,
-    "warm_ratio": 25.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 2
   },
   {
    "theme": "증권·자본시장",
@@ -43945,19 +42240,7 @@
     "한국투자증권"
    ],
    "count": 2,
-   "rep": 2,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 58.0,
-    "reason": "편입 7개 평균 점수 58.0, 당일 평균 +2.4%, 거래대금 분위 93, 과열 57%/냉각 0%",
-    "covered": 7,
-    "hot_ratio": 57.1,
-    "warm_ratio": 14.3,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 2
   },
   {
    "theme": "양자컴퓨터",
@@ -44090,19 +42373,7 @@
     "효성중공업"
    ],
    "count": 2,
-   "rep": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 52.7,
-    "reason": "편입 4개 평균 점수 52.7, 당일 평균 +1.6%, 거래대금 분위 99, 과열 50%/냉각 25%",
-    "covered": 4,
-    "hot_ratio": 50.0,
-    "warm_ratio": 25.0,
-    "cool_ratio": 25.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "원자재·안전자산",
@@ -44154,19 +42425,7 @@
     "파마리서치"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "flat",
-    "label": "· 시장 유지",
-    "score": 45.8,
-    "reason": "편입 3개 평균 점수 45.8, 당일 평균 +0.2%, 거래대금 분위 94, 과열 33%/냉각 0%",
-    "covered": 3,
-    "hot_ratio": 33.3,
-    "warm_ratio": 0.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "엔테구 (NEW)",
@@ -44281,19 +42540,7 @@
     "삼성증권"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 67.4,
-    "reason": "편입 5개 평균 점수 67.4, 당일 평균 +4.0%, 거래대금 분위 98, 과열 80%/냉각 20%",
-    "covered": 5,
-    "hot_ratio": 80.0,
-    "warm_ratio": 0.0,
-    "cool_ratio": 20.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "채권·자산배분",
@@ -44349,19 +42596,7 @@
     "주성엔지니어링"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 48.6,
-    "reason": "편입 5개 평균 점수 48.6, 당일 평균 +0.5%, 거래대금 분위 97, 과열 60%/냉각 20%",
-    "covered": 5,
-    "hot_ratio": 60.0,
-    "warm_ratio": 0.0,
-    "cool_ratio": 20.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "조선·방산",
@@ -44393,19 +42628,7 @@
     "현대미포조선"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 78.5,
-    "reason": "편입 4개 평균 점수 78.5, 당일 평균 +5.7%, 거래대금 분위 98, 과열 75%/냉각 0%",
-    "covered": 4,
-    "hot_ratio": 75.0,
-    "warm_ratio": 0.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "금융·금리수혜",
@@ -44431,19 +42654,7 @@
     "현대해상"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "hot",
-    "label": "🔥 시장 과열",
-    "score": 77.9,
-    "reason": "편입 1개 평균 점수 77.9, 당일 평균 +5.6%, 거래대금 분위 97, 과열 100%/냉각 0%",
-    "covered": 1,
-    "hot_ratio": 100.0,
-    "warm_ratio": 0.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "외국인 코스피 순매도",
@@ -44519,19 +42730,7 @@
     "알테오젠"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 43.6,
-    "reason": "편입 2개 평균 점수 43.6, 당일 평균 -0.2%, 거래대금 분위 98, 과열 0%/냉각 0%",
-    "covered": 2,
-    "hot_ratio": 0.0,
-    "warm_ratio": 50.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   },
   {
    "theme": "백화점 · 레저 · 미래에셋",
@@ -44563,19 +42762,7 @@
     "현대백화점"
    ],
    "count": 1,
-   "rep": 0,
-   "market_momentum": {
-    "state": "warm",
-    "label": "↗ 시장 상승",
-    "score": 56.5,
-    "reason": "편입 4개 평균 점수 56.5, 당일 평균 +4.4%, 거래대금 분위 96, 과열 25%/냉각 0%",
-    "covered": 4,
-    "hot_ratio": 25.0,
-    "warm_ratio": 25.0,
-    "cool_ratio": 0.0,
-    "source": "component-stocks",
-    "updated": "2026-06-12"
-   }
+   "rep": 0
   }
  ],
  "supply_days": [
@@ -50726,7 +48913,7 @@
    },
    {
     "date": "2026-06-12",
-    "value": 25698.39,
+    "value": 25874.59,
     "change": ""
    }
   ]
