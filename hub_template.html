@@ -123,6 +123,9 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 .page{max-width:1180px;margin:0 auto;padding:28px;width:100%;flex:1;}
 .view{display:none;}
 .view.active{display:block;animation:fade .28s ease;}
+/* 수출입동향 임베드 */
+#view-trade .tradeframe{width:100%;height:calc(100vh - 150px);min-height:640px;border:0;border-radius:14px;background:transparent;display:block;}
+@media (max-width:880px){#view-trade .tradeframe{height:calc(100vh - 210px);min-height:520px;border-radius:10px;}}
 @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 .sec-title{font-family:'Playfair Display','Noto Serif KR',serif;font-size:21px;font-weight:700;margin:34px 0 6px;letter-spacing:-.2px;}
 .sec-title:first-child{margin-top:0;}
@@ -539,6 +542,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
         <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
         <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
         <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
+        <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입동향</button>
       </div>
     </nav>
     <div class="side-foot">
@@ -566,6 +570,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
     <div class="page">
       <div class="view active" id="view-home"></div>
       <div class="view" id="view-analytics"></div>
+      <div class="view" id="view-trade"><iframe class="tradeframe" id="tradeFrame" data-src="trade.html" title="대한민국 수출입동향 대시보드" loading="lazy"></iframe></div>
       <div class="view" id="view-sectors"></div>
       <div class="view" id="view-stocks"></div>
       <div class="view" id="view-strategy"></div>
@@ -589,6 +594,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
   <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
   <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
+  <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입</button>
 </nav>
 
 <div id="popover"></div>
@@ -633,11 +639,12 @@ function sectorWhy(s){const ms=(s.mentions||[]);
   return ms.length?ms[ms.length-1]:null;}
 
 /* ───────── TABS ───────── */
-const TABS=['home','sectors','stocks','analytics','strategy','glossary','graph'];
+const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph'];
 function showTab(name,fromHash){
   if(!TABS.includes(name))name='home';
   $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));
+  if(name==='trade'){const f=document.getElementById('tradeFrame');if(f&&!f.getAttribute('src'))f.setAttribute('src',f.dataset.src);}
   if(typeof graphSetActive==='function') graphSetActive(name==='graph');
   if(!fromHash){ try{history.replaceState(null,'','#'+name);}catch(e){} window.scrollTo({top:0,behavior:'smooth'}); }
 }
@@ -1619,7 +1626,8 @@ function buildCommandItems(){
     {kind:'이동',title:'종목 유니버스',sub:'필터와 비교',go:()=>showTab('stocks')},
     {kind:'이동',title:'분석 대시보드',sub:'히트맵·모멘텀·수급 레이더',go:()=>showTab('analytics')},
     {kind:'이동',title:'전략',sub:'스탠스와 원칙',go:()=>showTab('strategy')},
-    {kind:'이동',title:'관계망',sub:'섹터·종목 그래프',go:()=>showTab('graph')}
+    {kind:'이동',title:'관계망',sub:'섹터·종목 그래프',go:()=>showTab('graph')},
+    {kind:'이동',title:'수출입동향',sub:'관세청 무역통계 대시보드',go:()=>showTab('trade')}
   ];
   (D.stocks||[]).slice(0,80).forEach(s=>items.push({kind:'종목',title:s.name,sub:`${s.count||0}회 · 수급 ${s.supply_count||0} · ${(s.themes||[]).slice(0,2).join(', ')}`,go:()=>{showTab('stocks');stockQuery=s.name;stockSort='count';renderStocks();}}));
   (D.sectors||[]).slice(0,50).forEach(s=>items.push({kind:'섹터',title:s.theme,sub:`${s.count||0}회 · ${(s.stocks||[]).slice(0,4).join(', ')}`,go:()=>{showTab('sectors');setTimeout(()=>{const card=$$('#view-sectors .scard').find(c=>c.querySelector('.scard-name')?.textContent===s.theme); if(card){card.querySelector('.scard-detail').classList.add('open');card.scrollIntoView({behavior:'smooth',block:'center'});}},80);}}));
