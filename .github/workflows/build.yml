@@ -37,6 +37,13 @@ jobs:
       - name: Install deps (knowledge hub)
         run: pip install beautifulsoup4 lxml yfinance
 
+      - name: Sync 수출입동향 대시보드 (korea-trade-dashboard → trade.html)
+        run: |
+          curl -fsSL -o trade.new.html https://raw.githubusercontent.com/haunpapa/korea-trade-dashboard/main/korea-trade-sector-dashboard.html \
+            && tail -c 30 trade.new.html | grep -q '</html>' \
+            && mv trade.new.html trade.html \
+            || { echo "동기화 실패 — 기존 trade.html 유지"; rm -f trade.new.html; }
+
       - name: Run build_index.py (아카이브 목록)
         run: python build_index.py
 
@@ -46,13 +53,4 @@ jobs:
       - name: AI weekly digest (선택 — 시크릿 없으면 자동 생략)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python ai_digest.py || echo "AI 다이제스트 생략(실패 무시)"
-
-      - name: Run build_hub.py (2차 — 다이제스트 반영)
-        run: python build_hub.py --src . --out hub.html --json knowledge_base.json
-
-      - name: Commit and push
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'auto: rebuild index + knowledge hub'
-          file_pattern: 'index.html hub.html knowledge_base.json ai_digest.json'
+        run: python ai_di
