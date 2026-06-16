@@ -1,0 +1,7 @@
+
+# 로컬 개발 아티팩트 (커밋 금지)
+.venv/
+__pycache__/
+*.pyc
+build/_probe_*
+hub_preview.html
