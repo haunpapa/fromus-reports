@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1781275166324,
+  "lastScanned": 1781622091195,
   "projectRoot": "/Users/haunpapa/Documents/GitHub/fromus-reports",
   "techStack": {
     "languages": [],
@@ -32,11 +32,21 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "build": {
+      "path": "build",
+      "purpose": "Build output",
+      "fileCount": 2,
+      "lastAccessed": 1781622091145,
+      "keyFiles": [
+        "_probe_dartlab.py",
+        "_probe_schema.json"
+      ]
+    },
     "icons": {
       "path": "icons",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1781275166316,
+      "lastAccessed": 1781622091146,
       "keyFiles": [
         "icon-192.png",
         "icon-512.png"
@@ -46,7 +56,7 @@
       "path": "reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1781275166317,
+      "lastAccessed": 1781622091146,
       "keyFiles": []
     }
   },
