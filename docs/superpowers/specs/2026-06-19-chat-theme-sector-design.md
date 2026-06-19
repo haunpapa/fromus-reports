@@ -44,7 +44,7 @@ kb.chat.themes = {
 - 멱등성: `_strip_prior_chat`이 `kb.pop("chat")` 통째 제거하므로 새 구조도 자동 정리.
 
 ### 3.2 `hub_template.html` — `sectorCard`
-`s.theme`이 `D.chat.themes`에 있으면(`const ct = (D.chat?.themes||{})[s.theme]`) 채팅 근거를 렌더:
+`s.theme`이 `D.chat.themes`(dict)에 있으면 채팅 근거를 렌더. **하위호환 가드 필수**(기존 빌드는 `chat.themes`가 이름 리스트): `const tmap = (D.chat && !Array.isArray(D.chat.themes)) ? (D.chat.themes||{}) : {}; const ct = tmap[s.theme];` — 옵셔널 체이닝만으론 리스트를 dict로 오인하니 `Array.isArray` 가드를 쓴다.
 - **카드 본문**(종목 칩 아래): `💬 채팅 의견 ${ct.opinions_count}건 · 강세 X·약세 Y·관망 Z` — **N(의견 수)과 stance 같은 모집단**(의견). + **채팅 논의 종목 칩**(`ct.stocks`, `data-stock` → 클릭 시 종목 탭). 섹터의 `stocks`와 별개로 채팅에서 논의된 종목.
 - **`scard-detail`(펼침)**: 💬 **대표 의견 미리보기** — `ct.opinions`를 `날짜 · [종목] · 발언자 · snippet(120자)` 행으로(최신순). 카드 본문은 가볍게 유지하고 상세는 펼침에.
 - `D.chat.themes`에 없는 섹터(채팅 전용 아님, 일별 동적 섹터 12개)는 채팅 블록 없음(기존 그대로).
