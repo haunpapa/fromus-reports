@@ -540,6 +540,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
         <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터·테마</button>
         <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
         <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
+        <button class="tab" data-tab="chat"><span class="t-ico">💬</span>채팅</button>
         <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
         <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
         <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입동향</button>
@@ -576,6 +577,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
       <div class="view" id="view-strategy"></div>
       <div class="view" id="view-glossary"></div>
       <div class="view" id="view-graph"></div>
+      <div class="view" id="view-chat"></div>
     </div>
 
     <div class="foot">
@@ -592,6 +594,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터</button>
   <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
   <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
+  <button class="tab" data-tab="chat"><span class="t-ico">💬</span>채팅</button>
   <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
   <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
   <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입</button>
@@ -651,7 +654,7 @@ function sectorWhy(s){const ms=(s.mentions||[]);
   return ms.length?ms[ms.length-1]:null;}
 
 /* ───────── TABS ───────── */
-const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph'];
+const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph','chat'];
 function showTab(name,fromHash){
   if(!TABS.includes(name))name='home';
   $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
@@ -1035,6 +1038,9 @@ function prinCard(p){
     <div class="pcard-detail">${occ}</div>
   </div>`;
 }
+
+/* ───────── CHAT GLOBAL SECTIONS ───────── */
+function renderChatView(){ $('#view-chat').innerHTML = '<div class="sec-title">💬 채팅</div>'; }
 
 /* ───────── GLOSSARY ───────── */
 let glossQuery='';
@@ -1856,7 +1862,7 @@ function drawSentiment(){
 }
 
 /* ───────── INIT ───────── */
-renderHome();renderSectors();renderStocks();renderAnalytics();renderStrategy();renderGlossary();renderGraph();
+renderHome();renderSectors();renderStocks();renderAnalytics();renderStrategy();renderGlossary();renderGraph();renderChatView();
 /* PWA 서비스워커 등록 (http/https에서만) */
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
