@@ -1209,6 +1209,47 @@ function drawSpark(cv,counts){
   ctx.beginPath();ctx.arc(x(n-1),y(counts[n-1]),3,0,7);ctx.fillStyle=gold;ctx.fill();
 }
 const STOCK_BY_NAME={};(D.stocks||[]).forEach(s=>STOCK_BY_NAME[s.name]=s);
+// ── 채팅 더보기/접기 (data-chat-* 만 처리; data-stock 전역 핸들러와 분리) ──
+function chatArr(stockName, kind){
+  const s=STOCK_BY_NAME[stockName]; if(!s||!s.chat) return [];
+  return kind==='opinion' ? (s.chat.opinions||[]) : (kind==='market' ? (s.chat.market_news||[]) : (s.chat.news||[]));
+}
+document.addEventListener('click', e=>{
+  // 1) 의견/시황 더보기 (kind 일반화)
+  const opMore=e.target.closest('.chat-more');
+  if(opMore){
+    const name=opMore.dataset.chatStock, kind=opMore.dataset.chatKind||'opinion';
+    const shown=+opMore.dataset.chatShown;
+    const arr=chatArr(name,kind); const next=Math.min(arr.length, shown+CHAT_MORE);
+    const frag=arr.slice(shown,next).map((m,i)=>chatMentionRow(STOCK_BY_NAME[name],kind,m,shown+i)).join('');
+    opMore.insertAdjacentHTML('beforebegin',frag);
+    opMore.dataset.chatShown=next;
+    const label=kind==='market'?'시황':'의견';
+    if(next>=arr.length) opMore.remove(); else opMore.textContent=`＋ ${label} ${arr.length-next}건 더보기`;
+    return;
+  }
+  // 2) 뉴스 더보기
+  const nwMore=e.target.closest('.chat-more-news');
+  if(nwMore){
+    const name=nwMore.dataset.chatStock, shown=+nwMore.dataset.chatShown;
+    const s=STOCK_BY_NAME[name], arr=(s&&s.chat&&s.chat.news)||[];
+    const next=Math.min(arr.length, shown+CHAT_MORE);
+    nwMore.insertAdjacentHTML('beforebegin', arr.slice(shown,next).map(chatNewsRow).join(''));
+    nwMore.dataset.chatShown=next;
+    if(next>=arr.length) nwMore.remove(); else nwMore.textContent=`＋ 뉴스 ${arr.length-next}건 더보기`;
+    return;
+  }
+});
+// 관련 시황 <details> 최초 펼침 시 채우기 + 더보기
+document.addEventListener('toggle', e=>{
+  const d=e.target.closest('details.chat-mkt'); if(!d||!d.open) return;
+  const body=d.querySelector('.chat-mkt-body'); if(!body || +body.dataset.chatShown>0) return;
+  const name=body.dataset.chatStock, arr=chatArr(name,'market');
+  const n=Math.min(arr.length,5);
+  body.innerHTML=arr.slice(0,n).map((m,i)=>chatMentionRow(STOCK_BY_NAME[name],'market',m,i)).join('')
+    + (arr.length>n?`<div class="chat-more" data-chat-stock="${esc(name)}" data-chat-kind="market" data-chat-shown="${n}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 시황 ${arr.length-n}건 더보기</div>`:'');
+  body.dataset.chatShown=n;
+}, true);
 /* ── 연관 종목(동시 언급) 맵 — Obsidian 백링크 벤치마크 ── */
 const CO_MAP=(()=>{
   const co={};
