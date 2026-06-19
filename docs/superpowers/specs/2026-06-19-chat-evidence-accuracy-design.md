@@ -53,7 +53,7 @@ chat_kb.json (변경 없음 — 기존 type 필드 활용)
 ### 3.2 `merge_hub.py` 강화
 
 핵심: 종목별 `chat` 블록을 의견/관련시황/뉴스로 분리하고, 모달용 `co_stocks`를 주입한다.
-**불변성 원칙 준수** — 원본 `chat_kb` 멘션을 변경하지 않고 새 객체를 만든다.
+**불변성 적용 범위(한정)**: 입력 `chat_kb`의 멘션 객체를 변경하지 않고 새 복사본을 만든다(co_stocks 미오염). 단 `merge(kb, chat)`의 **`kb` 인자는 기존 계약대로 in-place 보강**한다(`build_hub.py` L1195가 같은 객체 반환을 가정). → `merge()` 전체를 순수 함수로 재작성하지 않는다(과한 리팩토링 방지).
 
 #### 3.2.1 멘션 분류
 - **의견(opinions)**: `type ∈ {view, position}` — 사람이 그 종목 맥락에서 한 발언. 전량 유지(상한 100).
@@ -93,10 +93,11 @@ stock.chat = {
   "stance":  { "bullish": int, "bearish": int, "watch": int },
   "opinions":     [ { date, sharer, stance, type, snippet, co_stocks:[name…] } ],  // 최신순, ≤100
   "market_news":  [ { date, sharer, stance, type, snippet, co_stocks:[name…] } ],  // research∩종목명, 최신순, ≤50
-  "news":         [ { date, sharer, outlet, title, url, stocks, themes } ],        // 최신순, ≤50
+  "news":         [ { date, title, outlet, url } ],                                // 최신순, ≤50 — 실제 chat_kb 필드만
   "targets":      [ … ]   // 기존 유지
 }
 ```
+- **news 객체는 실제 chat_kb.json 필드(`date,title,outlet,url`)만 보유**한다. `sharer/stocks/themes`는 데이터 원천에 없으므로 소비 코드가 신뢰하지 않는다(필요 시 2단계 생성기 과제).
 - 기존 `recent` 키는 `opinions`로 대체(이름·의미 변경). `market_news` 신규.
 - `_strip_prior_chat`은 `stock.chat`·`kb.chat`을 통째 제거하므로 **멱등성 유지**(신규 키도 자동 정리).
 - 채팅 전용 종목(`chat_only`)도 동일 스키마 적용.
@@ -109,23 +110,24 @@ stock.chat = {
 - **💡 의견(최신순)**: 초기 3건 렌더 + 남으면 `＋ 의견 N건 더보기`(10개씩)
 - **📰 관련 시황 M건 ▾**: 기본 접힘, 펼치면 초기 5건 + 더보기
 - **📰 뉴스(최신순)**: 초기 4건 + 더보기
-- 각 의견/시황 항목, 뉴스 항목은 클릭 시 모달 호출
+- **의견/관련시황 멘션 클릭 → 모달**. **뉴스는 모달을 열지 않고 기존 외부 링크(`url`) 그대로**(#3은 정렬만 변경, 클릭 동작은 외부 링크 유지).
 
-더보기·접기·모달은 정적 `innerHTML`로 직접 데이터를 다 박지 않고, **전역 데이터(`D.stocks`)에서 종목명으로 조회**해 핸들러가 추가 렌더한다(카드 HTML 비대화 방지). 종목명은 `data-` 속성으로 전달.
+더보기·접기·모달은 정적 `innerHTML`로 데이터를 다 박지 않고, **기존 전역 맵 `STOCK_BY_NAME`(hub_template L1184, name→stock O(1) 조회; `D = window.DATA`(L624)로부터 구축)에서 종목명으로 조회**해 핸들러가 추가 렌더한다(카드 HTML 비대화 방지).
+- **data- 속성명 충돌 회피(중요)**: 기존 L1070의 document 레벨 위임 핸들러가 `data-stock`을 가로채 stocks 탭 이동 + `renderStocks()` 전체 재렌더를 수행한다. 채팅 더보기/모달 트리거는 반드시 **별도 속성**(`data-chat-stock`, `data-chat-kind`(`opinion`|`market`), `data-chat-idx`)을 쓴다. `data-chat-idx`는 **merge가 저장한 `opinions`/`market_news` 배열의 절대 인덱스**이며, `data-chat-kind`로 배열을 선택한다(더보기로 추가 렌더되는 항목도 동일 절대 인덱스 사용).
 
-### 3.4 모달 (신규, 기존 `.rmodal` CSS 패턴 재사용)
+### 3.4 모달 (신규 — `.rmodal` **CSS 클래스만** 재사용)
 
-`hub_template.html`에 채팅 전용 모달 컨테이너 + `openChatModal(stockName, kind, idx)` 추가.
-(`kind ∈ {opinion, market}`, `idx`는 해당 리스트 인덱스)
+⚠️ 기존 `.rmodal` 인프라(`#reportModal` L602~, `RM` 객체 L1453, `openReport`/`closeReport` L1516~, ESC L1548, 바디 스크롤락 `rmBodyOverflow` L1528)는 **iframe 리포트 뷰어 전용**(`RM.frame.src=file`)이다. 채팅 모달 본문은 iframe이 아니라 innerHTML 콘텐츠이므로 **CSS 클래스만 차용**하고 JS는 다음을 **새로** 만든다:
+- 채팅 전용 **별도 모달 DOM 컨테이너** + `openChatModal(stockName, kind, idx)` / `closeChatModal()` (`kind ∈ {opinion, market}` — 뉴스는 모달 없음)
+- 데이터 조회: `STOCK_BY_NAME[stockName].chat[kind==='opinion'?'opinions':'market_news'][idx]`
+- ESC 핸들러는 **열린 모달(리포트/채팅)을 분기**해 닫는다(기존 `closeReport`와 공존). 바디 overflow 복원 변수는 **공유하지 않고 별도**로 둔다(`rmBodyOverflow` 미공유).
 
 모달 본문:
 - 헤더: `💬 채팅 · {종목} · {date} · {sharer} · {stance}`
 - 본문: `snippet`(현재 180자). **2단계에서 원문으로 교체할 자리** — 주석/플래그로 표시.
 - **함께 언급 종목**: `m.co_stocks` 칩
-- **발언자 타임라인**: `D.stocks[stockName].chat.opinions` 중 같은 `sharer`만 날짜순
-- **관련 뉴스**: `D.stocks[stockName].chat.news` 상위 몇 건
-
-모달 열기/닫기·배경 클릭·ESC·바디 스크롤 잠금은 기존 `.rmodal` 동작과 일치시킨다.
+- **발언자 타임라인**: `STOCK_BY_NAME[stockName].chat.opinions` 중 같은 `sharer`만 날짜순
+- **관련 뉴스**: `STOCK_BY_NAME[stockName].chat.news` 상위 몇 건 (외부 링크)
 
 ### 3.5 더보기 / 정렬 기본값
 - 초기 표시: 의견 3 · 관련시황 0(접힘, 펼치면 5) · 뉴스 4
@@ -135,7 +137,7 @@ stock.chat = {
 ## 4. 테스트 전략
 
 프로젝트 컨벤션을 따른다: **stdlib `unittest`**, 픽스처 고정, 네트워크 불필요.
-신규 `build/test_merge_hub.py` — 실행 `python build/test_merge_hub.py`.
+신규 `build/test_merge_hub.py` — 실행 `python build/test_merge_hub.py`. `merge_hub`는 **리포 루트 모듈**이므로 테스트 상단에 `sys.path.insert(0, <repo_root>)` 후 `from merge_hub import merge`(dartlab 테스트와 동일 패턴). 스모크 명령은 루트 cwd 기준.
 
 작은 합성 `chat_kb`/`kb` 픽스처로 다음을 검증:
 1. **분류**: 의견은 opinions로, 종목명 포함 research는 market_news로, 종목명 미포함 research는 둘 다에서 제외.
@@ -157,6 +159,6 @@ stock.chat = {
 
 ## 6. 리스크 / 주의
 - **KB 크기 증가**: 의견 전량 저장(상한 100). 추정 수백 KB~약 1 MB 증가 — 상한으로 관리, 허용 범위.
-- **렌더 데이터 의존**: 더보기/모달이 전역 `D.stocks`에 의존 → 구현 시 `D`가 전역 접근 가능한지 확인.
+- **렌더 데이터 의존**(해소됨): `D = window.DATA`(L624)가 전역이고, `STOCK_BY_NAME`(L1184) name→stock 맵이 이미 존재하므로 더보기/모달은 이를 재사용한다.
 - **co_stocks 키 충돌**: snippet[:40]이 같은 서로 다른 메시지의 오결합 가능성(낮음). 날짜+발언자로 충분히 분별.
 - **2단계 연결점**: 모달 본문의 180자 자리는 2단계에서 원문으로 교체. 스키마에 원문 필드 추가 시 하위호환 유지.
