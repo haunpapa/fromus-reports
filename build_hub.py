@@ -1182,6 +1182,26 @@ def main():
                   "market_momentum": market_momentum_meta},
         "reports": reports, "search": search, "ai_digest": ai_digest, **agg,
     }
+
+    # -- 채팅 온톨로지 병합 (chat_kb.json 있으면 자동) --
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _chat_path = next((p for p in ("chat_kb.json", os.path.join(_here, "chat_kb.json"))
+                       if os.path.exists(p)), None)
+    if _chat_path:
+        try:
+            from merge_hub import merge as _merge_chat
+            with open(_chat_path, encoding="utf-8") as _cf:
+                _chat = json.load(_cf)
+            data, _added = _merge_chat(data, _chat)
+            print(f"chat_kb.json merged -- stocks +{_added}")
+        except ImportError as _e:
+            print(f"[WARN] merge_hub.py 없음 -- 채팅 병합 생략: {_e}", file=sys.stderr)
+            data.setdefault("build", {})["chat_merge_error"] = f"import: {_e}"
+        except Exception as _e:
+            import traceback as _tb
+            print(f"[ERROR] chat_kb.json 병합 실패 -- 비병합 허브 생성됨: {_e}", file=sys.stderr)
+            _tb.print_exc()
+            data.setdefault("build", {})["chat_merge_error"] = str(_e)
     with open(args.json, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
     print(f"\n→ {args.json} 작성 ({os.path.getsize(args.json)//1024} KB)")

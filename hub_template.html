@@ -919,6 +919,14 @@ function drawStockList(){
   host.innerHTML=list.map(stockRow).join('');
   drawStockSparks();
 }
+function renderChat(s){
+  const c=s.chat; if(!c) return '';
+  const st=c.stance||{};
+  const badge=`<span style="color:#7c3aed">강세 ${st.bullish||0} · 약세 ${st.bearish||0} · 관망 ${st.watch||0}</span>`;
+  const ments=(c.recent||[]).map(m=>`<div class="mention"><span class="md">${esc(fmtDate(m.date))}</span><span class="src-pill" style="background:#f5f3ff;color:#7c3aed">\uD83D\uDCAC ${esc(m.sharer||'')}</span><span>${esc((m.snippet||'').slice(0,120))}</span></div>`).join('');
+  const news=(c.news||[]).slice(0,4).map(n=>`<div class="mention"><span class="md">${esc(fmtDate(n.date))}</span><span class="src-pill \uD14C\uB9C8">\uB274\uC2A4</span><span>${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'\uC5F4\uAE30')}\u2197</a></span></div>`).join('');
+  return `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px"><div style="font-size:11.5px;font-weight:700;color:#7c3aed;margin-bottom:4px">\uD83D\uDCAC \uCC44\uD305 \uADFC\uAC70 \u00B7 ${c.count}\uD68C \u00B7 \uC2DC\uADF8\uB110 ${c.signals} \u00B7 ${badge}</div>${ments}${news}</div>`;
+}
 function stockRow(s){
   const themes=(s.themes||[]).slice(0,2).map(t=>`<span class="pill theme">${esc(t)}</span>`).join('');
   const tags=(s.supply_tags||[]).slice(0,2).map(t=>`<span class="pill supply">${esc(t)}</span>`).join('');
@@ -927,11 +935,12 @@ function stockRow(s){
     <div class="mention"><span class="md">${esc(fmtDate(m.date))}</span>
       <span class="src-pill ${m.source==='수급'?'수급':'테마'}">${esc(m.source||'')}</span>
       <span>${esc(m.label||m.theme||'')}${m.annotation?` <span style="color:var(--text-3)">· ${esc(m.annotation)}</span>`:''} ${srcLink(m.id)}</span></div>`).join('');
+  const chatPill = s.chat ? `<span class="pill" style="background:#f5f3ff;color:#7c3aed">\uD83D\uDCAC ${s.chat.count}</span>` : '';
   return `<div class="strow">
     <div class="strow-head" onclick="this.parentNode.querySelector('.strow-detail').classList.toggle('open')">
       <button class="star ${isWatched('stock',s.name)?'on':''}" data-watch="stock:${esc(s.name)}" title="워치리스트에 추가/제거" onclick="event.stopPropagation();toggleWatchEl(this)">${isWatched('stock',s.name)?'★':'☆'}</button>
       <span class="strow-name">${esc(s.name)}</span>
-      <span class="strow-mini">${momentumChip(s)}${themes}${tags}${tp}</span>
+      <span class="strow-mini">${momentumChip(s)}${themes}${tags}${tp}${chatPill}</span>
       <canvas class="strow-spark" data-spark-name="${esc(s.name)}" width="156" height="52"></canvas>
       <button class="cmp-add ${isComparePicked(s.name)?'on':''}" data-cmp="${esc(s.name)}" onclick="event.stopPropagation();toggleCompare('${esc(s.name)}')">${isComparePicked(s.name)?'비교중':'비교'}</button>
       <span class="strow-cnt">${s.count}회</span>
@@ -939,7 +948,7 @@ function stockRow(s){
     <div class="strow-detail">
       <div style="font-size:11.5px;color:var(--text-3);margin:6px 0 4px">테마 언급 ${s.theme_count||0} · 수급 포착 ${s.supply_count||0}${(s.themes||[]).length?' · '+esc(s.themes.join(', ')):''}</div>
       ${relatedChips(s.name)}
-      ${ments}
+      ${ments}${renderChat(s)}
     </div>
   </div>`;
 }

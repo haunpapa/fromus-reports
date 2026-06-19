@@ -17,6 +17,8 @@ on:
       - 'build_hub.py'
       - 'ai_digest.py'
       - 'hub_template.html'
+      - 'chat_kb.json'
+      - 'merge_hub.py'
   workflow_dispatch:
 
 permissions:
