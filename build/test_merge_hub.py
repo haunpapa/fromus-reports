@@ -165,7 +165,10 @@ class TestThemeBlocks(unittest.TestCase):
                     {"date": "2026-04-05", "sharer": "김철수", "stance": "bearish", "snippet": "현대차 약세"},
                 ]}},
             ],
-            "sectors": [{"theme": "반도체·메모리"}, {"theme": "자동차·현대차그룹"}],
+            "sectors": [
+                {"theme": "반도체·메모리", "stocks": ["엔비디아", "마이크론"]},   # 리포트 섹터 분류(신뢰 소스)
+                {"theme": "자동차·현대차그룹", "stocks": ["현대차"]},
+            ],
         }
 
     def _chat_themes(self):
@@ -202,11 +205,10 @@ class TestThemeBlocks(unittest.TestCase):
         self.assertEqual(semi["stance"]["bullish"], 12 + 1)               # stance는 상한 전 전체(엔비12+마이크론1)
 
     def test_stock_counted_independently_per_theme(self):
-        # 실데이터: 한 종목이 여러 매칭 테마에 동시 소속(예: 마이크론 → 반도체 + 금융)
+        # 한 종목이 여러 섹터 stocks에 동시 소속 → 각 테마에 독립 집계
         kb = self._kb_with_chat()
-        ct = self._chat_themes()
-        ct["자동차·현대차그룹"]["stocks"] = ["현대차", "마이크론"]   # 마이크론을 두 테마에
-        tb = _theme_blocks(kb, ct)
+        kb["sectors"][1]["stocks"] = ["현대차", "마이크론"]   # 자동차 섹터에 마이크론 추가
+        tb = _theme_blocks(kb, self._chat_themes())
         semi_stocks = [o["stock"] for o in tb["반도체·메모리"]["opinions"]]
         auto_stocks = [o["stock"] for o in tb["자동차·현대차그룹"]["opinions"]]
         self.assertIn("마이크론", semi_stocks)

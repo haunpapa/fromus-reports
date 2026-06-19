@@ -43,25 +43,32 @@ def _augment(m, nm, comap):
 THEME_OP_KEEP = 8
 
 def _theme_blocks(kb, chat_themes):
-    """채팅 테마 중 리포트 섹터와 이름 매칭되는 것만, 종목 chat.opinions를 모아 집계."""
+    """리포트 섹터 분류 기준으로 그 섹터 종목의 채팅 의견을 집계.
+       chat_kb 테마 stocks 분류는 부정확(무관 종목 혼입)해 사용하지 않고,
+       리포트 섹터(정확한 분류)의 stocks를 순회하되 섹터 이름이 채팅 테마에도 있을 때만 결합."""
     by_name = {s.get("name"): s for s in kb.get("stocks", [])}
-    sector_themes = {sec.get("theme") for sec in kb.get("sectors", [])}
     out = {}
-    for tname, tinfo in chat_themes.items():
-        if tname not in sector_themes:   # 매칭 섹터 없으면 제외
+    for sec in kb.get("sectors", []):
+        tname = sec.get("theme")
+        if tname not in chat_themes:   # 채팅에서 논의된 테마(이름 매칭)만
             continue
-        ops = []
-        for nm in tinfo.get("stocks", []):
+        ops, seen = [], []
+        for nm in sec.get("stocks", []):   # ← 리포트 섹터 stocks(신뢰 가능한 분류)
             s = by_name.get(nm)
             if not s:
                 continue
-            for op in (s.get("chat", {}).get("opinions") or []):
+            sops = s.get("chat", {}).get("opinions") or []
+            if sops:
+                seen.append(nm)
+            for op in sops:
                 ops.append({**op, "stock": nm})   # 출처 종목 부착(불변)
+        if not ops:   # 채팅 의견 있는 섹터 종목 없으면 결합 안 함
+            continue
         ops = _sort_desc(ops)
         st = Counter(o.get("stance") for o in ops if o.get("stance") in ("bullish", "bearish", "watch"))
         out[tname] = {
             "opinions_count": len(ops),
-            "stocks": tinfo.get("stocks", []),
+            "stocks": seen,   # 채팅 의견 있는 섹터 종목만
             "stance": {"bullish": st["bullish"], "bearish": st["bearish"], "watch": st["watch"]},
             "opinions": ops[:THEME_OP_KEEP],
         }
