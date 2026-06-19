@@ -40,11 +40,20 @@ def stance_summary(mentions):
     c=Counter(m.get("stance") for m in mentions if m.get("stance") in("bullish","bearish","watch"))
     return {"bullish":c["bullish"],"bearish":c["bearish"],"watch":c["watch"]}
 
-def _chat_block(cs, with_targets=True):
-    ments=cs.get("mentions",[])
-    blk={"count":cs.get("count",0),"signals":len(ments),"stance":stance_summary(ments),
-         "recent":_sort_desc(ments)[:5],"news":cs.get("news",[])[:8]}
-    if with_targets: blk["targets"]=cs.get("targets",[])[:5]
+def _chat_block(cs, nm, comap, with_targets=True):
+    ments = cs.get("mentions", [])
+    ticker = cs.get("ticker", "") or ""
+    opinions = [_augment(m, nm, comap)
+                for m in _sort_desc([m for m in ments if _is_opinion(m)])][:OPINION_KEEP]
+    market = [_augment(m, nm, comap)
+              for m in _sort_desc([m for m in ments
+                                   if (not _is_opinion(m)) and _name_in(m, nm, ticker)])][:MARKET_KEEP]
+    news = _sort_desc(cs.get("news", []))[:NEWS_KEEP]
+    blk = {"count": cs.get("count", 0), "signals": len(ments),
+           "stance": stance_summary(ments),
+           "opinions": opinions, "market_news": market, "news": news}
+    if with_targets:
+        blk["targets"] = cs.get("targets", [])[:5]
     return blk
 
 def _strip_prior_chat(kb):
@@ -66,13 +75,14 @@ def merge(kb, chat):
     #       리포트 원본 데이터는 보존하되, 재실행 시 중복 누적을 막기 위해 직전 주입물을 먼저 제거.
     _strip_prior_chat(kb)
     cstocks=chat.get("stocks",{})
+    comap = _build_comention_map(cstocks)        # ← 추가
     report_names=set()
     # 1) 리포트 종목에 chat 블록 주입
     for s in kb.get("stocks",[]):
         nm=s.get("name"); report_names.add(nm)
         cs=cstocks.get(nm)
         if cs:
-            s["chat"]=_chat_block(cs)
+            s["chat"]=_chat_block(cs, nm, comap)   # ← 시그니처 변경
             s["has_chat"]=True
     # 2) 채팅 전용 종목 추가
     added=0
@@ -82,7 +92,7 @@ def merge(kb, chat):
         kb.setdefault("stocks",[]).append({"name":nm,"count":0,"source":"chat",
             "market":cs.get("market",""),"ticker":cs.get("ticker",""),"themes":cs.get("themes",[]),
             "mentions":[],"sectors":[],"supply_tags":[],"targets":cs.get("targets",[])[:5],
-            "chat":_chat_block(cs),
+            "chat":_chat_block(cs, nm, comap),       # ← 시그니처 변경
             "has_chat":True,"chat_only":True})
         added+=1
     # 3) glossary 병합(채팅 교육/용어 → source 표시)
