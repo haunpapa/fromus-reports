@@ -23,6 +23,19 @@ def _sort_desc(items):
     # date 키가 없어도 안전하게 내림차순(최신순)
     return sorted(items, key=lambda x: x.get("date", "") or "", reverse=True)
 
+def _build_comention_map(cstocks):
+    msg2names = defaultdict(set)
+    for nm, cs in cstocks.items():
+        for m in cs.get("mentions", []):
+            key = (m.get("date"), m.get("sharer"), (m.get("snippet", "") or "")[:40])
+            msg2names[key].add(nm)
+    return msg2names
+
+def _augment(m, nm, comap):
+    key = (m.get("date"), m.get("sharer"), (m.get("snippet", "") or "")[:40])
+    co = sorted(comap.get(key, set()) - {nm})
+    return {**m, "co_stocks": co}   # 불변 복사 — 원본 멘션 미변경
+
 def stance_summary(mentions):
     c=Counter(m.get("stance") for m in mentions if m.get("stance") in("bullish","bearish","watch"))
     return {"bullish":c["bullish"],"bearish":c["bearish"],"watch":c["watch"]}
