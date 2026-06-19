@@ -40,6 +40,33 @@ def _augment(m, nm, comap):
     co = sorted(comap.get(key, set()) - {nm})
     return {**m, "co_stocks": co}   # 불변 복사 — 원본 멘션 미변경
 
+THEME_OP_KEEP = 8
+
+def _theme_blocks(kb, chat_themes):
+    """채팅 테마 중 리포트 섹터와 이름 매칭되는 것만, 종목 chat.opinions를 모아 집계."""
+    by_name = {s.get("name"): s for s in kb.get("stocks", [])}
+    sector_themes = {sec.get("theme") for sec in kb.get("sectors", [])}
+    out = {}
+    for tname, tinfo in chat_themes.items():
+        if tname not in sector_themes:   # 매칭 섹터 없으면 제외
+            continue
+        ops = []
+        for nm in tinfo.get("stocks", []):
+            s = by_name.get(nm)
+            if not s:
+                continue
+            for op in (s.get("chat", {}).get("opinions") or []):
+                ops.append({**op, "stock": nm})   # 출처 종목 부착(불변)
+        ops = _sort_desc(ops)
+        st = Counter(o.get("stance") for o in ops if o.get("stance") in ("bullish", "bearish", "watch"))
+        out[tname] = {
+            "opinions_count": len(ops),
+            "stocks": tinfo.get("stocks", []),
+            "stance": {"bullish": st["bullish"], "bearish": st["bearish"], "watch": st["watch"]},
+            "opinions": ops[:THEME_OP_KEEP],
+        }
+    return out
+
 def stance_summary(mentions):
     c=Counter(m.get("stance") for m in mentions if m.get("stance") in("bullish","bearish","watch"))
     return {"bullish":c["bullish"],"bearish":c["bearish"],"watch":c["watch"]}
@@ -109,7 +136,7 @@ def merge(kb, chat):
         "targets":chat.get("targets",[]),"qna":chat.get("qna",[]),
         "news":chat.get("news",[]),"readings":chat.get("readings",[]),
         "glossary":chat.get("glossary",[]),
-        "stocks_added":added,"themes":list(chat.get("themes",{}).keys())}
+        "stocks_added":added,"themes":_theme_blocks(kb, chat.get("themes", {}))}
     # build 메타에 표시
     kb.setdefault("build",{})["chat_merged"]=True
     kb["build"]["chat_stocks_added"]=added

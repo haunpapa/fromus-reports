@@ -9,7 +9,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from merge_hub import (  # noqa: E402
-    _is_opinion, _name_in, _sort_desc, _build_comention_map, _augment, merge, _is_bot,
+    _is_opinion, _name_in, _sort_desc, _build_comention_map, _augment, merge, _is_bot, _theme_blocks,
 )
 import json
 
@@ -147,6 +147,70 @@ class TestBotExclusion(unittest.TestCase):
         g = next(s for s in kb["stocks"] if s["name"] == "구글")["chat"]
         sharers = [m["sharer"] for m in g["opinions"] + g["market_news"]]
         self.assertNotIn("김병철(봇)", sharers)  # 봇은 의견·시황 양쪽에서 제외
+
+
+class TestThemeBlocks(unittest.TestCase):
+    def _kb_with_chat(self):
+        # 섹터 2개(반도체·기타), chat 종목 chat.opinions 보유
+        return {
+            "stocks": [
+                {"name": "엔비디아", "chat": {"opinions": [
+                    {"date": "2026-04-07", "sharer": "탱이", "stance": "bullish", "snippet": "엔비 좋다"},
+                    {"date": "2026-04-02", "sharer": "탱이", "stance": "watch", "snippet": "관망"},
+                ]}},
+                {"name": "마이크론", "chat": {"opinions": [
+                    {"date": "2026-04-08", "sharer": "문지영", "stance": "bullish", "snippet": "마이크론 강세"},
+                ]}},
+                {"name": "현대차", "chat": {"opinions": [
+                    {"date": "2026-04-05", "sharer": "김철수", "stance": "bearish", "snippet": "현대차 약세"},
+                ]}},
+            ],
+            "sectors": [{"theme": "반도체·메모리"}, {"theme": "자동차·현대차그룹"}],
+        }
+
+    def _chat_themes(self):
+        return {
+            "반도체·메모리": {"theme": "반도체·메모리", "count": 99, "stocks": ["엔비디아", "마이크론"], "mentions": []},
+            "자동차·현대차그룹": {"theme": "자동차·현대차그룹", "count": 30, "stocks": ["현대차"], "mentions": []},
+            "에너지·정유": {"theme": "에너지·정유", "count": 50, "stocks": ["엔비디아"], "mentions": []},  # 섹터에 없음(미집계)
+        }
+
+    def test_only_matched_themes(self):
+        tb = _theme_blocks(self._kb_with_chat(), self._chat_themes())
+        self.assertEqual(set(tb.keys()), {"반도체·메모리", "자동차·현대차그룹"})  # 에너지·정유 제외(섹터 없음)
+
+    def test_stance_recount_and_count(self):
+        tb = _theme_blocks(self._kb_with_chat(), self._chat_themes())
+        semi = tb["반도체·메모리"]
+        self.assertEqual(semi["opinions_count"], 3)                       # 엔비디아 2 + 마이크론 1
+        self.assertEqual(semi["stance"], {"bullish": 2, "bearish": 0, "watch": 1})
+
+    def test_opinions_have_stock_and_sorted(self):
+        tb = _theme_blocks(self._kb_with_chat(), self._chat_themes())
+        ops = tb["반도체·메모리"]["opinions"]
+        self.assertTrue(all("stock" in o for o in ops))                   # stock 부착
+        self.assertEqual([o["date"] for o in ops], ["2026-04-08", "2026-04-07", "2026-04-02"])  # 최신순
+
+    def test_cap_applies_to_list_not_stance(self):
+        kb = self._kb_with_chat()
+        kb["stocks"][0]["chat"]["opinions"] = [
+            {"date": f"2026-01-{i:02d}", "sharer": "x", "stance": "bullish", "snippet": "n"} for i in range(1, 13)
+        ]  # 엔비디아 12개
+        tb = _theme_blocks(kb, self._chat_themes())
+        semi = tb["반도체·메모리"]
+        self.assertLessEqual(len(semi["opinions"]), 8)                    # 대표 의견 ≤8
+        self.assertEqual(semi["stance"]["bullish"], 12 + 1)               # stance는 상한 전 전체(엔비12+마이크론1)
+
+    def test_stock_counted_independently_per_theme(self):
+        # 실데이터: 한 종목이 여러 매칭 테마에 동시 소속(예: 마이크론 → 반도체 + 금융)
+        kb = self._kb_with_chat()
+        ct = self._chat_themes()
+        ct["자동차·현대차그룹"]["stocks"] = ["현대차", "마이크론"]   # 마이크론을 두 테마에
+        tb = _theme_blocks(kb, ct)
+        semi_stocks = [o["stock"] for o in tb["반도체·메모리"]["opinions"]]
+        auto_stocks = [o["stock"] for o in tb["자동차·현대차그룹"]["opinions"]]
+        self.assertIn("마이크론", semi_stocks)
+        self.assertIn("마이크론", auto_stocks)   # 두 테마에 독립 집계(공유·누적 아님)
 
 
 if __name__ == "__main__":
