@@ -616,6 +616,18 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   </div>
 </div>
 
+<div class="rmodal" id="chatModal" role="dialog" aria-modal="true">
+  <div class="rmodal-bd" data-cmclose></div>
+  <div class="rmodal-box" style="height:auto;max-height:88vh">
+    <div class="rmodal-head">
+      <span class="rmodal-kind" style="color:#7c3aed;background:#f5f3ff;border-color:#e9d5ff">💬 채팅</span>
+      <span class="rmodal-title" id="cmTitle"></span>
+      <button class="rmodal-close" aria-label="닫기" data-cmclose>✕</button>
+    </div>
+    <div class="rmodal-body" id="cmBody" style="padding:16px 18px;overflow:auto"></div>
+  </div>
+</div>
+
 <script id="kb-data">
 window.DATA = /*DATA*/{"build":{"reports":0,"daily":0,"weekly":0,"from":"","to":"","generated":""},"reports":[],"search":[],"stocks":[],"sectors":[],"supply_days":[],"stance":[],"principles":[],"glossary":[],"series":{}}/*ENDDATA*/;
 </script>
@@ -1606,6 +1618,40 @@ function closeReport(){
 RM.jump.addEventListener('click',()=>{ if(rmHit){try{rmHit.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
   else if(rmQuery){try{highlightInFrame(RM.frame.contentDocument,rmQuery);}catch(_){}}});
 $$('[data-rclose]').forEach(el=>el.addEventListener('click',closeReport));
+// ── 채팅 모달 (별도 컨테이너; RM/openReport/closeReport 재사용 금지) ──
+let cmBodyOverflow='';
+function openChatModal(stockName, kind, idx){
+  const arr = chatArr(stockName, kind);
+  const m = arr[idx]; if(!m) return;
+  $('#cmTitle').innerHTML = `${esc(stockName)} <span class="rm-date">${esc(fmtDate(m.date))} · ${esc(m.sharer||'')} · ${esc(m.stance||'')}</span>`;
+  const co = (m.co_stocks||[]).map(n=>`<span class="tag" data-stock="${esc(n)}">${esc(n)}</span>`).join('');
+  const s = STOCK_BY_NAME[stockName]||{};
+  const tl = ((s.chat&&s.chat.opinions)||[]).filter(o=>o.sharer===m.sharer)
+    .map(o=>`<div style="font-size:11.5px;color:var(--text-3)">· ${esc(fmtDate(o.date))} ${esc(o.stance||'')} — ${esc((o.snippet||'').slice(0,60))}</div>`).join('');
+  const news = ((s.chat&&s.chat.news)||[]).slice(0,4)
+    .map(n=>`<div style="font-size:11.5px"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`).join('');
+  $('#cmBody').innerHTML = `
+    <div style="background:var(--surface-2);border-radius:8px;padding:12px;line-height:1.6;font-size:13px">${esc(m.snippet||'')}
+      <div style="font-size:10.5px;color:var(--text-4);margin-top:6px">※ 현재 180자 요약 — 원문 전체는 2단계 예정</div></div>
+    ${co?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">함께 언급 종목</div><div>${co}</div>`:''}
+    ${tl?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">${esc(m.sharer||'')} · ${esc(stockName)} 발언 타임라인</div>${tl}`:''}
+    ${news?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">관련 뉴스</div>${news}`:''}`;
+  $('#chatModal').classList.add('open');
+  cmBodyOverflow=document.body.style.overflow; document.body.style.overflow='hidden';
+}
+function closeChatModal(){
+  const cm=$('#chatModal'); if(!cm.classList.contains('open'))return;
+  cm.classList.remove('open');
+  document.body.style.overflow=cmBodyOverflow||'';
+}
+$$('[data-cmclose]').forEach(el=>el.addEventListener('click',closeChatModal));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#chatModal').classList.contains('open')){e.stopPropagation();closeChatModal();} },true);
+// 멘션 클릭 → 모달 (data-chat-idx 가진 항목)
+document.addEventListener('click',e=>{
+  const row=e.target.closest('.chat-clk'); if(!row) return;
+  if(e.target.closest('a')) return;  // 내부 링크는 그대로
+  openChatModal(row.dataset.chatStock, row.dataset.chatKind, +row.dataset.chatIdx);
+});
 /* 전역: 모든 원문 링크/검색결과 클릭을 모달로 가로채기 (새 탭 단축키는 허용) */
 document.addEventListener('click',e=>{
   const a=e.target.closest('[data-report]'); if(!a)return;
