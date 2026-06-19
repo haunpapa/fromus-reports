@@ -9,7 +9,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from merge_hub import (  # noqa: E402
-    _is_opinion, _name_in, _sort_desc, _build_comention_map, _augment, merge,
+    _is_opinion, _name_in, _sort_desc, _build_comention_map, _augment, merge, _is_bot,
 )
 import json
 
@@ -129,6 +129,24 @@ class TestCoStocks(unittest.TestCase):
         comap = _build_comention_map(_chat_fixture())
         _augment(m, "구글", comap)
         self.assertNotIn("co_stocks", m)                    # 원본 미오염
+
+
+class TestBotExclusion(unittest.TestCase):
+    def test_is_bot(self):
+        self.assertTrue(_is_bot({"sharer": "김병철(봇)"}))
+        self.assertFalse(_is_bot({"sharer": "탱이"}))
+        self.assertFalse(_is_bot({}))
+
+    def test_bot_excluded_from_block(self):
+        chat = _full_chat()
+        chat["stocks"]["구글"]["mentions"] += [
+            {"date": "2026-05-01", "sharer": "김병철(봇)", "type": "view", "stance": "bullish", "snippet": "구글 의견"},
+            {"date": "2026-05-02", "sharer": "김병철(봇)", "type": "research", "stance": "자료", "snippet": "구글 시황 복붙"},
+        ]
+        kb, _ = merge(_kb(), chat)
+        g = next(s for s in kb["stocks"] if s["name"] == "구글")["chat"]
+        sharers = [m["sharer"] for m in g["opinions"] + g["market_news"]]
+        self.assertNotIn("김병철(봇)", sharers)  # 봇은 의견·시황 양쪽에서 제외
 
 
 if __name__ == "__main__":

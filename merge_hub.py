@@ -8,12 +8,16 @@ import json, sys
 from collections import Counter, defaultdict
 
 OPINION_TYPES = {"view", "position"}
+BOT_SHARERS = {"김병철(봇)"}   # 자동 시황 봇 — 채팅 근거에서 제외
 OPINION_KEEP = 100
 MARKET_KEEP = 50
 NEWS_KEEP = 50
 
 def _is_opinion(m):
     return m.get("type") in OPINION_TYPES
+
+def _is_bot(m):
+    return m.get("sharer") in BOT_SHARERS
 
 def _name_in(m, nm, ticker):
     sn = m.get("snippet", "") or ""
@@ -41,7 +45,7 @@ def stance_summary(mentions):
     return {"bullish":c["bullish"],"bearish":c["bearish"],"watch":c["watch"]}
 
 def _chat_block(cs, nm, comap, with_targets=True):
-    ments = cs.get("mentions", [])
+    ments = [m for m in cs.get("mentions", []) if not _is_bot(m)]   # 봇 멘션 제외
     ticker = cs.get("ticker", "") or ""
     opinions = [_augment(m, nm, comap)
                 for m in _sort_desc([m for m in ments if _is_opinion(m)])][:OPINION_KEEP]
