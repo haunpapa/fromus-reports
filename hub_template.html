@@ -919,13 +919,40 @@ function drawStockList(){
   host.innerHTML=list.map(stockRow).join('');
   drawStockSparks();
 }
+const CHAT_INIT_OP = 3, CHAT_INIT_NEWS = 4, CHAT_MORE = 10;
+
+function chatMentionRow(s, kind, m, idx){
+  return `<div class="mention chat-clk" data-chat-stock="${esc(s.name)}" data-chat-kind="${kind}" data-chat-idx="${idx}" style="cursor:pointer">
+    <span class="md">${esc(fmtDate(m.date))}</span>
+    <span class="src-pill" style="background:#f5f3ff;color:#7c3aed">💬 ${esc(m.sharer||'')}</span>
+    <span>${esc((m.snippet||'').slice(0,120))}${(m.co_stocks&&m.co_stocks.length)?` <span style="color:var(--text-4)">+${m.co_stocks.length}</span>`:''}</span></div>`;
+}
+function chatNewsRow(n){
+  return `<div class="mention"><span class="md">${esc(fmtDate(n.date))}</span>
+    <span class="src-pill 테마">뉴스</span>
+    <span>${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></span></div>`;
+}
 function renderChat(s){
   const c=s.chat; if(!c) return '';
   const st=c.stance||{};
   const badge=`<span style="color:#7c3aed">강세 ${st.bullish||0} · 약세 ${st.bearish||0} · 관망 ${st.watch||0}</span>`;
-  const ments=(c.recent||[]).map(m=>`<div class="mention"><span class="md">${esc(fmtDate(m.date))}</span><span class="src-pill" style="background:#f5f3ff;color:#7c3aed">\uD83D\uDCAC ${esc(m.sharer||'')}</span><span>${esc((m.snippet||'').slice(0,120))}</span></div>`).join('');
-  const news=(c.news||[]).slice(0,4).map(n=>`<div class="mention"><span class="md">${esc(fmtDate(n.date))}</span><span class="src-pill \uD14C\uB9C8">\uB274\uC2A4</span><span>${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'\uC5F4\uAE30')}\u2197</a></span></div>`).join('');
-  return `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px"><div style="font-size:11.5px;font-weight:700;color:#7c3aed;margin-bottom:4px">\uD83D\uDCAC \uCC44\uD305 \uADFC\uAC70 \u00B7 ${c.count}\uD68C \u00B7 \uC2DC\uADF8\uB110 ${c.signals} \u00B7 ${badge}</div>${ments}${news}</div>`;
+  const ops=c.opinions||[], mkt=c.market_news||[], nws=c.news||[];
+  const opHtml = ops.slice(0,CHAT_INIT_OP).map((m,i)=>chatMentionRow(s,'opinion',m,i)).join('')
+    || '<div style="font-size:11.5px;color:var(--text-4)">개별 의견 없음</div>';
+  const opMore = ops.length>CHAT_INIT_OP
+    ? `<div class="chat-more" data-chat-stock="${esc(s.name)}" data-chat-kind="opinion" data-chat-shown="${CHAT_INIT_OP}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 의견 ${ops.length-CHAT_INIT_OP}건 더보기</div>` : '';
+  const mktBlock = mkt.length
+    ? `<details class="chat-mkt" style="margin-top:6px"><summary style="cursor:pointer;color:#16a34a;font-size:11.5px">📰 관련 시황 ${mkt.length}건</summary>
+        <div class="chat-mkt-body" data-chat-stock="${esc(s.name)}" data-chat-shown="0"></div></details>` : '';
+  const nwHtml = nws.slice(0,CHAT_INIT_NEWS).map(chatNewsRow).join('');
+  const nwMore = nws.length>CHAT_INIT_NEWS
+    ? `<div class="chat-more-news" data-chat-stock="${esc(s.name)}" data-chat-shown="${CHAT_INIT_NEWS}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 뉴스 ${nws.length-CHAT_INIT_NEWS}건 더보기</div>` : '';
+  return `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
+    <div style="font-size:11.5px;font-weight:700;color:#7c3aed;margin-bottom:4px">💬 채팅 근거 · ${c.count}회 · ${badge}</div>
+    <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">💡 의견</div>${opHtml}${opMore}
+    ${mktBlock}
+    ${nws.length?`<div style="font-size:11px;color:var(--text-3);margin:5px 0 3px">📰 뉴스(최신순)</div>${nwHtml}${nwMore}`:''}
+  </div>`;
 }
 function stockRow(s){
   const themes=(s.themes||[]).slice(0,2).map(t=>`<span class="pill theme">${esc(t)}</span>`).join('');
