@@ -8,3 +8,6 @@ hub_preview.html
 
 # OMC 휘발성 런타임 상태 (세션마다 변경 → 추적 제외)
 .omc/state/
+
+# 브레인스토밍 비주얼 컴패니언 (로컬 전용)
+.superpowers/

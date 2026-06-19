@@ -1,0 +1,162 @@
+# 채팅 근거 정확도 + 인터랙션 교정 (1단계)
+
+- 날짜: 2026-06-19
+- 상태: 설계 승인 → 구현 계획 대기
+- 범위: 1단계(소비 단계 교정). 2단계(chat_kb 생성기·원문 보존)는 별도 사이클.
+
+## 1. 배경 / 문제
+
+PR #2(`feat: 카카오톡 채팅 온톨로지 ↔ 지식허브 결합`)로 종목 카드에 💬 채팅 근거가
+표시되지만, **근거가 해당 종목과 이어지지 않는다**는 사용자 피드백이 있었다.
+데이터 진단으로 근본 원인을 확정했다.
+
+| 증거 | 값 | 의미 |
+|---|---|---|
+| 멘션 복제율 | 3.0× (고유 메시지 876 → 멘션 2,647) | 시황 1개가 평균 3개 종목에 복제 |
+| 다종목 중복 귀속 | 453개 메시지(절반↑), 최악 24개 종목 | "특징 종목: 마이크론, 테슬라…" 한 줄이 AMD·TSMC·구글… 동시 삽입 |
+| `type=research`(시황) | 2,103개 = 전체 79% | 데일리 시황. 실제 의견(view+position)은 21% |
+| snippet에 종목명 포함 | 38%만 | 긴 시황이 180자로 잘려 종목명조차 없음 |
+
+**메커니즘**: `chat_kb.json` 생성기(리포에 없음 = 2단계 과제)가 데일리 시황에서
+언급된 모든 종목명을 뽑아 각 종목에 같은 글을 복제한다. `renderChat`은 날짜순
+최근 5개만 보여줘서 거의 모든 종목 카드가 동일한 시황으로 도배된다.
+
+`merge_hub.py`는 종목명 **정확 일치**(`cstocks.get(nm)`)로만 채팅 블록을 붙이므로
+병합 단계의 버그는 아니다. 다만 `chat_kb.json`에는 이미 멘션을 구분할 수 있는
+`type` 필드(`research` / `view` / `position`)가 들어 있어, **소비 단계에서 즉시 교정 가능**하다.
+
+## 2. 목표 / 비목표
+
+### 목표 (사용자 피드백 #1~#4)
+1. **#1 정확도**: 종목 카드 근거를 "실제 의견" 중심으로 재구성, 종목 무관 시황 노이즈 제거.
+2. **#2 모달**: 멘션 클릭 시 모달로 전문 + 맥락(함께 언급 종목·발언자 타임라인·관련 뉴스).
+3. **#3 뉴스 정렬**: 공유 뉴스를 최신순으로.
+4. **#4 더보기**: 초기 N개 + 10개씩 추가 로드.
+
+### 비목표 (이번 spec 제외 — 후속 사이클)
+- 전역 "시장 시황 타임라인" 섹션, Q&A/전략/액션/목표가 전용 뷰 (A의 전역 섹션)
+- D 테마 단위 결합
+- `chat_kb.json` 생성 파이프라인 / 원문 보존 (2단계)
+- `apply_hub_patch.py`(1회용 부트스트랩) 제거 — 후속 정리
+
+## 3. 설계
+
+### 3.1 데이터 흐름 (변경점 2곳)
+
+```
+chat_kb.json (변경 없음 — 기존 type 필드 활용)
+  └─> merge_hub.py        [강화: 분류·필터·co_stocks·정렬]
+  └─> build_hub.py        [변경 없음 — merge 훅 그대로]
+  └─> hub_template.html   [renderChat 재작성 + 모달 + 더보기 JS]
+```
+
+### 3.2 `merge_hub.py` 강화
+
+핵심: 종목별 `chat` 블록을 의견/관련시황/뉴스로 분리하고, 모달용 `co_stocks`를 주입한다.
+**불변성 원칙 준수** — 원본 `chat_kb` 멘션을 변경하지 않고 새 객체를 만든다.
+
+#### 3.2.1 멘션 분류
+- **의견(opinions)**: `type ∈ {view, position}` — 사람이 그 종목 맥락에서 한 발언. 전량 유지(상한 100).
+- **관련 시황(market_news)**: `type == research` **이고** 본문에 종목명/티커가 실제 등장하는 것만. (상한 50)
+- **버림**: `type == research` 이면서 종목명 미포함 — 도배의 원흉, 카드에서 제외.
+
+```python
+OPINION_TYPES = {"view", "position"}
+def _is_opinion(m):   return m.get("type") in OPINION_TYPES
+def _name_in(m, nm, ticker):
+    sn = m.get("snippet", "") or ""
+    return (nm in sn) or (bool(ticker) and ticker in sn)
+def _sort_desc(items):    # date 역순(키 없어도 안전)
+    return sorted(items, key=lambda x: x.get("date", ""), reverse=True)
+```
+
+#### 3.2.2 co_stocks (모달 "왜 이 종목에 붙었나")
+`merge()` 시작 시 chat 전체 멘션을 1회 순회하여 동일 메시지 → 언급 종목 집합 맵을 만든다.
+메시지 키는 진단에서 검증된 `(date, sharer, snippet[:40])`.
+
+```python
+def _build_comention_map(cstocks):
+    msg2names = defaultdict(set)
+    for nm, cs in cstocks.items():
+        for m in cs.get("mentions", []):
+            key = (m.get("date"), m.get("sharer"), (m.get("snippet","") or "")[:40])
+            msg2names[key].add(nm)
+    return msg2names
+```
+각 멘션 복사본에 `co_stocks = sorted(msg2names[key] - {nm})` 주입(자기 자신 제외, 불변 복사).
+
+#### 3.2.3 새 chat 블록 스키마
+```jsonc
+stock.chat = {
+  "count":   int,
+  "signals": int,
+  "stance":  { "bullish": int, "bearish": int, "watch": int },
+  "opinions":     [ { date, sharer, stance, type, snippet, co_stocks:[name…] } ],  // 최신순, ≤100
+  "market_news":  [ { date, sharer, stance, type, snippet, co_stocks:[name…] } ],  // research∩종목명, 최신순, ≤50
+  "news":         [ { date, sharer, outlet, title, url, stocks, themes } ],        // 최신순, ≤50
+  "targets":      [ … ]   // 기존 유지
+}
+```
+- 기존 `recent` 키는 `opinions`로 대체(이름·의미 변경). `market_news` 신규.
+- `_strip_prior_chat`은 `stock.chat`·`kb.chat`을 통째 제거하므로 **멱등성 유지**(신규 키도 자동 정리).
+- 채팅 전용 종목(`chat_only`)도 동일 스키마 적용.
+
+### 3.3 종목 카드 — `renderChat(s)` 재작성
+
+`hub_template.html`의 `renderChat`(현 L922~929)을 교체한다. 출력 구성:
+
+- **헤더**: `💬 N회 · 강세 a · 약세 b · 관망 c`
+- **💡 의견(최신순)**: 초기 3건 렌더 + 남으면 `＋ 의견 N건 더보기`(10개씩)
+- **📰 관련 시황 M건 ▾**: 기본 접힘, 펼치면 초기 5건 + 더보기
+- **📰 뉴스(최신순)**: 초기 4건 + 더보기
+- 각 의견/시황 항목, 뉴스 항목은 클릭 시 모달 호출
+
+더보기·접기·모달은 정적 `innerHTML`로 직접 데이터를 다 박지 않고, **전역 데이터(`D.stocks`)에서 종목명으로 조회**해 핸들러가 추가 렌더한다(카드 HTML 비대화 방지). 종목명은 `data-` 속성으로 전달.
+
+### 3.4 모달 (신규, 기존 `.rmodal` CSS 패턴 재사용)
+
+`hub_template.html`에 채팅 전용 모달 컨테이너 + `openChatModal(stockName, kind, idx)` 추가.
+(`kind ∈ {opinion, market}`, `idx`는 해당 리스트 인덱스)
+
+모달 본문:
+- 헤더: `💬 채팅 · {종목} · {date} · {sharer} · {stance}`
+- 본문: `snippet`(현재 180자). **2단계에서 원문으로 교체할 자리** — 주석/플래그로 표시.
+- **함께 언급 종목**: `m.co_stocks` 칩
+- **발언자 타임라인**: `D.stocks[stockName].chat.opinions` 중 같은 `sharer`만 날짜순
+- **관련 뉴스**: `D.stocks[stockName].chat.news` 상위 몇 건
+
+모달 열기/닫기·배경 클릭·ESC·바디 스크롤 잠금은 기존 `.rmodal` 동작과 일치시킨다.
+
+### 3.5 더보기 / 정렬 기본값
+- 초기 표시: 의견 3 · 관련시황 0(접힘, 펼치면 5) · 뉴스 4
+- 더보기 증분: 10
+- 정렬: 의견·관련시황·뉴스 모두 `date` 역순(`merge_hub`에서 저장 시 정렬 → 렌더는 그대로)
+
+## 4. 테스트 전략
+
+프로젝트 컨벤션을 따른다: **stdlib `unittest`**, 픽스처 고정, 네트워크 불필요.
+신규 `build/test_merge_hub.py` — 실행 `python build/test_merge_hub.py`.
+
+작은 합성 `chat_kb`/`kb` 픽스처로 다음을 검증:
+1. **분류**: 의견은 opinions로, 종목명 포함 research는 market_news로, 종목명 미포함 research는 둘 다에서 제외.
+2. **co_stocks**: 동일 메시지가 2개 종목에 있을 때 서로의 이름이 co_stocks에 들어가고 자기 자신은 빠진다.
+3. **정렬**: opinions·market_news·news가 date 역순.
+4. **상한**: 각 리스트가 상한(100/50/50)을 넘지 않는다.
+5. **멱등성**: `merge()`를 2회 적용해도 결과가 동일(누적 없음) — `_strip_prior_chat` 동작.
+6. **불변성**: 입력 `chat_kb` 멘션 객체가 변경되지 않는다(co_stocks 미오염).
+
+스모크(수동/CI): `python build_hub.py --src . --out hub.html --json knowledge_base.json` 실행 후
+`hub.html`에 `renderChat`·`openChatModal`·더보기 마커가 존재하고 `chat_merged:true`인지 확인.
+
+## 5. 파일 변경
+- `merge_hub.py` — 분류·필터·co_stocks·정렬·새 스키마 (강화)
+- `hub_template.html` — `renderChat` 재작성 + 채팅 모달 + 더보기/접기 JS
+- `build/test_merge_hub.py` — 신규 단위 테스트
+- (변경 없음) `chat_kb.json`, `build_hub.py`, `build.yml`
+- (이번 미변경) `apply_hub_patch.py` — 직접 수정으로 대체, 제거는 후속 정리
+
+## 6. 리스크 / 주의
+- **KB 크기 증가**: 의견 전량 저장(상한 100). 추정 수백 KB~약 1 MB 증가 — 상한으로 관리, 허용 범위.
+- **렌더 데이터 의존**: 더보기/모달이 전역 `D.stocks`에 의존 → 구현 시 `D`가 전역 접근 가능한지 확인.
+- **co_stocks 키 충돌**: snippet[:40]이 같은 서로 다른 메시지의 오결합 가능성(낮음). 날짜+발언자로 충분히 분별.
+- **2단계 연결점**: 모달 본문의 180자 자리는 2단계에서 원문으로 교체. 스키마에 원문 필드 추가 시 하위호환 유지.
