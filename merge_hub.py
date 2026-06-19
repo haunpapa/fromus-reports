@@ -5,20 +5,32 @@
    - 최상위 chat 섹션(readings/glossary/actions/strategy/targets/qna/news) 추가
    사용:  python merge_hub.py knowledge_base.json chat_kb.json"""
 import json, sys
-from collections import Counter
+from collections import Counter, defaultdict
+
+OPINION_TYPES = {"view", "position"}
+OPINION_KEEP = 100
+MARKET_KEEP = 50
+NEWS_KEEP = 50
+
+def _is_opinion(m):
+    return m.get("type") in OPINION_TYPES
+
+def _name_in(m, nm, ticker):
+    sn = m.get("snippet", "") or ""
+    return (nm in sn) or (bool(ticker) and ticker in sn)
+
+def _sort_desc(items):
+    # date 키가 없어도 안전하게 내림차순(최신순)
+    return sorted(items, key=lambda x: x.get("date", "") or "", reverse=True)
 
 def stance_summary(mentions):
     c=Counter(m.get("stance") for m in mentions if m.get("stance") in("bullish","bearish","watch"))
     return {"bullish":c["bullish"],"bearish":c["bearish"],"watch":c["watch"]}
 
-def _recent(ments):
-    # date 키가 없어도 안전하게 정렬(KeyError 방지)
-    return sorted(ments, key=lambda m: m.get("date",""), reverse=True)[:5]
-
 def _chat_block(cs, with_targets=True):
     ments=cs.get("mentions",[])
     blk={"count":cs.get("count",0),"signals":len(ments),"stance":stance_summary(ments),
-         "recent":_recent(ments),"news":cs.get("news",[])[:8]}
+         "recent":_sort_desc(ments)[:5],"news":cs.get("news",[])[:8]}
     if with_targets: blk["targets"]=cs.get("targets",[])[:5]
     return blk
 
