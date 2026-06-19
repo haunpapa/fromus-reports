@@ -66,8 +66,8 @@ def _is_opinion(m):   return m.get("type") in OPINION_TYPES
 def _name_in(m, nm, ticker):
     sn = m.get("snippet", "") or ""
     return (nm in sn) or (bool(ticker) and ticker in sn)
-def _sort_desc(items):    # date 역순(키 없어도 안전)
-    return sorted(items, key=lambda x: x.get("date", ""), reverse=True)
+def _sort_desc(items):    # date 역순(키·None 모두 안전)
+    return sorted(items, key=lambda x: x.get("date", "") or "", reverse=True)
 ```
 
 #### 3.2.2 co_stocks (모달 "왜 이 종목에 붙었나")
@@ -137,7 +137,7 @@ stock.chat = {
 ## 4. 테스트 전략
 
 프로젝트 컨벤션을 따른다: **stdlib `unittest`**, 픽스처 고정, 네트워크 불필요.
-신규 `build/test_merge_hub.py` — 실행 `python build/test_merge_hub.py`. `merge_hub`는 **리포 루트 모듈**이므로 테스트 상단에 `sys.path.insert(0, <repo_root>)` 후 `from merge_hub import merge`(dartlab 테스트와 동일 패턴). 스모크 명령은 루트 cwd 기준.
+신규 `build/test_merge_hub.py` — 실행 `python build/test_merge_hub.py`. `merge_hub`는 **리포 루트 모듈**이므로 테스트 상단에 `sys.path.insert(0, <repo_root>)` 후 `from merge_hub import merge`(루트 모듈 import 부트스트랩). 스모크 명령은 루트 cwd 기준.
 
 작은 합성 `chat_kb`/`kb` 픽스처로 다음을 검증:
 1. **분류**: 의견은 opinions로, 종목명 포함 research는 market_news로, 종목명 미포함 research는 둘 다에서 제외.
