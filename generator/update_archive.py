@@ -593,27 +593,16 @@ def main():
                     "time":m["time"],"sender":m["sender"],"body":m["body"],"urls":uu,"n_urls":len(uu)},
                     ensure_ascii=False)+"\n")
     except PermissionError: pass
-    # ===== 지식허브 통합 (지식허브_통합/ 폴더가 있으면 chat_kb.json + 병합본 생성) =====
+    # ===== chat_kb.json 생성 (리포 루트, public=False=실명 유지). 병합은 CI build_hub.py 전담 =====
     try:
-        intdir=P("지식허브_통합")
-        if os.path.isdir(intdir):
-            if intdir not in sys.path: sys.path.insert(0,intdir)
-            import fromus_taxonomy, chat_to_kb, merge_hub
-            kb=chat_to_kb.build(msgs, links, sig)
-            json.dump(kb, open(os.path.join(intdir,"chat_kb.json"),"w",encoding="utf-8"), ensure_ascii=False, indent=1)
-            done="chat_kb.json"
-            kbp=os.path.join(intdir,"knowledge_base.json")
-            if os.path.exists(kbp):
-                try:
-                    base=json.load(open(kbp,encoding="utf-8"))
-                    merged,added=merge_hub.merge(base, kb)
-                    json.dump(merged, open(os.path.join(intdir,"knowledge_base.merged.json"),"w",encoding="utf-8"), ensure_ascii=False, indent=1)
-                    done+=" + knowledge_base.merged.json(채팅종목+{})".format(added)
-                except Exception as e2:
-                    done+=" (병합 건너뜀: {})".format(str(e2)[:40])
-            print(f"▶ 지식허브 통합: {done}")
+        import chat_to_kb
+        kb=chat_to_kb.build(msgs, links, sig)
+        REPO_ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        out=os.path.join(REPO_ROOT,"chat_kb.json")
+        json.dump(kb, open(out,"w",encoding="utf-8"), ensure_ascii=False, indent=1)
+        print(f"▶ chat_kb.json 생성: {out} (stocks {len(kb['stocks'])})")
     except Exception as e:
-        print(f"  (지식허브 통합 건너뜀: {str(e)[:60]})")
+        print(f"  (chat_kb.json 생성 실패: {str(e)[:80]})")
     print(f"▶ 완료: 고유기사 {len(uniq)} · 전략 개인 {len(personal)}/리서치 {len(research)} · 노드 {len(nodes)}/엣지 {len(edges)}")
     print(f"▶ 저장: 프롬어스_온톨로지_뷰어.html · 온톨로지_데이터/ (11개 파일 갱신)")
 
