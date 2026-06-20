@@ -1760,8 +1760,7 @@ function openChatModal(stockName, kind, idx){
   const news = ((s.chat&&s.chat.news)||[]).slice(0,4)
     .map(n=>`<div style="font-size:11.5px"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`).join('');
   $('#cmBody').innerHTML = `
-    <div style="background:var(--surface-2);border-radius:8px;padding:12px;line-height:1.6;font-size:13px">${esc(m.snippet||'')}
-      <div style="font-size:10.5px;color:var(--text-4);margin-top:6px">※ 현재 180자 요약 — 원문 전체는 2단계 예정</div></div>
+    <div style="background:var(--surface-2);border-radius:8px;padding:12px;line-height:1.6;font-size:13px;white-space:pre-wrap">${esc(m.full||m.snippet||'')}</div>
     ${co?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">함께 언급 종목</div><div>${co}</div>`:''}
     ${tl?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">${esc(m.sharer||'')} · ${esc(stockName)} 발언 타임라인</div>${tl}`:''}
     ${news?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">관련 뉴스</div>${news}`:''}`;
