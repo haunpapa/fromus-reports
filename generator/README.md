@@ -3,7 +3,15 @@
 카카오톡 export(`.txt`/`.csv`) → `chat_kb.json`(리포 루트) 생성 파이프라인.
 네이버 링크 해제(네트워크)·온톨로지 뷰어를 포함하므로 **로컬에서만** 실행한다(CI 미실행).
 
-## 실행
+## 한 줄 갱신·배포 (권장)
+새 `.csv` 를 `~/Downloads` 에 둔 뒤:
+```bash
+./generator/refresh.sh                 # 최신 KakaoTalk_* 자동 선택
+./generator/refresh.sh ~/Downloads/KakaoTalk_Chat_..._프롬어스_....csv   # 파일 지정
+```
+`refresh.sh` 가 ① git pull → ② 재생성 → ③ **변경 있을 때만** chat_kb.json 커밋 → ④ push(=CI 배포)까지 자동 수행한다. 새 export 가 없으면 "변경 없음"으로 그냥 종료(빈 커밋 방지).
+
+## 수동 실행 (스크립트 없이)
 ```bash
 # 리포 루트에서 실행 권장
 python generator/update_archive.py "~/Downloads/KakaoTalk_Chat_..._프롬어스_*.csv"
