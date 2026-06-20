@@ -1447,7 +1447,18 @@ function buildGraph(filter){
     if(ia==null||ib==null) return;            // chat_only·major필터 제외 종목 자연 스킵
     links.push({s:ia,t:ib,kind:'co',w:e.w}); nodes[ia].deg++; nodes[ib].deg++;
   });
-  // 고립 섹터 제거 안 함(섹터는 항상 표시). 연결 0인 stock은 생기지 않음.
+  // major: 섹터 1개에만 매달리고 종목간(co) 연결 0인 잔가지(실연결 deg<=1 stock) 제거.
+  // deg<=1 stock 은 반드시 co 링크가 없으므로(co 있으면 섹터+co=deg>=2) 제거해도 타 종목 연결 불변 → 1-pass 안전.
+  if(filter==='major'){
+    const drop=new Set(); nodes.forEach((n,i)=>{ if(n.kind==='stock' && n.deg<=1) drop.add(i); });
+    if(drop.size){
+      const keep=nodes.map((_,i)=>i).filter(i=>!drop.has(i)); const remap={}; keep.forEach((o,nw)=>remap[o]=nw);
+      const N=keep.map(i=>nodes[i]); const L=links.filter(l=>!drop.has(l.s)&&!drop.has(l.t)).map(l=>({...l,s:remap[l.s],t:remap[l.t]}));
+      N.forEach(n=>n.deg=0); L.forEach(l=>{N[l.s].deg++; N[l.t].deg++;}); const I={}; N.forEach((n,i)=>I[n.id]=i);
+      return {nodes:N,links:L,idx:I};   // 섹터는 항상 유지(deg 0 이어도 표시)
+    }
+  }
+  // 섹터는 항상 표시(고립 섹터도 유지).
   return {nodes,links,idx};
 }
 function gRadius(n){return n.kind==='sector' ? 7+Math.sqrt(n.val)*2.4 : 3+Math.sqrt(n.val)*1.5;}
