@@ -1,0 +1,8 @@
+# 로컬 실행 산출물 — 커밋 금지 (chat_kb.json 은 리포 루트에 별도 생성)
+# 입력 CSV 는 generator/ 에 두지 말 것(*.csv 로 git 침묵 무시됨) — 인자로 경로 전달
+온톨로지_데이터/
+*.html
+*.jsonl
+*.csv
+resolve_cache.json
+__pycache__/

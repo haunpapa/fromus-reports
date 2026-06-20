@@ -263,5 +263,26 @@ class TestCoEdges(unittest.TestCase):
         self.assertEqual(len(hPairs), 7)   # 합집합: 7쌍 모두 유지(교집합이면 6)
 
 
+class TestFullPassthrough(unittest.TestCase):
+    def test_full_flows_to_opinions_and_research_safe(self):
+        import merge_hub
+        kb = {"stocks": [{"name": "삼성전자", "ticker": "005930"}], "sectors": []}
+        chat = {"build": {}, "stocks": {"삼성전자": {"count": 2, "ticker": "005930", "mentions": [
+            {"date": "2026-03-20", "sharer": "ㄱ 이혜나", "source": "chat",
+             "stance": "bullish", "type": "view", "snippet": "좋게 봅니다", "full": "좋게 봅니다\n장기 보유"},
+            {"date": "2026-03-19", "sharer": "키움", "source": "chat",
+             "stance": "bullish", "type": "research", "snippet": "삼성전자 리서치"},  # full 없음
+        ], "news": [], "targets": []}},
+        "themes": {}, "news": [], "targets": [], "actions": [], "strategy": [],
+        "qna": [], "readings": [], "glossary": []}
+        merged, _ = merge_hub.merge(kb, chat)
+        s = next(x for x in merged["stocks"] if x["name"] == "삼성전자")
+        ops = s["chat"]["opinions"]
+        self.assertEqual(ops[0].get("full"), "좋게 봅니다\n장기 보유")   # full 통과
+        # research(market_news)는 full 없어도 안전(KeyError 없이 통과)
+        for m in s["chat"]["market_news"]:
+            self.assertNotIn("full", m)
+
+
 if __name__ == "__main__":
     unittest.main()
