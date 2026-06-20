@@ -1416,7 +1416,7 @@ document.addEventListener('keydown',e=>{
 /* ═══════════ V3: 관계망 그래프 ═══════════ */
 const SECTOR_BY_THEME={}; (D.sectors||[]).forEach(s=>SECTOR_BY_THEME[s.theme]=s);
 const GPAL=['#dc2626','#2563eb','#16a34a','#7c3aed','#0891b2','#b8860b','#db2777','#ea580c','#0d9488','#4f46e5','#65a30d','#9333ea','#0284c7','#ca8a04','#e11d48','#059669','#a16207','#1d4ed8','#be123c','#15803d','#6d28d9','#0e7490','#c026d3','#0369a1','#b45309','#7e22ce','#047857','#9f1239'];
-const GMAJOR_MIN=3;
+const GMAJOR_MIN=3, LEGEND_N=7;   // LEGEND_N: 범례 표시 + 상시 라벨 노출할 상위 섹터 수
 let G=null, gAlpha=0, gRAF=null, gActive=false, gBuiltFilter=null;
 let gView={k:1,tx:0,ty:0}, gHover=null, gDrag=null, gPan=null, gDirty=false;
 
@@ -1428,7 +1428,7 @@ function buildGraph(filter){
   const coEdges = (D.chat && Array.isArray(D.chat.co_edges)) ? D.chat.co_edges : [];
   const coSet = new Set(); coEdges.forEach(e=>{coSet.add(gClean(e.a)); coSet.add(gClean(e.b));});
   sectors.forEach((s,i)=>{const id='S:'+s.theme;
-    nodes.push({id,kind:'sector',name:s.theme,val:s.count||1,color:GPAL[i%GPAL.length],deg:0,ref:s,
+    nodes.push({id,kind:'sector',name:s.theme,val:s.count||1,color:GPAL[i%GPAL.length],deg:0,ref:s,legend:i<LEGEND_N,
       x:Math.cos(i/sectors.length*6.283)*120,y:Math.sin(i/sectors.length*6.283)*120,vx:0,vy:0});
     idx[id]=nodes.length-1;});
   sectors.forEach((s,i)=>{const col=GPAL[i%GPAL.length], sIdx=idx['S:'+s.theme];
@@ -1534,12 +1534,13 @@ function gDraw(){
       if(ring){ ctx.beginPath(); ctx.arc(p.x,p.y,r+2.5/gView.k,0,6.2832); ctx.lineWidth=2/gView.k; ctx.strokeStyle=ring; ctx.stroke(); }
     }
   }
-  // labels: 섹터 항상, 종목은 hover/이웃/확대 시
+  // labels: 범례(상위 LEGEND_N) 섹터는 항상, 나머지 섹터·종목은 hover/이웃/확대 시
   ctx.globalAlpha=1; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=txC;
   for(const p of G.nodes){const r=gRadius(p);
-    const showLbl = p.kind==='sector' || p===gHover || (nb&&nb.has(p)) || gView.k>1.25;
+    const isLegend = p.kind==='sector' && p.legend;
+    const showLbl = isLegend || p===gHover || (nb&&nb.has(p)) || gView.k>1.25;
     if(!showLbl) continue;
-    if(gHover && p!==gHover && !(nb&&nb.has(p))) continue;
+    if(gHover && !isLegend && p!==gHover && !(nb&&nb.has(p))) continue;   // 범례 섹터는 hover 중에도 라벨 유지
     ctx.font=`${(p.kind==='sector'?12:10)}px 'Noto Sans KR',sans-serif`;
     ctx.fillStyle = p.kind==='sector'?txC:cs.getPropertyValue('--text-3').trim();
     ctx.fillText(p.name, p.x, p.y+r+2);
@@ -1612,7 +1613,7 @@ function gStart(filter,force){
     for(let i=0;i<160;i++){gAlpha=Math.max(gAlpha,1);gTick();} // 워밍업(정적 안정화)
     gFit();
     const sc=$('#graphCount'); if(sc)sc.textContent=G.nodes.length+'노드';
-    const lg=$('#graphLegend'); if(lg){const tops=(D.sectors||[]).slice(0,7);
+    const lg=$('#graphLegend'); if(lg){const tops=(D.sectors||[]).slice(0,LEGEND_N);
       lg.innerHTML=tops.map((s,i)=>`<span class="glg"><i style="background:${GPAL[i%GPAL.length]}"></i>${esc(s.theme)}</span>`).join('')
         +`<span class="glg-sep"></span>`
         +`<span class="glg"><i class="glg-ring" style="border-color:#16a34a"></i>강세</span>`
