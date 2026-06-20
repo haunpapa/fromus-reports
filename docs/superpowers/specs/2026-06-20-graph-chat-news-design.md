@@ -56,7 +56,7 @@
 - playwright: 관계망 탭 → 종목-종목 **점선 엣지** 존재(실제 렌더), 강세 종목 노드에 녹색 링. 콘솔 에러 없음.
 
 ## 5. 파일 변경
-- `merge_hub.py`: `CO_EDGE_*` 상수 + `_co_edges(kb, chat)` + `kb.chat.co_edges` 설정.
+- `merge_hub.py`: `import itertools` + `CO_EDGE_*` 상수 + `_co_edges(chat)`(kb 인자 불요 — chat의 stocks·news만 사용) + `kb.chat.co_edges` 설정.
 - `hub_template.html`: `buildGraph`(co 엣지) + `gDraw`(점선·stance 링).
 - `build/test_merge_hub.py`: `_co_edges` 테스트.
 
