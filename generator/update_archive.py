@@ -12,6 +12,7 @@
        python update_archive.py --no-resolve   (네트워크 해제 건너뛰기)
 """
 import os, re, sys, csv, json, time, glob, base64
+import datetime
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlsplit, parse_qsl, urlencode
@@ -130,11 +131,40 @@ DATE_RE=re.compile(r"^-{5,}\s*(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(.+?)\s
 MSG_RE=re.compile(r"^\[([^\]]+)\]\s*\[(오전|오후)\s*(\d{1,2}):(\d{2})\]\s?(.*)$")
 NAVER_ART=re.compile(r"/article/(\d{3})/(\d+)")
 
-def find_txt():
-    for a in sys.argv[1:]:
-        if a.lower().endswith(".txt") and os.path.exists(a): return a
-    c=sorted(glob.glob(P("KakaoTalk_*.txt"))+glob.glob(P("*.txt")),key=os.path.getmtime,reverse=True)
-    return c[0] if c else None
+WEEKDAY_KO = ["월요일","화요일","수요일","목요일","금요일","토요일","일요일"]
+
+def parse_csv(path):
+    """카카오톡 CSV(Date,User,Message) → parse(txt) 와 동일 msgs 스키마."""
+    msgs = []
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        rows = list(csv.reader(f))
+    for row in rows[1:]:                      # 헤더 1행 스킵
+        if len(row) < 3:                       # 열 부족 방어
+            continue
+        ds = row[0] or ""
+        try:                                   # 깨진/비ISO 날짜 행 skip
+            d = datetime.date(int(ds[0:4]), int(ds[5:7]), int(ds[8:10]))
+        except (ValueError, IndexError):
+            continue
+        body = row[2]
+        lines = body.split("\n")               # link_records 가 m["lines"] 순회 → 필수
+        msgs.append({"idx": len(msgs), "date": ds[:10], "weekday": WEEKDAY_KO[d.weekday()],
+                     "time": ds[11:16], "sender": row[1].strip(),
+                     "body": "\n".join(lines), "lines": lines})
+    return msgs
+
+def find_input(argv=None):
+    """txt/csv 입력 자동 선택. 명시 인자 우선 → cwd·~/Downloads 의 KakaoTalk_* 최신."""
+    argv = sys.argv if argv is None else argv
+    for a in argv[1:]:
+        if a.lower().endswith((".txt", ".csv")) and os.path.exists(a):
+            return a
+    cands = []
+    for root in (os.getcwd(), os.path.expanduser("~/Downloads")):
+        for pat in ("KakaoTalk_*.txt", "KakaoTalk_*.csv"):   # 출력 CSV 오선택 방지(prefix 제한)
+            cands += glob.glob(os.path.join(root, pat))
+    cands = sorted(set(cands), key=os.path.getmtime, reverse=True)
+    return cands[0] if cands else None
 
 def to24(ap,h,m):
     h=int(h);m=int(m)
@@ -480,10 +510,12 @@ def build_viewer(vd):
 LINKCOUNT={}
 def main():
     do_net="--no-resolve" not in sys.argv
-    txt=find_txt()
-    if not txt: print("[!] 카카오톡 .txt 를 찾지 못했습니다. 이 폴더에 넣고 실행하세요."); return
-    print(f"▶ 입력: {os.path.basename(txt)}")
-    msgs=parse(txt); links=link_records(msgs); enrich(links)
+    path=find_input()
+    if not path: print("[!] 카카오톡 .txt/.csv 를 찾지 못했습니다. 인자로 경로를 주거나 ~/Downloads 에 두세요."); return
+    print(f"▶ 입력: {os.path.basename(path)}")
+    msgs = parse_csv(path) if path.lower().endswith(".csv") else parse(path)
+    if not msgs: print("[!] 메시지가 비어 있습니다(파싱 0건)."); return
+    links=link_records(msgs); enrich(links)
     global LINKCOUNT; LINKCOUNT=Counter(l["sharer"] for l in links)
     print(f"▶ 메시지 {len(msgs)} · 링크 {len(links)} · 로컬제목 {sum(1 for l in links if l['title'])}")
     cache={}
