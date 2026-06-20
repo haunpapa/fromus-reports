@@ -335,7 +335,9 @@ def strategy(msgs):
             else: stance="neutral"
         sig.append({"msg_idx":m["idx"],"date":m["date"],"time":m["time"],"sharer":m["sender"],
             "entities":sorted(ents),"themes":sorted(ths),"stance":stance,"type":stype,
-            "snippet":re.sub(r"\s+"," ",text)[:220],"core":m["sender"] in CORE,"teacher":m["sender"] in TEACHERS})
+            "snippet":re.sub(r"\s+"," ",text)[:220],
+            "full":re.sub(r"[ \t]+"," ",text).strip()[:1500],
+            "core":m["sender"] in CORE,"teacher":m["sender"] in TEACHERS})
     return sig
 
 # ===== 집계 =====

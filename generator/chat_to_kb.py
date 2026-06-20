@@ -56,8 +56,11 @@ def build(msgs, links, signals, public=False):
     for s in signals:
         for e in s["entities"]:
             st=S(e)
-            st["mentions"].append({"date":s["date"],"sharer":s["sharer"],"source":"chat",
-                "stance":s["stance"],"type":s["type"],"snippet":s["snippet"][:180]})
+            ment={"date":s["date"],"sharer":s["sharer"],"source":"chat",
+                  "stance":s["stance"],"type":s["type"],"snippet":s["snippet"][:180]}
+            if s.get("type") in ("view","position"):   # 의견만 원문 보존(research 제외)
+                ment["full"]=s.get("full","")
+            st["mentions"].append(ment)
     # ---------- themes ----------
     themes={}
     for m in msgs:
