@@ -337,9 +337,12 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 .graph-canvas{display:block;width:100%;height:560px;cursor:grab;touch-action:none;}
 .graph-canvas:active{cursor:grabbing;}
 .graph-controls{position:absolute;top:14px;left:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:5;}
-.graph-legend{position:absolute;left:14px;bottom:12px;display:flex;gap:13px;z-index:5;background:color-mix(in srgb,var(--surface) 82%,transparent);backdrop-filter:blur(6px);border:1px solid var(--border-light);border-radius:999px;padding:5px 14px;}
+.graph-legend{position:absolute;left:14px;bottom:12px;display:flex;flex-wrap:wrap;gap:7px 12px;z-index:5;background:color-mix(in srgb,var(--surface) 82%,transparent);backdrop-filter:blur(6px);border:1px solid var(--border-light);border-radius:14px;padding:6px 14px;max-width:66%;}
 .glg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3);}
 .glg i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.glg-ring{width:11px;height:11px;border-radius:50%;border:2px solid;background:transparent;display:inline-block;box-sizing:border-box;}
+.glg-dash{width:15px;height:0;border-top:2px dashed #7c3aed;display:inline-block;}
+.glg-sep{width:1px;height:12px;background:var(--border-light);align-self:center;}
 .graph-hint{position:absolute;right:14px;bottom:12px;font-size:10.5px;color:var(--text-4);z-index:5;}
 .graph-tip{position:fixed;z-index:90;background:var(--surface);border:1px solid var(--border);border-radius:12px;
   box-shadow:0 10px 36px rgba(20,14,4,.2);padding:9px 13px;pointer-events:none;opacity:0;transition:opacity .12s;max-width:260px;}
@@ -1421,6 +1424,9 @@ function gClean(nm){return (''+nm).replace(/\s*[+\-]?\d[\d.,%]*\s*$/,'').trim()|
 function buildGraph(filter){
   const sectors=(D.sectors||[]);
   const nodes=[], idx={}, links=[];
+  // 종목간(co) 연결이 있는 종목 — major 필터에서 단일섹터 잔챙이라도 살림
+  const coEdges = (D.chat && Array.isArray(D.chat.co_edges)) ? D.chat.co_edges : [];
+  const coSet = new Set(); coEdges.forEach(e=>{coSet.add(gClean(e.a)); coSet.add(gClean(e.b));});
   sectors.forEach((s,i)=>{const id='S:'+s.theme;
     nodes.push({id,kind:'sector',name:s.theme,val:s.count||1,color:GPAL[i%GPAL.length],deg:0,ref:s,
       x:Math.cos(i/sectors.length*6.283)*120,y:Math.sin(i/sectors.length*6.283)*120,vx:0,vy:0});
@@ -1428,7 +1434,7 @@ function buildGraph(filter){
   sectors.forEach((s,i)=>{const col=GPAL[i%GPAL.length], sIdx=idx['S:'+s.theme];
     (s.stocks||[]).forEach(raw=>{const nm=gClean(raw); const st=STOCK_BY_NAME[nm]||STOCK_BY_NAME[raw];
       const cnt=(st&&st.count)||1;
-      if(filter==='major' && cnt<GMAJOR_MIN && !(st&&(st.sectors||[]).length>=2)) return; // 주요: 언급 적고 단일섹터면 생략
+      if(filter==='major' && cnt<GMAJOR_MIN && !(st&&(st.sectors||[]).length>=2) && !coSet.has(nm)) return; // 주요: 언급 적고 단일섹터·종목간연결(co) 없으면 생략
       const id='K:'+nm;
       if(idx[id]==null){ nodes.push({id,kind:'stock',name:nm,val:cnt,color:col,deg:0,ref:st,
         x:(Math.random()-.5)*260,y:(Math.random()-.5)*260,vx:0,vy:0}); idx[id]=nodes.length-1; }
@@ -1436,7 +1442,6 @@ function buildGraph(filter){
     });
   });
   // ── 채팅·뉴스 종목↔종목 엣지 (양쪽이 그래프 노드인 쌍만) ──
-  const coEdges = (D.chat && Array.isArray(D.chat.co_edges)) ? D.chat.co_edges : [];
   coEdges.forEach(e=>{
     const ia=idx['K:'+gClean(e.a)], ib=idx['K:'+gClean(e.b)];
     if(ia==null||ib==null) return;            // chat_only·major필터 제외 종목 자연 스킵
@@ -1561,7 +1566,7 @@ function gWireCanvas(){
     if(hit){gDrag=hit; const w=gScreenToWorld(e.clientX-r.left,e.clientY-r.top); gDrag.fx=w.x; gDrag.fy=w.y; gDrag.__moved=false;}
     else gPan={x:e.clientX,y:e.clientY};});
   window.addEventListener('mouseup',e=>{ if(gDrag){gDrag=null;} gPan=null; });
-  cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(); const hit=gPick(e.clientX-r.left,e.clientY-r.top); if(hit)gNavigate(hit);});
+  cv.addEventListener('dblclick',e=>{const r=cv.getBoundingClientRect(); const hit=gPick(e.clientX-r.left,e.clientY-r.top); if(hit)gNavigate(hit);}); // 1클릭/드래그=위치조정, 더블클릭=이동
   cv.addEventListener('wheel',e=>{e.preventDefault(); const r=cv.getBoundingClientRect(); const mx=e.clientX-r.left,my=e.clientY-r.top;
     const f=e.deltaY<0?1.12:0.89; const nk=Math.max(0.3,Math.min(3.2,gView.k*f));
     gView.tx=mx-(mx-gView.tx)*(nk/gView.k); gView.ty=my-(my-gView.ty)*(nk/gView.k); gView.k=nk; gDirty=true;},{passive:false});
@@ -1570,7 +1575,7 @@ function gWireCanvas(){
 function renderGraph(){
   $('#view-graph').innerHTML=`
     <div class="sec-title">🕸 종목·섹터 관계망 <span class="count-badge" id="graphCount"></span></div>
-    <div class="sec-sub">섹터(큰 노드)와 종목(작은 노드)의 연결 지도 · 노드를 끌어보고, 클릭하면 해당 항목으로 이동 · 같은 종목이 여러 섹터에 걸치면 클러스터를 잇습니다</div>
+    <div class="sec-sub">섹터(큰 노드)와 종목(작은 노드)의 연결 지도 · 노드를 끌어 위치 조정, 더블클릭하면 해당 항목으로 이동 · 같은 종목이 여러 섹터에 걸치면 클러스터를 잇습니다</div>
     <div class="graph-wrap">
       <div class="graph-controls">
         <div class="seg" id="graphFilter">
@@ -1579,7 +1584,7 @@ function renderGraph(){
         </div>
         <div class="seg"><button id="graphReset">⟳ 재배치</button></div>
       </div>
-      <div class="graph-hint">스크롤 = 확대 · 빈 곳 드래그 = 이동</div>
+      <div class="graph-hint">스크롤 확대 · 빈 곳 드래그 이동 · 노드 더블클릭 열기</div>
       <canvas class="graph-canvas" id="graphCanvas"></canvas>
       <div class="graph-legend" id="graphLegend"></div>
     </div>`;
@@ -1596,8 +1601,12 @@ function gStart(filter,force){
     for(let i=0;i<160;i++){gAlpha=Math.max(gAlpha,1);gTick();} // 워밍업(정적 안정화)
     gFit();
     const sc=$('#graphCount'); if(sc)sc.textContent=G.nodes.length+'노드';
-    const lg=$('#graphLegend'); if(lg){const tops=(D.sectors||[]).slice(0,8);
-      lg.innerHTML=tops.map((s,i)=>`<span class="glg"><i style="background:${GPAL[i%GPAL.length]}"></i>${esc(s.theme)}</span>`).join('');}
+    const lg=$('#graphLegend'); if(lg){const tops=(D.sectors||[]).slice(0,7);
+      lg.innerHTML=tops.map((s,i)=>`<span class="glg"><i style="background:${GPAL[i%GPAL.length]}"></i>${esc(s.theme)}</span>`).join('')
+        +`<span class="glg-sep"></span>`
+        +`<span class="glg"><i class="glg-ring" style="border-color:#16a34a"></i>강세</span>`
+        +`<span class="glg"><i class="glg-ring" style="border-color:#dc2626"></i>약세</span>`
+        +`<span class="glg"><span class="glg-dash"></span>동시언급</span>`;}
   }
   gAlpha=0.9;
 }
