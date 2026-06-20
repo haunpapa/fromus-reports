@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, sys, tempfile, time, unittest
+import os, sys, shutil, tempfile, time, unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import update_archive as U
 import chat_to_kb as C
@@ -15,7 +15,9 @@ CSV_SAMPLE = (
 class TestParseCsv(unittest.TestCase):
     def _write(self, text):
         f = tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8")
-        f.write(text); f.close(); return f.name
+        f.write(text); f.close()
+        self.addCleanup(os.unlink, f.name)
+        return f.name
 
     def test_schema_and_fields(self):
         msgs = U.parse_csv(self._write(CSV_SAMPLE))
@@ -40,12 +42,22 @@ class TestParseCsv(unittest.TestCase):
 class TestFindInput(unittest.TestCase):
     def test_arg_priority_and_prefix(self):
         d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
         old = os.path.join(d, "KakaoTalk_old.csv"); open(old, "w").close()
         time.sleep(0.02)
         new = os.path.join(d, "KakaoTalk_new.csv"); open(new, "w").close()
         out = os.path.join(d, "뉴스_전체아카이브.csv"); open(out, "w").close()  # 출력형(미선택)
         # 명시 인자 우선
         self.assertEqual(U.find_input(["prog", new]), new)
+
+        # 인자 없음 → cwd 자동탐색: KakaoTalk_* 선택, 출력형 CSV 제외
+        import unittest.mock as mock
+        with mock.patch("os.getcwd", return_value=d):
+            picked = U.find_input(["prog"])           # 인자 없음 → 자동탐색
+            # ~/Downloads 에 더 최신 KakaoTalk_* 가 존재할 수 있으므로
+            # basename이 KakaoTalk_ 로 시작하는지만 확인하고, 출력형 CSV가 아님을 검증
+            self.assertTrue(os.path.basename(picked).startswith("KakaoTalk_"))
+            self.assertNotEqual(picked, out)
 
 class TestFull(unittest.TestCase):
     def _msg(self, idx, body):
@@ -96,6 +108,7 @@ class TestParseTxtGolden(unittest.TestCase):
                "[대성] [오후 5:43] 첫 줄\n둘째 줄\n")
         f = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8")
         f.write(txt); f.close()
+        self.addCleanup(os.unlink, f.name)
         msgs = U.parse(f.name)
         self.assertEqual(len(msgs), 1)
         m = msgs[0]
