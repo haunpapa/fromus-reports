@@ -1432,8 +1432,15 @@ function buildGraph(filter){
       const id='K:'+nm;
       if(idx[id]==null){ nodes.push({id,kind:'stock',name:nm,val:cnt,color:col,deg:0,ref:st,
         x:(Math.random()-.5)*260,y:(Math.random()-.5)*260,vx:0,vy:0}); idx[id]=nodes.length-1; }
-      links.push({s:sIdx,t:idx[id]}); nodes[sIdx].deg++; nodes[idx[id]].deg++;
+      links.push({s:sIdx,t:idx[id],kind:'sector'}); nodes[sIdx].deg++; nodes[idx[id]].deg++;
     });
+  });
+  // ── 채팅·뉴스 종목↔종목 엣지 (양쪽이 그래프 노드인 쌍만) ──
+  const coEdges = (D.chat && Array.isArray(D.chat.co_edges)) ? D.chat.co_edges : [];
+  coEdges.forEach(e=>{
+    const ia=idx['K:'+gClean(e.a)], ib=idx['K:'+gClean(e.b)];
+    if(ia==null||ib==null) return;            // chat_only·major필터 제외 종목 자연 스킵
+    links.push({s:ia,t:ib,kind:'co',w:e.w}); nodes[ia].deg++; nodes[ib].deg++;
   });
   // 고립 섹터 제거 안 함(섹터는 항상 표시). 연결 0인 stock은 생기지 않음.
   return {nodes,links,idx};
@@ -1488,12 +1495,14 @@ function gDraw(){
   // links
   for(const e of G.links){const a=G.nodes[e.s], b=G.nodes[e.t];
     const hot = gHover && (a===gHover||b===gHover);
-    ctx.strokeStyle = hot ? (a.kind==='sector'?a.color:b.color) : lineC;
-    ctx.globalAlpha = gHover ? (hot?0.85:0.12) : 0.5;
-    ctx.lineWidth = (hot?1.6:0.7)/gView.k;
+    const isCo = e.kind==='co';
+    ctx.setLineDash(isCo ? [4/gView.k, 3/gView.k] : []);
+    ctx.strokeStyle = hot ? (a.kind==='sector'?a.color:b.color) : (isCo ? '#7c3aed' : lineC);
+    ctx.globalAlpha = gHover ? (hot?0.85:0.12) : (isCo ? 0.40 : 0.5);
+    ctx.lineWidth = (hot?1.6 : (isCo ? Math.min(0.6+(e.w||1)*0.22, 2.0) : 0.7))/gView.k;
     ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
   }
-  ctx.globalAlpha=1;
+  ctx.setLineDash([]); ctx.globalAlpha=1;   // 점선·알파 리셋(원본 L1496 globalAlpha=1 포함, 노드 루프 영향 방지)
   // nodes
   for(const p of G.nodes){const r=gRadius(p);
     const dim = gHover && p!==gHover && !(nb&&nb.has(p));
@@ -1502,6 +1511,12 @@ function gDraw(){
     ctx.fillStyle=p.color||'#9a8f7d'; ctx.fill();
     ctx.lineWidth=1.4/gView.k; ctx.strokeStyle=bg; ctx.stroke();
     if(p===gHover){ctx.lineWidth=2.4/gView.k; ctx.strokeStyle=p.color; ctx.stroke();}
+    // stance 링 (종목 노드, 강세 녹/약세 빨강, 동률·무는 없음)
+    if(p.kind==='stock' && p.ref && p.ref.chat){
+      const st=p.ref.chat.stance||{};
+      const ring = (st.bullish||0)>(st.bearish||0) ? '#16a34a' : ((st.bearish||0)>(st.bullish||0) ? '#dc2626' : null);
+      if(ring){ ctx.beginPath(); ctx.arc(p.x,p.y,r+2.5/gView.k,0,6.2832); ctx.lineWidth=2/gView.k; ctx.strokeStyle=ring; ctx.stroke(); }
+    }
   }
   // labels: 섹터 항상, 종목은 hover/이웃/확대 시
   ctx.globalAlpha=1; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=txC;

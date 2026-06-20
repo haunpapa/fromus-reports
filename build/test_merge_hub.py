@@ -9,7 +9,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from merge_hub import (  # noqa: E402
-    _is_opinion, _name_in, _sort_desc, _build_comention_map, _augment, merge, _is_bot, _theme_blocks,
+    _is_opinion, _name_in, _sort_desc, _build_comention_map, _augment, merge, _is_bot, _theme_blocks, _co_edges,
 )
 import json
 
@@ -213,6 +213,54 @@ class TestThemeBlocks(unittest.TestCase):
         auto_stocks = [o["stock"] for o in tb["자동차·현대차그룹"]["opinions"]]
         self.assertIn("마이크론", semi_stocks)
         self.assertIn("마이크론", auto_stocks)   # 두 테마에 독립 집계(공유·누적 아님)
+
+
+class TestCoEdges(unittest.TestCase):
+    def _chat(self):
+        D = lambda dt, sh, ty, snip: {"date": dt, "sharer": sh, "type": ty, "snippet": snip}
+        return {
+            "stocks": {
+                # 엔비디아-AMD를 의견 2회(탱이·문지영) 동시언급 → w=2(임계값 통과)
+                # 봇/research도 엔비-AMD 동시언급하나 제외돼야(가중치 미반영)
+                "엔비디아": {"mentions": [
+                    D("2026-04-01", "탱이", "view", "엔비AMD"), D("2026-04-02", "문지영", "view", "엔비AMD2"),
+                    D("2026-04-03", "김병철(봇)", "view", "봇 엔비AMD"),   # 봇 → 제외
+                    D("2026-04-04", "x", "research", "시황 엔비AMD")]},   # research → 제외
+                "AMD": {"mentions": [
+                    D("2026-04-01", "탱이", "view", "엔비AMD"), D("2026-04-02", "문지영", "view", "엔비AMD2"),
+                    D("2026-04-03", "김병철(봇)", "view", "봇 엔비AMD"),
+                    D("2026-04-04", "x", "research", "시황 엔비AMD")]},
+            },
+            "news": [
+                {"stocks": ["엔비디아", "AMD"], "title": "n1"},   # 엔비-AMD +1 → 의견2 + 뉴스1 = 3
+                {"stocks": ["삼성전자"], "title": "n2"},          # 1종목 → 쌍 없음
+            ],
+        }
+
+    def test_sum_normalize_threshold(self):
+        edges = {(e["a"], e["b"]): e["w"] for e in _co_edges(self._chat())}
+        self.assertEqual(edges.get(("AMD", "엔비디아")), 3)   # 의견 2 + 뉴스 1, 정규화(a<b), w≥2 통과
+
+    def test_bot_and_research_excluded(self):
+        # 봇(04-03)·research(04-04)도 엔비-AMD 동시언급하나 제외 → 5가 아닌 3
+        edges = {(e["a"], e["b"]): e["w"] for e in _co_edges(self._chat())}
+        self.assertEqual(edges.get(("AMD", "엔비디아")), 3)   # 봇·research 미반영
+
+    def test_top6_union(self):
+        # 허브 H가 7개 종목과 각 w=2 동시언급. H 기준 top6 초과분(7번째)도
+        # 상대 종목 기준 top6라 '합집합'으로 유지 → H 관련 7쌍 모두 남음(교집합이면 6).
+        DD = lambda dt, sh, sn: {"date": dt, "sharer": sh, "type": "view", "snippet": sn}
+        others = list("ABCDEFG")  # 7개
+        stocks = {"H": {"mentions": []}}
+        for o in others: stocks[o] = {"mentions": []}
+        for k in range(2):  # 각 쌍 2회 → w=2
+            for o in others:
+                sn = f"H{o}{k}"
+                stocks["H"]["mentions"].append(DD(f"2026-05-0{k+1}", f"u{k}{o}", sn))
+                stocks[o]["mentions"].append(DD(f"2026-05-0{k+1}", f"u{k}{o}", sn))
+        edges = _co_edges({"stocks": stocks, "news": []})
+        hPairs = [e for e in edges if "H" in (e["a"], e["b"])]
+        self.assertEqual(len(hPairs), 7)   # 합집합: 7쌍 모두 유지(교집합이면 6)
 
 
 if __name__ == "__main__":

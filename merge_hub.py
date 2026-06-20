@@ -4,7 +4,7 @@
    - 채팅 전용 종목: source=chat 으로 신규 추가 (리포트엔 없지만 채팅에서 논의된 종목)
    - 최상위 chat 섹션(readings/glossary/actions/strategy/targets/qna/news) 추가
    사용:  python merge_hub.py knowledge_base.json chat_kb.json"""
-import json, sys
+import json, sys, itertools
 from collections import Counter, defaultdict
 
 OPINION_TYPES = {"view", "position"}
@@ -18,6 +18,39 @@ def _is_opinion(m):
 
 def _is_bot(m):
     return m.get("sharer") in BOT_SHARERS
+
+CO_EDGE_MIN_W = 2
+CO_EDGE_PER_NODE = 6
+
+def _co_edges(chat):
+    """종목쌍 동시언급(채팅 의견 봇제외·view/position + 뉴스 stocks) 가중치.
+       _build_comention_map 재사용 금지(봇·비의견 포함). 독립 그룹핑, snippet[:40] 통일."""
+    pair = Counter()
+    # 1) 채팅 의견 동시언급
+    msg = defaultdict(set)
+    for nm, cs in chat.get("stocks", {}).items():
+        for m in cs.get("mentions", []):
+            if m.get("type") in OPINION_TYPES and not _is_bot(m):
+                key = (m.get("date"), m.get("sharer"), (m.get("snippet", "") or "")[:40])
+                msg[key].add(nm)
+    for names in msg.values():
+        for a, b in itertools.combinations(sorted(names), 2):
+            pair[(a, b)] += 1
+    # 2) 뉴스 동시언급
+    for n in chat.get("news", []):
+        for a, b in itertools.combinations(sorted(set(n.get("stocks") or [])), 2):
+            pair[(a, b)] += 1
+    # 임계값
+    strong = {k: w for k, w in pair.items() if w >= CO_EDGE_MIN_W}
+    # 종목당 상위 PER_NODE — 합집합(한쪽 top6에만 들어도 유지)
+    per = defaultdict(list)
+    for (a, b), w in strong.items():
+        per[a].append(((a, b), w)); per[b].append(((a, b), w))
+    keep = set()
+    for lst in per.values():
+        for pk, _w in sorted(lst, key=lambda x: -x[1])[:CO_EDGE_PER_NODE]:
+            keep.add(pk)
+    return [{"a": a, "b": b, "w": strong[(a, b)]} for (a, b) in sorted(keep)]
 
 def _name_in(m, nm, ticker):
     sn = m.get("snippet", "") or ""
@@ -143,7 +176,8 @@ def merge(kb, chat):
         "targets":chat.get("targets",[]),"qna":chat.get("qna",[]),
         "news":chat.get("news",[]),"readings":chat.get("readings",[]),
         "glossary":chat.get("glossary",[]),
-        "stocks_added":added,"themes":_theme_blocks(kb, chat.get("themes", {}))}
+        "stocks_added":added,"themes":_theme_blocks(kb, chat.get("themes", {})),
+        "co_edges": _co_edges(chat)}
     # build 메타에 표시
     kb.setdefault("build",{})["chat_merged"]=True
     kb["build"]["chat_stocks_added"]=added
