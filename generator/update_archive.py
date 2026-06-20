@@ -317,6 +317,64 @@ def find_ths(b):
             if a in b: s.add(th);break
     return s
 def hit(t,kws): return [k for k in kws if k in t]
+
+W_ATTR = 60
+STANCE_SIGNAL = POS + VIEWKW + WATCH + BULL + BEAR   # 귀속 게이팅 신호(%·목표가 제외)
+
+def _ascii_alnum(c):
+    return bool(c) and c.isascii() and c.isalnum()
+
+def _alias_spans(body, alias):
+    """공백패딩 alias(' AMD','AMD ')는 strip 후 매칭. 영문은 ASCII 영숫자만 경계
+       (한글/공백/기호는 경계 통과 → 'AMD 추매' 귀속, 'AMDOCS' 제외). 한글은 substring."""
+    surf = alias.strip()
+    if not surf:
+        return []
+    spans = []
+    for m in re.finditer(re.escape(surf), body):
+        i, j = m.start(), m.end()
+        if surf.isascii():
+            b = body[i-1] if i > 0 else ""
+            a = body[j] if j < len(body) else ""
+            if _ascii_alnum(b) or _ascii_alnum(a):
+                continue
+        spans.append((i, j))
+    return spans
+
+def attribute_stocks(body, is_src):
+    """find_ents 후보 → ±60 stance 게이팅 + 인접종목 절단 세그먼트로 [(canon, stance)]."""
+    cand = list(find_ents(body))
+    spans_by = {c: [s for al in ENTITIES[c]["al"] for s in _alias_spans(body, al)] for c in cand}
+    marks = sorted((i, j, c) for c, sp in spans_by.items() for (i, j) in sp)
+    out = []
+    for canon in cand:
+        sp = spans_by[canon]
+        if not sp:                                              # 경계인식 등장 없음(영문 오탐)
+            continue
+        gate = " ".join(body[max(0, i-W_ATTR): j+W_ATTR] for (i, j) in sp)
+        if not any(k in gate for k in STANCE_SIGNAL):           # 주변 stance 신호 없음 → 도배 제외
+            continue
+        if is_src:
+            stance = "자료"
+        else:
+            others = sorted(oi for (oi, oj, oc) in marks if oc != canon)
+            cut = []                                            # 한국어 후치: 좌=자기 시작, 우=다음 다른종목 시작
+            for (i, j) in sp:
+                hi = j + W_ATTR
+                for oi in others:
+                    if oi >= j:
+                        hi = min(hi, oi); break
+                cut.append(body[i: hi])
+            seg = " ".join(cut)
+            bu, be, wa = hit(seg, BULL), hit(seg, BEAR), hit(seg, WATCH)
+            if len(bu) > len(be): stance = "bullish"
+            elif len(be) > len(bu): stance = "bearish"
+            elif wa and not (bu or be): stance = "watch"
+            elif bu and be: stance = "mixed"
+            else: stance = "neutral"
+        out.append((canon, stance))
+    return out
+
 def strategy(msgs):
     sig=[]
     for m in msgs:
@@ -338,6 +396,7 @@ def strategy(msgs):
             else: stance="neutral"
         sig.append({"msg_idx":m["idx"],"date":m["date"],"time":m["time"],"sharer":m["sender"],
             "entities":sorted(ents),"themes":sorted(ths),"stance":stance,"type":stype,
+            "stocks":attribute_stocks(body, is_src),
             "snippet":re.sub(r"\s+"," ",text)[:220],
             "full":re.sub(r"[ \t]+"," ",text).strip()[:1500],  # URL 제거된 원문 (body 아님)
             "core":m["sender"] in CORE,"teacher":m["sender"] in TEACHERS})

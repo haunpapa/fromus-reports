@@ -117,5 +117,36 @@ class TestParseTxtGolden(unittest.TestCase):
         self.assertIsInstance(m["lines"], list)
         self.assertIn("둘째 줄", m["body"])
 
+class TestAttribute(unittest.TestCase):
+    def test_amd_korean_context(self):            # ③ 양성(경계로직 교정 전엔 RED)
+        self.assertIn("AMD", U.ENTITIES)
+        r = dict(U.attribute_stocks("AMD 추매했어요 좋음", False))
+        self.assertIn("AMD", r)
+
+    def test_amdocs_excluded(self):               # ③ 음성(오탐 제외)
+        r = dict(U.attribute_stocks("AMDOCS는 통신소프트라 관심", False))
+        self.assertNotIn("AMD", r)
+
+    def test_no_signal_excluded(self):            # 단순 언급 → 제외
+        r = dict(U.attribute_stocks("오늘 삼성전자 뉴스 봤어", False))
+        self.assertNotIn("삼성전자", r)
+
+    def test_far_signal_excluded(self):           # ② stance 멀리(>윈도우) → 제외
+        filler = "가" * (U.W_ATTR + 10)
+        r = dict(U.attribute_stocks(f"삼성전자{filler}좋게 봅니다", False))
+        self.assertNotIn("삼성전자", r)
+
+    def test_per_segment_split(self):             # ⑤ 근접 복수종목 절단
+        r = dict(U.attribute_stocks("삼성전자는 손절하고 정리했지만 하이닉스는 추매로 담았습니다", False))
+        self.assertEqual(r.get("삼성전자"), "bearish")
+        self.assertEqual(r.get("SK하이닉스"), "bullish")
+
+    def test_research_stance_label(self):         # ④ 시황 stance="자료"
+        body = U.SRC_MARKERS[0] + " 삼성전자 비중확대 기대"
+        r = dict(U.attribute_stocks(body, True))
+        if "삼성전자" in r:
+            self.assertEqual(r["삼성전자"], "자료")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
