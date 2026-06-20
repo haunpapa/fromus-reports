@@ -54,10 +54,10 @@ def build(msgs, links, signals, public=False):
                 S(canon)["themes"][th]+=1
     # 시그널 기반 mention(스탠스/유형/스니펫)
     for s in signals:
-        for e in s["entities"]:
+        for e, st_stance in s.get("stocks", []):       # proximity 귀속 + 종목별 stance
             st=S(e)
             ment={"date":s["date"],"sharer":s["sharer"],"source":"chat",
-                  "stance":s["stance"],"type":s["type"],"snippet":s["snippet"][:180]}
+                  "stance":st_stance,"type":s["type"],"snippet":s["snippet"][:180]}
             if s.get("type") in ("view","position"):   # 의견만 원문 보존(research 제외)
                 ment["full"]=s.get("full","")
             st["mentions"].append(ment)
