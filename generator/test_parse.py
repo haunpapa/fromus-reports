@@ -176,5 +176,26 @@ class TestAttribute(unittest.TestCase):
             self.assertEqual(r["삼성전자"], "자료")
 
 
+class TestTypeNews(unittest.TestCase):
+    def _msg(self, body):
+        return {"idx": 0, "date": "2026-03-20", "weekday": "금요일", "time": "09:00",
+                "sender": "ㄱ 이혜나", "body": body, "lines": body.split("\n")}
+
+    def test_news_url_no_stance_is_research(self):       # URL + 강세/약세 없음 → 뉴스
+        sig = U.strategy([self._msg("삼성전자 신제품 출시 https://n.news.naver.com/x")])
+        self.assertTrue(sig)
+        self.assertEqual(sig[0]["type"], "research")
+
+    def test_news_media_no_stance_is_research(self):     # 매체명 + 강세/약세 없음 → 뉴스
+        sig = U.strategy([self._msg("삼성전자 실적 개선 전망 - 한국경제 기자")])
+        self.assertTrue(sig)
+        self.assertEqual(sig[0]["type"], "research")
+
+    def test_opinion_with_stance_kept_despite_url(self): # 강세 키워드 있으면 URL 있어도 의견 유지
+        sig = U.strategy([self._msg("삼성전자 좋게 봐서 추매했어요 https://x.co/a")])
+        self.assertTrue(sig)
+        self.assertIn(sig[0]["type"], ("view", "position"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
