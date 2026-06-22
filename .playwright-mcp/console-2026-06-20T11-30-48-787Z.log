@@ -1,0 +1,6 @@
+[     190ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8769/manifest.webmanifest:0
+[     190ms] [ERROR] Manifest fetch from http://localhost:8769/manifest.webmanifest failed, code 404 @ http://localhost:8769/hub_g2.html:653
+[     429ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8769/favicon.ico:0
+[     430ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8769/manifest.webmanifest:0
+[     430ms] [ERROR] Manifest fetch from http://localhost:8769/manifest.webmanifest failed, code 404 @ http://localhost:8769/hub_g2.html:0
+[     443ms] [ERROR] A bad HTTP response code (404) was received when fetching the script. @ :0

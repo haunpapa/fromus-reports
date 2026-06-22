@@ -1,0 +1,486 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: From Us
+        - generic [ref=e6]: Knowledge Hub
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - button "⌂ 개요" [ref=e9] [cursor=pointer]:
+            - generic [ref=e10]: ⌂
+            - text: 개요
+          - button "📊 분석" [ref=e11] [cursor=pointer]:
+            - generic [ref=e12]: 📊
+            - text: 분석
+          - button "🧩 섹터·테마" [ref=e13] [cursor=pointer]:
+            - generic [ref=e14]: 🧩
+            - text: 섹터·테마
+          - button "📈 종목" [ref=e15] [cursor=pointer]:
+            - generic [ref=e16]: 📈
+            - text: 종목
+          - button "🧭 전략" [ref=e17] [cursor=pointer]:
+            - generic [ref=e18]: 🧭
+            - text: 전략
+          - button "📚 용어" [ref=e19] [cursor=pointer]:
+            - generic [ref=e20]: 📚
+            - text: 용어
+          - button "🕸 관계망" [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: 🕸
+            - text: 관계망
+          - button "🚢 수출입동향" [ref=e23] [cursor=pointer]:
+            - generic [ref=e24]: 🚢
+            - text: 수출입동향
+      - generic [ref=e25]:
+        - button "테마 전환" [ref=e26] [cursor=pointer]: 🌙
+        - generic [ref=e27]: 2026-04-06 ~ 2026-06-19 · 갱신 2026-06-20 20:15 한국시간(KST)
+    - generic [ref=e28]:
+      - generic [ref=e32]:
+        - generic [ref=e33]: 🔎
+        - textbox "종목·섹터·전략·용어·뉴스 무엇이든 검색…" [ref=e34]
+        - button "✕" [ref=e35] [cursor=pointer]
+        - text: / 또는 ⌘K
+      - generic [ref=e38]:
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - text: 오늘의 브리핑
+            - generic [ref=e43]: 2026 W25 · 이혜나 대표님
+          - generic [ref=e44]: 9천피라는 새 역사를 쓴 한 주
+          - generic [ref=e45]: 종전 합의로 시작해 사상 첫 9,000선을 넘고, 장중 신고가 뒤 첫 출렁임까지 — 프롬어스가 함께한 W25
+          - generic [ref=e46]:
+            - text: "\"한 해, 한 달 수익 잘 내는 것보다 꾸준한 걸음으로 오래 수익을 잘 내는 게 더 중요하잖아요. 진부하지만 결코 수익이 진부하지 않은 적립투자로 오래토록 함께하고 싶어요.\""
+            - generic [ref=e47]: — 이혜나 대표님, 2026 W25
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: "1"
+              - generic [ref=e51]: "\"종전도 결국 금리 때문\" — 종전 → 유가 하락 → 물가·금리 부담 완화의 큰 그림. \"올해 미국은 금리 인상 절대 없다, 오히려 인하 1회"
+            - generic [ref=e52]:
+              - generic [ref=e53]: "2"
+              - generic [ref=e54]: 종전 3대장 눌림목 — 건설·방산·조선. "결국 갈놈갈"이라며 대우건설(상승탄력 최고)·DL이앤씨·삼성E&A를 꼽고, '테마'가 아닌 '실제 수
+            - generic [ref=e55]:
+              - generic [ref=e56]: "3"
+              - generic [ref=e57]: 빠른 순환매 대응 — "전닉(코어)+삼전기+조방원 사이클이 계속 돈다." 빠질 때 담고 상승할 때 정리하되, 순환이 어려우면 보유 종목 집중도
+            - generic [ref=e58]:
+              - generic [ref=e59]: "4"
+              - generic [ref=e60]: 적립투자가 기본 — 올해만 QLD +50%, TIME 글로벌AI인공지능액티브 +100%, KOACT 미국나스닥성장기업액티브 +70%. "단 1,
+        - generic [ref=e61]:
+          - generic [ref=e62]: 🤖 AI 위클리 다이제스트
+          - generic [ref=e63]: 최근 7일 리포트를 AI가 요약 · 2026-06-20 19:57 생성 · 투자 판단의 참고용
+          - generic [ref=e64]: "\"9천피 돌파, 환희와 출렁임 사이\""
+          - generic [ref=e65]: 이번 주 시장은 종전 기대감과 금리 완화 신호를 동력 삼아 코스피 9,000선을 돌파하는 역사적 장면을 연출했다. 센티멘트는 6/16(46)과 6/18(52)에 정점을 찍었으나, 주 마지막 날인 6/19에는 14까지 급락하며 고점 부담과 차익실현 압력이 현실화됐다. 운영 스탠스는 일관되게 '무리한 추격 매수 자제, 순환매 대응, 짧게 수익 실현'을 강조했으며, FOMC를 앞두고 줄먹줄먹(분할 매수·매도) 전략을 권고했다. 장기적으로는 적립 투자의 원칙을 흔들지 말 것을 거듭 당부하며 조급함을 경계하는 메시지로 마무리됐다.
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: 순환매 — 반도체·전력·방산·건설
+              - text: 반도체를 코어로 유지하면서 전력·방산·조선·건설로의 순환매 흐름이 한 주 내내 주목받았으며, '갈 놈은 간다'는 기조 아래 섹터 교체 타이밍이 핵심 전략으로 제시됐다.
+            - generic [ref=e69]:
+              - generic [ref=e70]: 종전·지정학 리스크 해소
+              - text: 미-이란 협상 진전과 종전 기대감이 시장 상승의 핵심 촉매로 작용했고, 종전은 끝이 아닌 재건 수혜 섹터 투자의 시작점으로 해석됐다.
+            - generic [ref=e71]:
+              - generic [ref=e72]: 금리·FOMC 경계감
+              - text: 트럼프가 가장 두려워하는 변수로 금리가 지목됐고, FOMC를 앞두고 금리 인상론이 조정의 명분이 될 수 있다는 경고와 함께 무리한 포지션 확대를 자제하도록 안내됐다.
+          - generic [ref=e73]:
+            - generic [ref=e74]: 주목 종목
+            - generic [ref=e75] [cursor=pointer]: SK하이닉스
+            - generic [ref=e76] [cursor=pointer]: SK스퀘어
+            - generic [ref=e77] [cursor=pointer]: 삼성전자
+            - generic [ref=e78] [cursor=pointer]: 삼성전기
+            - generic [ref=e79] [cursor=pointer]: HD현대일렉트릭
+          - generic [ref=e80]:
+            - generic [ref=e81]: 리스크 체크
+            - list [ref=e82]:
+              - listitem [ref=e83]: FOMC 전후 금리 인상론 재부각 시 고점 조정의 명분으로 작용할 수 있다.
+              - listitem [ref=e84]: 6/19 센티멘트가 14까지 급락하며 9,000선 돌파 직후 첫 출렁임이 나타났고, 단기 차익실현 매물 압력이 지속될 수 있다.
+              - listitem [ref=e85]: 발행어음(브채) 만기금 등 레버리지성 자금으로 주식 매수 시 변동성 국면에서 손실 위험이 커진다는 점이 명시적으로 경고됐다.
+        - generic [ref=e86]:
+          - button "56 리포트 →" [ref=e87] [cursor=pointer]:
+            - generic [ref=e88]: "56"
+            - generic [ref=e89]: 리포트 →
+          - button "49 데일리" [ref=e90] [cursor=pointer]:
+            - generic [ref=e91]: "49"
+            - generic [ref=e92]: 데일리
+          - button "7 위클리" [ref=e93] [cursor=pointer]:
+            - generic [ref=e94]: "7"
+            - generic [ref=e95]: 위클리
+          - button "201 종목 →" [ref=e96] [cursor=pointer]:
+            - generic [ref=e97]: "201"
+            - generic [ref=e98]: 종목 →
+          - button "26 섹터 →" [ref=e99] [cursor=pointer]:
+            - generic [ref=e100]: "26"
+            - generic [ref=e101]: 섹터 →
+          - button "149 용어 →" [ref=e102] [cursor=pointer]:
+            - generic [ref=e103]: "149"
+            - generic [ref=e104]: 용어 →
+          - button "📊 분석 →" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: 📊
+            - generic [ref=e107]: 분석 →
+        - generic [ref=e109]:
+          - generic [ref=e110]: ⭐ 내 워치리스트
+          - generic [ref=e111]: 종목·섹터 옆의 ☆ 를 눌러 관심 항목을 모아보세요 — 여기에 바로 모입니다.
+        - generic [ref=e112]:
+          - button "Market Pulse 삼성그룹 삼성전자 노사 협상 타결(155일 만)이 핵심 트리거. 그룹주가 일제히 두 자릿수 상승. 노무라가 같은 날 코스피 목표치를 10,000~11,000으로 상향한 이유 중 하나. 🔥 시장 과열 1회 대표님 강조 0" [ref=e113]:
+            - generic [ref=e114]: Market Pulse
+            - generic [ref=e115]: 삼성그룹
+            - generic [ref=e116]: 삼성전자 노사 협상 타결(155일 만)이 핵심 트리거. 그룹주가 일제히 두 자릿수 상승. 노무라가 같은 날 코스피 목표치를 10,000~11,000으로 상향한 이유 중 하나.
+            - generic [ref=e117]:
+              - generic "편입 5개 평균 점수 69.6, 당일 평균 +1.6%, 거래대금 분위 99, 과열 40%/냉각 0% · 점수 69.6" [ref=e118]: 🔥 시장 과열
+              - generic [ref=e119]: 1회
+              - generic [ref=e120]: 대표님 강조 0
+          - button "Supply Radar SK하이닉스 반도체 / 메모리 수급 15 전체 23회 언급" [ref=e121]:
+            - generic [ref=e122]: Supply Radar
+            - generic [ref=e123]: SK하이닉스
+            - generic [ref=e124]: 반도체 / 메모리
+            - generic [ref=e125]:
+              - generic [ref=e126]: 수급 15
+              - generic [ref=e127]: 전체 23회 언급
+          - button "Event Watch 6/25(목) 美 5월 PCE 발표 연준 정책 향방의 핵심이에요. 6월 FOMC에서 26년 PCE 전망이 3.6%로 상향(매파)됐죠. PCE가 예상(전년比 4.1%)을 상회하면 매파 강화 , 부합·하회 시 물가 안정 기대로 증시 상승 탄력 이 강화될 전망입니다. 2026 W25 원문에서 확인" [ref=e128]:
+            - generic [ref=e129]: Event Watch
+            - generic [ref=e130]: 6/25(목) 美 5월 PCE 발표
+            - generic [ref=e131]: 연준 정책 향방의 핵심이에요. 6월 FOMC에서 26년 PCE 전망이 3.6%로 상향(매파)됐죠. PCE가 예상(전년比 4.1%)을 상회하면 매파 강화 , 부합·하회 시 물가 안정 기대로 증시 상승 탄력 이 강화될 전망입니다.
+            - generic [ref=e132]:
+              - generic [ref=e133]: 2026 W25
+              - generic [ref=e134]: 원문에서 확인
+        - generic [ref=e135]:
+          - generic [ref=e136]: 🗓 리포트 캘린더
+          - generic [ref=e137]: 발행 히트맵 — 칸을 누르면 해당 리포트 · ■ 데일리 ■ 위클리
+          - generic [ref=e138]:
+            - generic [ref=e139]:
+              - generic "04/06 · D-Day전야, 실적이 답하다" [ref=e140] [cursor=pointer]
+              - generic "04/07 · 57.2조의 어닝 서프라이즈" [ref=e141] [cursor=pointer]
+              - generic "04/08 · 휴전,그리고 봄이 왔다" [ref=e142] [cursor=pointer]
+              - generic "04/09 · 급등 다음 날, 숨 고르기의 기술" [ref=e143] [cursor=pointer]
+              - generic "04/10 · 휴전을 향해 다시 5,800선" [ref=e144] [cursor=pointer]
+              - generic "04/11" [ref=e145]
+              - generic "04/12" [ref=e146]
+            - generic [ref=e147]:
+              - generic "04/13 · 협상은결렬, 그러나 시장은버텼다" [ref=e148] [cursor=pointer]
+              - generic "04/14 · 쌍끌이가 돌아온 날 협상 + 반도체 = 코스피 6,000 재터치" [ref=e149] [cursor=pointer]
+              - generic "04/15 · 코스피 6,000 다시 밟다" [ref=e150] [cursor=pointer]
+              - generic "04/16 · 신고가가 쏟아진 날" [ref=e151] [cursor=pointer]
+              - generic "04/17 · 2026-04-17" [ref=e152] [cursor=pointer]
+              - generic "04/18" [ref=e153]
+              - generic "04/19" [ref=e154]
+            - generic [ref=e155]:
+              - generic "04/20 · 전쟁보다 강한 실적의 귀환" [ref=e156] [cursor=pointer]
+              - generic "04/21 · 실적이 전쟁을 이긴 날" [ref=e157] [cursor=pointer]
+              - generic "04/22 · 전쟁보다 실적이 증명된 날" [ref=e158] [cursor=pointer]
+              - generic "04/23 · 하이닉스의72%, 서프라이즈의 날" [ref=e159] [cursor=pointer]
+              - generic "04/24 · 코스닥 1,200p 26년의 기다림" [ref=e160] [cursor=pointer]
+              - generic "04/25" [ref=e161]
+              - generic "04/26" [ref=e162]
+            - generic [ref=e163]:
+              - generic "04/27 · 코스피,처음으로 6,600을 넘다" [ref=e164] [cursor=pointer]
+              - generic "04/28 · 한국이 영국을 넘었다" [ref=e165] [cursor=pointer]
+              - generic "04/29 · 반도체가 끌고 연금으로 다잡은 하루" [ref=e166] [cursor=pointer]
+              - generic "04/30 · 4월의 끝, 매파의 그림자" [ref=e167] [cursor=pointer]
+              - generic "05/01 · 한국이영국을 넘어선 한 주" [ref=e168] [cursor=pointer]
+              - generic "05/02" [ref=e169]
+              - generic "05/03" [ref=e170]
+            - generic [ref=e171]:
+              - generic "05/04 · 6,900p처음 찍은 날" [ref=e172] [cursor=pointer]
+              - generic "05/05" [ref=e173]
+              - generic "05/06 · 코스피7,000 시대 개막" [ref=e174] [cursor=pointer]
+              - generic "05/07 · 7천피 시대의 첫 24시간" [ref=e175] [cursor=pointer]
+              - generic "05/08 · 어버이날의\"효 TIME\" 그리고 AMD" [ref=e176] [cursor=pointer]
+              - generic "05/09" [ref=e177]
+              - generic "05/10" [ref=e178]
+            - generic [ref=e179]:
+              - generic "05/11 · 반도체가 끌고 로봇이 밀고" [ref=e180] [cursor=pointer]
+              - generic "05/12 · 쉬어가야할 자리에서, 쉬어가다" [ref=e181] [cursor=pointer]
+              - generic "05/13 · 프.로.미의 날 다시, 사상 최고치" [ref=e182] [cursor=pointer]
+              - generic "05/14 · 엔비, 중국의 빗장을 열어젖히다" [ref=e183] [cursor=pointer]
+              - generic "05/15 · 환희와 조정, 같은 날에" [ref=e184] [cursor=pointer]
+              - generic "05/16" [ref=e185]
+              - generic "05/17" [ref=e186]
+            - generic [ref=e187]:
+              - generic "05/18 · 현실로돌아와, 다시 우직하게" [ref=e188] [cursor=pointer]
+              - generic "05/19 · 흔들릴수록, 채권시장을 보세요" [ref=e189] [cursor=pointer]
+              - generic "05/20 · 마지막 파동을 기다리며..." [ref=e190] [cursor=pointer]
+              - generic "05/21 · 역사를 갈아치우고도, 또 갈아치우다" [ref=e191] [cursor=pointer]
+              - generic "05/22 · 코스닥의시간, 드디어 오나" [ref=e192] [cursor=pointer]
+              - generic "05/23" [ref=e193]
+              - generic "05/24" [ref=e194]
+            - generic [ref=e195]:
+              - generic "05/25" [ref=e196]
+              - generic "05/26 · 신호를 사고, 소음을 팔다" [ref=e197] [cursor=pointer]
+              - generic "05/27 · 삼닉의, 삼닉에 의한, 삼닉만을 위한" [ref=e198] [cursor=pointer]
+              - generic "05/28 · 끔찍했던장세, 그래도 추세는 살아있다" [ref=e199] [cursor=pointer]
+              - generic "05/29 · 지수는 신고가, 시장은 두 갈래" [ref=e200] [cursor=pointer]
+              - generic "05/30" [ref=e201]
+              - generic "05/31" [ref=e202]
+            - generic [ref=e203]:
+              - generic "06/01 · 사상 최고치일수록 취하지 않기" [ref=e204] [cursor=pointer]
+              - generic "06/02 · 사진이 아니라, 주문서를 삽니다" [ref=e205] [cursor=pointer]
+              - generic "06/03" [ref=e206]
+              - generic "06/04" [ref=e207]
+              - generic "06/05" [ref=e208]
+              - generic "06/06" [ref=e209]
+              - generic "06/07" [ref=e210]
+            - generic [ref=e211]:
+              - generic "06/08 · 공포는소음, 실적은 신호" [ref=e212] [cursor=pointer]
+              - generic "06/09 · 어제의 공포를 하루 만에 되돌리다" [ref=e213] [cursor=pointer]
+              - generic "06/10 · 쉬어가는자리에서, 현금을 총알로" [ref=e214] [cursor=pointer]
+              - generic "06/11 · 흔들렸지만, 훼손되지 않았다" [ref=e215] [cursor=pointer]
+              - generic "06/12 · 공포가 걷힌 자리에, 환희가 차오르다" [ref=e216] [cursor=pointer]
+              - generic "06/13" [ref=e217]
+              - generic "06/14" [ref=e218]
+            - generic [ref=e219]:
+              - generic "06/15 · 금리가 풀리자, 시장이 환호하다" [ref=e220] [cursor=pointer]
+              - generic "06/16 · 종전의 산을 넘고, 이제 FOMC를 향해" [ref=e221] [cursor=pointer]
+              - generic "06/17 · 전쟁이 끝나고, 삽 뜰 준비가 끝났다" [ref=e222] [cursor=pointer]
+              - generic "06/18 · 9000이라는 새 역사, 그리고 매파의 그림자" [ref=e223] [cursor=pointer]
+              - generic "06/19 · 9천피를 넘고서 맞이한 첫 출렁임" [ref=e224] [cursor=pointer]
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - text: 📅 최근 포착된 일정·이벤트
+            - generic [ref=e229]: "207"
+          - generic [ref=e230]: 리포트에서 추출한 실적·정책·수급 이벤트 — 최근 포착순
+          - generic [ref=e231]:
+            - generic [ref=e232]:
+              - generic [ref=e233]:
+                - text: 2026 W25
+                - link "원문↗" [ref=e234] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W25.html
+              - generic [ref=e235]: 6/25(목) 美 5월 PCE 발표
+              - generic [ref=e236]: 연준 정책 향방의 핵심이에요. 6월 FOMC에서 26년 PCE 전망이 3.6%로 상향(매파)됐죠. PCE가 예상(전년比 4.1%)을 상회하면 매파 강화 , 부합·하회 시 물가 안정 기대로 증시 상승 탄력 이 강화될 전망입니다.
+            - generic [ref=e237]:
+              - generic [ref=e238]:
+                - text: 2026 W25
+                - link "원문↗" [ref=e239] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W25.html
+              - generic [ref=e240]: 마이크론 3분기 실적 — 프리어닝 첫 관문
+              - generic [ref=e241]: 김은지쌤이 "메모리 슈퍼사이클의 첫 관문"으로 지목한 이벤트. EPS 컨센서스 19.92달러(전년比 +942.9%)예요. 가이던스가 예상에 부합·상회하면 메모리 장기 호황 기대가 증폭돼 삼성·SK 실적 모멘텀으로 직결 됩니다.
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - text: 2026 W25
+                - link "원문↗" [ref=e244] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W25.html
+              - generic [ref=e245]: 케빈 워시 연준의 스탠스
+              - generic [ref=e246]: 첫 FOMC는 132개 단어의 매파적 동결 이었어요. "물가 안정을 강조하고 고용은 거의 언급하지 않았다"는 평가. 다만 그가 '증거주의'를 따르기에 당분간 정책은 완화적일 수 있다는 해석도 있어, 다음 주 발언·데이터로 방향을 가늠해야 합니다.
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - text: 2026 W25
+                - link "원문↗" [ref=e249] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W25.html
+              - generic [ref=e250]: 미-이란 협상 재개 여부
+              - generic [ref=e251]: 밴스 부통령의 스위스 방문 연기와 이스라엘의 레바논 작전이 변수예요. 이혜나 대표님은 "또 지나갈 하나의 작은 관문" 이라 보지만, 단기 변동성을 자극하는 재료인 만큼 헤드라인을 계속 체크할 필요가 있어요.
+            - generic [ref=e252]:
+              - generic [ref=e253]:
+                - text: 2026 W25
+                - link "원문↗" [ref=e254] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W25.html
+              - generic [ref=e255]: 7월 일정 카운트다운 + 코스닥 개편
+              - generic [ref=e256]: 7/2 고용보고서, 7/16 한은 금통위, 7/29 FOMC, 그리고 7월 첫째 주 삼성전자 실적 가이던스가 줄줄이 대기. 김은지쌤은 밸류 매력 높은 반도체·자동차·조선·2차전지·방산 주도주 매집 전략을 유지했어요. 한국거래소는 9월 말 코스닥 대표지수(우량 70개)를 발표해 소외된 코스닥 활성화 계기가 될지 주목됩니다.
+            - generic [ref=e257]:
+              - generic [ref=e258]:
+                - text: 2026 W24
+                - link "원문↗" [ref=e259] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W24.html
+              - generic [ref=e260]: 6/17(수) 美 FOMC — 동결 예상, 점도표가 관건
+              - generic [ref=e261]: 기준금리는 동결(예상 3.50~3.75%) 전망이에요. 점도표 상향은 불가피해도, 26·27년 동결을 시사하면 오히려 안도 랠리 가 될 수 있다는 게 김은지쌤이 전한 시각입니다.
+            - generic [ref=e262]:
+              - generic [ref=e263]:
+                - text: 2026 W24
+                - link "원문↗" [ref=e264] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W24.html
+              - generic [ref=e265]: 미국·이란 최종 서명 (토/월 예상)
+              - generic [ref=e266]: 호르무즈 해협 재개방 공식 합의 여부가 핵심이에요. 서명이 확인되면 유가 하락·환율 안정이 이어질 수 있어요. 다만 최종 서명까지는 '살얼음판'이라는 점도 기억하기.
+            - generic [ref=e267]:
+              - generic [ref=e268]:
+                - text: 2026 W24
+                - link "원문↗" [ref=e269] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W24.html
+              - generic [ref=e270]: 6/15~17 G7 정상회의 · 6/16 BOJ·RBA 회의
+              - generic [ref=e271]: 일본은행(BOJ)·호주(RBA)의 통화정책 결정이 예정돼 있어요. 신현송 한국은행 총재도 "늦지 않게 금리를 인상할 필요가 있다"는 시그널을 냈습니다. 글로벌 긴축 분위기를 함께 점검.
+            - generic [ref=e272]:
+              - generic [ref=e273]:
+                - text: 2026 W24
+                - link "원문↗" [ref=e274] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W24.html
+              - generic [ref=e275]: 6/18(목) 美 선물옵션 동시 만기 — '네 마녀의 날'
+              - generic [ref=e276]: 선물·옵션이 한꺼번에 만기를 맞는 날이라 수급 변동성이 커질 수 있어요. 만기 전후 프로그램 매매 흐름을 살펴두면 좋습니다.
+            - generic [ref=e277]:
+              - generic [ref=e278]:
+                - text: 2026 W24
+                - link "원문↗" [ref=e279] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W24.html
+              - generic [ref=e280]: 코스피 1만 시대 & 7월 실적시즌 대비
+              - generic [ref=e281]: 7월 첫째 주 삼성전자 실적 가이던스 가 출발점이에요. Deep Value(선행 PER 7.34배) 구간에서 실적 전망 상향이 확인되면, 이혜나 대표님이 기대한 "코스피 1만"의 발판이 될 수 있어요. 반도체는 코어, 다음은 전력·2차전지·신재생·방산 — 함께 그린 지도를 기억해요 💛
+            - generic [ref=e282]:
+              - generic [ref=e283]:
+                - text: 2026 W22
+                - link "원문↗" [ref=e284] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W22.html
+              - generic [ref=e285]: 미-이란 MOU 체결 (6/5 본격 협상)
+              - generic [ref=e286]: 종전 합의가 실제로 체결되느냐가 다음 주 최대 변수예요. 확정되면 유가↓→금리↓→증시 우호. 반대로 협상이 흔들리면 목요일 같은 변동성이 재현될 수 있습니다.
+            - generic [ref=e287]:
+              - generic [ref=e288]:
+                - text: 2026 W22
+                - link "원문↗" [ref=e289] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W22.html
+              - generic [ref=e290]: 미국 6월 고용 슈퍼위크 (6/1~5)
+              - generic [ref=e291]: ADP 민간고용·JOLTs 구인구직·금요일(5일) 고용보고서가 줄줄이 나와요. 연준의 금리 인하 기대와 국채 금리 방향에 큰 영향을 줄 일정입니다.
+        - generic [ref=e292]:
+          - generic [ref=e293]: 📉 지수 추이
+          - generic [ref=e294]: KOSPI · KOSDAQ · 나스닥 — 일별 종가 · 독립 3분할 · 리포트 추출값
+          - generic [ref=e295]:
+            - generic [ref=e297]: KOSPI
+            - generic [ref=e302]: KOSDAQ
+            - generic [ref=e307]: 나스닥
+        - generic [ref=e311]:
+          - generic [ref=e312]: 🧭 지금 살아있는 전략
+          - generic [ref=e313]: 최신 스탠스 · 반복 강화된 원칙 · 프벤져스 코어 섹터
+          - generic [ref=e314]:
+            - generic [ref=e315]: “"한 해, 한 달 수익 잘 내는 것보다 꾸준한 걸음으로 오래 수익을 잘 내는 게 더 중요하잖아요. 진부하지만 결코 수익이 진부하지 않은 적립투자로 오래토록 함께하고 싶어요."”
+            - generic [ref=e316]: — 이혜나 대표님, 2026 W25 · 9천피라는 새 역사를 쓴 한 주
+          - generic [ref=e317]:
+            - generic [ref=e318] [cursor=pointer]:
+              - text: 📈 분할매수·적립
+              - generic [ref=e319]: "75"
+            - generic [ref=e320] [cursor=pointer]:
+              - text: ✋ 추격매수 자제
+              - generic [ref=e321]: "48"
+            - generic [ref=e322] [cursor=pointer]:
+              - text: 🌱 노후·연금
+              - generic [ref=e323]: "32"
+            - generic [ref=e324] [cursor=pointer]:
+              - text: 🚨 레버리지 자제
+              - generic [ref=e325]: "20"
+          - generic [ref=e326]: 🎯 프벤져스 코어 섹터 TOP 5 · 최근 1개월 기준
+          - generic [ref=e327]:
+            - generic [ref=e328]:
+              - generic [ref=e329]:
+                - generic [ref=e330]: "1"
+                - generic [ref=e331]: 반도체·메모리
+                - generic [ref=e332]: 10회
+                - generic [ref=e333]: 👑 대표님 강조 7
+              - generic [ref=e334]: "근거 엔비디아 1Q FY27 매출 816억$(+85% YoY) · 영업이익 80조원 · 자사주 800억$ 신규 매입 + Vera CPU 2,000억$ 신규 시장. Citi가 마이크론 목표가를 425 → 840달러로 두 배 상향. 이혜나 대표님 가이드: 이번 상승 파동에서 삼전 30 / 하닉 200 돌파는 가능 . 그러나 삼전 35 / 하닉 300 도달 시 비…"
+              - generic [ref=e335]:
+                - text: 2026 W21 기준
+                - link "원문↗" [ref=e336] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W21.html
+                - generic [ref=e337] [cursor=pointer]: AMD
+                - generic [ref=e338] [cursor=pointer]: HPSP
+                - generic [ref=e339] [cursor=pointer]: SK스퀘어
+                - generic [ref=e340] [cursor=pointer]: SK하이닉스
+            - generic [ref=e341]:
+              - generic [ref=e342]:
+                - generic [ref=e343]: "2"
+                - generic [ref=e344]: 로봇·피지컬AI
+                - generic [ref=e345]: 6회
+                - generic [ref=e346]: 👑 대표님 강조 4
+              - generic [ref=e347]: 근거 젠슨 황이 한국 로보틱스 투자를 검토 중이라 밝히며 현대차·LG·네이버·두산로보틱스 등이 부각. 다만 이혜나 대표님은 이틀 연속 급등한 로봇 ETF를 차익실현했다고 이야기했어요.
+              - generic [ref=e348]:
+                - text: 06/02 기준
+                - link "원문↗" [ref=e349] [cursor=pointer]:
+                  - /url: reports/daily/2026-06-02.html
+                - generic [ref=e350] [cursor=pointer]: LG
+                - generic [ref=e351] [cursor=pointer]: 기아
+                - generic [ref=e352] [cursor=pointer]: 네이버
+                - generic [ref=e353] [cursor=pointer]: 두산로보틱스
+            - generic [ref=e354]:
+              - generic [ref=e355]:
+                - generic [ref=e356]: "3"
+                - generic [ref=e357]: 우주항공·위성
+                - generic [ref=e358]: 6회
+                - generic [ref=e359]: 👑 대표님 강조 2
+              - generic [ref=e360]: 근거 스페이스X가 상장 첫날 +19%로 시총 6위, 이후 역대 최대 IPO를 완료하며 시총이 아마존을 추월 (6/18)했어요. 서학개미는 한 달 순매수 1위로 스페이스X를 약 8억 달러(1.7조원) 폭풍매수. 다만 이혜나 대표님은 "우주는 이제 시작, 추격은 자제" 라며 멀리 보는 관점을 강조했어요
+              - generic [ref=e361]:
+                - text: 2026 W25 기준
+                - link "원문↗" [ref=e362] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W25.html
+                - generic [ref=e363] [cursor=pointer]: HMM
+                - generic [ref=e364] [cursor=pointer]: LIG넥스원
+                - generic [ref=e365] [cursor=pointer]: RF머트리얼즈
+                - generic [ref=e366] [cursor=pointer]: 대한해운
+            - generic [ref=e367]:
+              - generic [ref=e368]:
+                - generic [ref=e369]: "4"
+                - generic [ref=e370]: AI 전력·원전·ESS
+                - generic [ref=e371]: 5회
+                - generic [ref=e372]: 👑 대표님 강조 1
+              - generic [ref=e373]: "근거 수요일 기관 순매수에서 전력·방산·우주항공이 부각되더니, 금요일엔 외인·기관이 본격적으로 전력주를 담았어요. 이혜나 대표님 曰: \"말 하기가 무섭게 외인이랑 기관이 전력(주)을 담았구나\" — 반도체가 코어라면, 그다음 자리로 지목된 섹터입니다."
+              - generic [ref=e374]:
+                - text: 2026 W24 기준
+                - link "원문↗" [ref=e375] [cursor=pointer]:
+                  - /url: reports/weekly/2026-W24.html
+                - generic [ref=e376] [cursor=pointer]: HD현대일렉트릭
+                - generic [ref=e377] [cursor=pointer]: LG에너지솔루션
+                - generic [ref=e378] [cursor=pointer]: LIG디펜스앤에어로
+                - generic [ref=e379] [cursor=pointer]: LS
+            - generic [ref=e380]:
+              - generic [ref=e381]:
+                - generic [ref=e382]: "5"
+                - generic [ref=e383]: 바이오·제약
+                - generic [ref=e384]: 3회
+                - generic [ref=e385]: 👑 대표님 강조 2
+              - generic [ref=e386]: 근거 반도체 소부장이 지수를 이끄는 가운데 바닥에서 턴하는 바이오텍이 눈에 띄었고, 오랜 소외에 수급이 비어 있던 엔터로도 매수세가 유입됐어요. "헐값"이라던 대표님 표현이 떠오르는 흐름.
+              - generic [ref=e387]:
+                - text: 06/11 기준
+                - link "원문↗" [ref=e388] [cursor=pointer]:
+                  - /url: reports/daily/2026-06-11.html
+                - generic [ref=e389] [cursor=pointer]: JYP
+                - generic [ref=e390] [cursor=pointer]: 두산에너빌리티
+                - generic [ref=e391] [cursor=pointer]: 리가켐바이오
+                - generic [ref=e392] [cursor=pointer]: 리투오
+        - generic [ref=e393]:
+          - generic [ref=e394]: 🔥 최다 등장 섹터·종목
+          - generic [ref=e395]: 최근 1개월 · 05/19~ 기준 · 언급순 빈도 상위 — 클릭하면 해당 탭으로
+          - generic [ref=e396]: 섹터·테마
+          - generic [ref=e397]:
+            - generic [ref=e398] [cursor=pointer]:
+              - text: 반도체·메모리
+              - generic [ref=e399]: "10"
+            - generic [ref=e400] [cursor=pointer]:
+              - text: 로봇·피지컬AI
+              - generic [ref=e401]: "6"
+            - generic [ref=e402] [cursor=pointer]:
+              - text: 우주항공·위성
+              - generic [ref=e403]: "6"
+            - generic [ref=e404] [cursor=pointer]:
+              - text: AI 전력·원전·ESS
+              - generic [ref=e405]: "5"
+            - generic [ref=e406] [cursor=pointer]:
+              - text: 바이오·제약
+              - generic [ref=e407]: "3"
+            - generic [ref=e408] [cursor=pointer]:
+              - text: 양자컴퓨터
+              - generic [ref=e409]: "2"
+          - generic [ref=e410]: 종목
+          - generic [ref=e411]:
+            - generic [ref=e412] [cursor=pointer]:
+              - text: SK하이닉스
+              - generic [ref=e413]: "23"
+            - generic [ref=e414] [cursor=pointer]:
+              - text: 삼성전자
+              - generic [ref=e415]: "20"
+            - generic [ref=e416] [cursor=pointer]:
+              - text: SK스퀘어
+              - generic [ref=e417]: "15"
+            - generic [ref=e418] [cursor=pointer]:
+              - text: 삼성전기
+              - generic [ref=e419]: "14"
+            - generic [ref=e420] [cursor=pointer]:
+              - text: 알테오젠
+              - generic [ref=e421]: "12"
+            - generic [ref=e422] [cursor=pointer]:
+              - text: 현대차
+              - generic [ref=e423]: "10"
+            - generic [ref=e424] [cursor=pointer]:
+              - text: 네이버
+              - generic [ref=e425]: "8"
+            - generic [ref=e426] [cursor=pointer]:
+              - text: 리노공업
+              - generic [ref=e427]: "8"
+            - generic [ref=e428] [cursor=pointer]:
+              - text: 삼성SDI
+              - generic [ref=e429]: "8"
+            - generic [ref=e430] [cursor=pointer]:
+              - text: 성호전자
+              - generic [ref=e431]: "8"
+      - generic [ref=e432]:
+        - generic [ref=e433]: From Us
+        - paragraph [ref=e434]: 프롬어스 Knowledge Hub · 데일리/위클리 리포트 구조화 아카이브
+        - paragraph [ref=e435]: 본 허브는 프롬어스 내부 리포트를 분석·집계하여 자동 생성되었으며, 투자 권유가 아닙니다.
+  - generic [ref=e436]:
+    - generic [ref=e437]: 종목 비교
+    - button "비교 보기" [ref=e438] [cursor=pointer]
+    - button "비우기" [ref=e439] [cursor=pointer]

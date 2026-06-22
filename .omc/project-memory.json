@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1781709423816,
+  "lastScanned": 1782026074227,
   "projectRoot": "/Users/haunpapa/Documents/GitHub/fromus-reports",
   "techStack": {
     "languages": [],
@@ -24,7 +24,9 @@
   "structure": {
     "isMonorepo": false,
     "workspaces": [],
-    "mainDirectories": [],
+    "mainDirectories": [
+      "docs"
+    ],
     "gitBranches": {
       "defaultBranch": "main",
       "branchingStrategy": null
@@ -32,21 +34,51 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "__pycache__": {
+      "path": "__pycache__",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1782026074216,
+      "keyFiles": [
+        "merge_hub.cpython-311.pyc"
+      ]
+    },
     "build": {
       "path": "build",
       "purpose": "Build output",
-      "fileCount": 2,
-      "lastAccessed": 1781709423805,
+      "fileCount": 3,
+      "lastAccessed": 1782026074216,
       "keyFiles": [
         "_probe_dartlab.py",
-        "_probe_schema.json"
+        "_probe_schema.json",
+        "test_merge_hub.py"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1782026074217,
+      "keyFiles": []
+    },
+    "generator": {
+      "path": "generator",
+      "purpose": null,
+      "fileCount": 9,
+      "lastAccessed": 1782026074217,
+      "keyFiles": [
+        "README.md",
+        "chat_to_kb.py",
+        "fromus_taxonomy.py",
+        "refresh.sh",
+        "resolve_cache.json"
       ]
     },
     "icons": {
       "path": "icons",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1781709423805,
+      "lastAccessed": 1782026074218,
       "keyFiles": [
         "icon-192.png",
         "icon-512.png"
@@ -56,10 +88,77 @@
       "path": "reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1781709423806,
+      "lastAccessed": 1782026074218,
       "keyFiles": []
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "hub_template.html",
+      "accessCount": 4,
+      "lastAccessed": 1782026235743,
+      "type": "file"
+    },
+    {
+      "path": "ai_digest.py",
+      "accessCount": 3,
+      "lastAccessed": 1782026229866,
+      "type": "file"
+    },
+    {
+      "path": "merge_hub.py",
+      "accessCount": 3,
+      "lastAccessed": 1782026245012,
+      "type": "file"
+    },
+    {
+      "path": "generator/chat_to_kb.py",
+      "accessCount": 3,
+      "lastAccessed": 1782026510161,
+      "type": "file"
+    },
+    {
+      "path": "generator/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1782026112750,
+      "type": "file"
+    },
+    {
+      "path": "generator/update_archive.py",
+      "accessCount": 1,
+      "lastAccessed": 1782026201584,
+      "type": "file"
+    },
+    {
+      "path": "knowledge_base.json",
+      "accessCount": 1,
+      "lastAccessed": 1782026216984,
+      "type": "file"
+    },
+    {
+      "path": "apply_hub_patch.py",
+      "accessCount": 1,
+      "lastAccessed": 1782026224924,
+      "type": "file"
+    },
+    {
+      "path": "generator/fromus_taxonomy.py",
+      "accessCount": 1,
+      "lastAccessed": 1782026225238,
+      "type": "file"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "accessCount": 1,
+      "lastAccessed": 1782026241004,
+      "type": "file"
+    },
+    {
+      "path": "sw.js",
+      "accessCount": 1,
+      "lastAccessed": 1782026241232,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }
