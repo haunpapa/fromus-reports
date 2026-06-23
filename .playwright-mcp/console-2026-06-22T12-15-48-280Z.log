@@ -1,0 +1,3 @@
+[     394ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8771/favicon.ico:0
+[   20244ms] [WARNING] API 연동 실패 → 정적 데이터 시도: signal timed out @ http://localhost:8771/korea-trade-sector-dashboard.html:985
+[   20496ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://raw.githubusercontent.com/haunpapa/korea-trade-dashboard/main/data/release.json:0

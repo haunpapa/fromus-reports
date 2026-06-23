@@ -1,0 +1,452 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e7]:
+      - heading "한국 수출입동향 · 섹터 대시보드" [level=1] [ref=e8]
+      - generic [ref=e9]: 산업분야별 수출 구조와 모멘텀을 발표 회차별로 추적
+    - generic [ref=e12]: 다음 발표 6월 1~20일 (6/21·관세청)
+  - generic [ref=e13]:
+    - generic [ref=e14]:
+      - generic [ref=e15]: 수출
+      - generic [ref=e16]: 877.5억$
+      - generic [ref=e17]: ▲53.2%
+    - generic [ref=e19]:
+      - generic [ref=e20]: 수입
+      - generic [ref=e21]: 608억$
+      - generic [ref=e22]: ▲20.8%
+    - generic [ref=e24]:
+      - generic [ref=e25]: 무역수지
+      - generic [ref=e26]: +269.5억$
+    - generic [ref=e28]:
+      - generic [ref=e29]: 일평균
+      - generic [ref=e30]: 42.8억$
+      - generic [ref=e31]: ▲60.7%
+  - tablist "발표 회차 선택" [ref=e32]:
+    - tab "월간 동향 1일 발표 · 산업부" [selected] [ref=e33] [cursor=pointer]:
+      - generic [ref=e34]: 월간 동향
+      - generic [ref=e35]: 1일 발표 · 산업부
+    - tab "1~20일 속보 21일 발표 · 관세청" [ref=e36] [cursor=pointer]:
+      - generic [ref=e37]: 1~20일 속보
+      - generic [ref=e38]: 21일 발표 · 관세청
+    - tab "1~10일 속보 11일 발표 · 관세청" [ref=e39] [cursor=pointer]:
+      - generic [ref=e40]: 1~10일 속보
+      - generic [ref=e41]: 11일 발표 · 관세청
+  - generic [ref=e42]:
+    - generic [ref=e43]: 상세
+    - generic [ref=e44]: 2026년 5월 (1~31일)
+    - generic [ref=e45]: · 월간 잠정
+    - generic [ref=e46]: 발표 2026.06.01 · 산업통상자원부
+  - generic [ref=e48]:
+    - generic [ref=e49]:
+      - generic [ref=e51]:
+        - text: 수출
+        - generic: 국내 → 해외로 판매한 금액 (FOB 기준)
+      - generic [ref=e52]: 877.5억 달러
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: ▲
+          - text: 53.2%
+        - generic [ref=e56]: 전년동기비
+    - generic [ref=e57]:
+      - generic [ref=e59]:
+        - text: 수입
+        - generic: 해외 → 국내로 들여온 금액 (CIF 기준)
+      - generic [ref=e60]: 608억 달러
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]: ▲
+          - text: 20.8%
+        - generic [ref=e64]: 전년동기비
+    - generic [ref=e65]:
+      - generic [ref=e67]:
+        - text: 무역수지
+        - generic: 수출 − 수입. 플러스면 흑자, 마이너스면 적자.
+      - generic [ref=e68]: +269.5억 달러
+      - generic [ref=e70]: 흑자
+    - generic [ref=e71]:
+      - generic [ref=e73]:
+        - text: 일평균 수출
+        - generic: 조업일수로 나눈 값. 영업일 수 차이를 보정해 추세를 비교.
+      - generic [ref=e74]: 42.8억 달러
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]: ▲
+          - text: 60.7%
+        - generic [ref=e78]: 전년동기비
+  - generic [ref=e79]:
+    - generic [ref=e80]:
+      - generic [ref=e81]:
+        - generic [ref=e82]: Trend · 최근 12개월
+        - heading "산업분야별 월별 수출 흐름" [level=2] [ref=e83]
+      - generic [ref=e84]: DATA 데이터 연동 중…
+    - tablist "산업분야 선택" [ref=e85]:
+      - tab "전체" [selected] [ref=e86] [cursor=pointer]
+      - tab "IT·반도체" [ref=e87] [cursor=pointer]
+      - tab "모빌리티" [ref=e88] [cursor=pointer]
+      - tab "에너지·화학" [ref=e89] [cursor=pointer]
+      - tab "소재·기계" [ref=e90] [cursor=pointer]
+      - tab "소비재·바이오" [ref=e91] [cursor=pointer]
+    - img "전체 최근 12개월 수출 추이" [ref=e93]:
+      - generic [ref=e120]: "25.06"
+      - generic [ref=e121]: "25.08"
+      - generic [ref=e122]: "25.10"
+      - generic [ref=e123]: "25.12"
+      - generic [ref=e124]: "26.02"
+      - generic [ref=e125]: "26.04"
+      - generic [ref=e126]: "26.05"
+    - generic [ref=e139]:
+      - generic [ref=e140]: 수출
+      - generic [ref=e142]: 무역수지
+      - generic [ref=e144]: "월간 기준 · 발표 회차와 무관 (단위: 억 달러)"
+  - generic [ref=e145]:
+    - generic [ref=e146]:
+      - generic [ref=e147]:
+        - generic [ref=e148]: Signature · 섹터 모멘텀
+        - heading "산업분야별 수출 구조" [level=2] [ref=e149]
+      - generic [ref=e150]: 막대 길이 = 수출액 규모 · 색 = 전년대비 증감(증가/감소) · 클릭 = 12개월 추이
+    - generic [ref=e151]:
+      - generic [ref=e152]:
+        - generic [ref=e153] [cursor=pointer]:
+          - generic [ref=e154]:
+            - generic [ref=e155]: IT·반도체
+            - generic [ref=e156]: 수출 비중 50.5%
+          - generic [ref=e157]:
+            - generic [ref=e158]: "442.7"
+            - generic [ref=e159]: 억 달러
+        - generic [ref=e162]:
+          - generic [ref=e163] [cursor=pointer]:
+            - generic [ref=e164]:
+              - text: 반도체
+              - generic [ref=e165]: 최대 동력
+            - generic [ref=e166]:
+              - generic [ref=e167]: "371.6"
+              - generic [ref=e168]:
+                - generic [ref=e169]: ▲
+                - text: 169.4%
+          - generic [ref=e172] [cursor=pointer]:
+            - generic [ref=e173]: 컴퓨터(SSD)
+            - generic [ref=e174]:
+              - generic [ref=e175]: "41.8"
+              - generic [ref=e176]:
+                - generic [ref=e177]: ▲
+                - text: 290.7%
+          - generic [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: 디스플레이
+            - generic [ref=e182]:
+              - generic [ref=e183]: "14.7"
+              - generic [ref=e184]:
+                - generic [ref=e185]: ▲
+                - text: 9.4%
+          - generic [ref=e188] [cursor=pointer]:
+            - generic [ref=e189]: 무선통신기기
+            - generic [ref=e190]:
+              - generic [ref=e191]: "14.6"
+              - generic [ref=e192]:
+                - generic [ref=e193]: ▲
+                - text: 12.6%
+      - generic [ref=e196]:
+        - generic [ref=e197] [cursor=pointer]:
+          - generic [ref=e198]:
+            - generic [ref=e199]: 모빌리티
+            - generic [ref=e200]: 수출 비중 12.1%
+          - generic [ref=e201]:
+            - generic [ref=e202]: "106.4"
+            - generic [ref=e203]: 억 달러
+        - generic [ref=e206]:
+          - generic [ref=e207] [cursor=pointer]:
+            - generic [ref=e208]: 자동차
+            - generic [ref=e209]:
+              - generic [ref=e210]: "58.3"
+              - generic [ref=e211]:
+                - generic [ref=e212]: ▼
+                - text: 5.9%
+          - generic [ref=e215] [cursor=pointer]:
+            - generic [ref=e216]: 선박
+            - generic [ref=e217]:
+              - generic [ref=e218]: "26.1"
+              - generic [ref=e219]:
+                - generic [ref=e220]: ▲
+                - text: 16.7%
+          - generic [ref=e223] [cursor=pointer]:
+            - generic [ref=e224]:
+              - text: 자동차부품
+              - generic [ref=e225]: 추정
+            - generic [ref=e226]:
+              - generic [ref=e227]: 16*
+              - generic [ref=e228]:
+                - generic [ref=e229]: ▼
+                - text: 12.0%
+          - generic [ref=e232] [cursor=pointer]:
+            - generic [ref=e233]:
+              - text: 이차전지
+              - generic [ref=e234]: 추정
+            - generic [ref=e235]:
+              - generic [ref=e236]: 6*
+              - generic [ref=e237]:
+                - generic [ref=e238]: ▼
+                - text: 5.0%
+      - generic [ref=e241]:
+        - generic [ref=e242] [cursor=pointer]:
+          - generic [ref=e243]:
+            - generic [ref=e244]: 에너지·화학
+            - generic [ref=e245]: 수출 비중 10.2%
+          - generic [ref=e246]:
+            - generic [ref=e247]: "89.5"
+            - generic [ref=e248]: 억 달러
+        - generic [ref=e251]:
+          - generic [ref=e252] [cursor=pointer]:
+            - generic [ref=e253]: 석유제품
+            - generic [ref=e254]:
+              - generic [ref=e255]: "52.5"
+              - generic [ref=e256]:
+                - generic [ref=e257]: ▲
+                - text: 46.6%
+          - generic [ref=e260] [cursor=pointer]:
+            - generic [ref=e261]: 석유화학
+            - generic [ref=e262]:
+              - generic [ref=e263]: "37"
+              - generic [ref=e264]:
+                - generic [ref=e265]: ▲
+                - text: 11.1%
+      - generic [ref=e268]:
+        - generic [ref=e269] [cursor=pointer]:
+          - generic [ref=e270]:
+            - generic [ref=e271]: 소재·기계
+            - generic [ref=e272]: 수출 비중 8.6%
+          - generic [ref=e273]:
+            - generic [ref=e274]: "75.3"
+            - generic [ref=e275]: 억 달러
+        - generic [ref=e278]:
+          - generic [ref=e279] [cursor=pointer]:
+            - generic [ref=e280]: 일반기계
+            - generic [ref=e281]:
+              - generic [ref=e282]: "38.2"
+              - generic [ref=e283]:
+                - generic [ref=e284]: ▼
+                - text: 6.3%
+          - generic [ref=e287] [cursor=pointer]:
+            - generic [ref=e288]: 철강
+            - generic [ref=e289]:
+              - generic [ref=e290]: "20.4"
+              - generic [ref=e291]:
+                - generic [ref=e292]: ▼
+                - text: 2.1%
+          - generic [ref=e295] [cursor=pointer]:
+            - generic [ref=e296]: 비철금속
+            - generic [ref=e297]:
+              - generic [ref=e298]: "16.7"
+              - generic [ref=e299]:
+                - generic [ref=e300]: ▲
+                - text: 41.5%
+      - generic [ref=e303]:
+        - generic [ref=e304] [cursor=pointer]:
+          - generic [ref=e305]:
+            - generic [ref=e306]: 소비재·바이오
+            - generic [ref=e307]: 수출 비중 5.9%
+          - generic [ref=e308]:
+            - generic [ref=e309]: "51.9"
+            - generic [ref=e310]: 억 달러
+        - generic [ref=e313]:
+          - generic [ref=e314] [cursor=pointer]:
+            - generic [ref=e315]: 바이오헬스
+            - generic [ref=e316]:
+              - generic [ref=e317]: "14.4"
+              - generic [ref=e318]:
+                - generic [ref=e319]: ▲
+                - text: 5.2%
+          - generic [ref=e322] [cursor=pointer]:
+            - generic [ref=e323]: 화장품
+            - generic [ref=e324]:
+              - generic [ref=e325]: "11.8"
+              - generic [ref=e326]:
+                - generic [ref=e327]: ▲
+                - text: 24.2%
+          - generic [ref=e330] [cursor=pointer]:
+            - generic [ref=e331]: 농수산식품
+            - generic [ref=e332]:
+              - generic [ref=e333]: "10.7"
+              - generic [ref=e334]:
+                - generic [ref=e335]: ▲
+                - text: 4.7%
+          - generic [ref=e338] [cursor=pointer]:
+            - generic [ref=e339]:
+              - text: 섬유
+              - generic [ref=e340]: 추정
+            - generic [ref=e341]:
+              - generic [ref=e342]: 9*
+              - generic [ref=e343]:
+                - generic [ref=e344]: ▲
+                - text: 4.0%
+          - generic [ref=e347] [cursor=pointer]:
+            - generic [ref=e348]:
+              - text: 가전
+              - generic [ref=e349]: 추정
+            - generic [ref=e350]:
+              - generic [ref=e351]: 6*
+              - generic [ref=e352]:
+                - generic [ref=e353]: ▼
+                - text: 6.0%
+      - generic [ref=e357] [cursor=pointer]:
+        - generic [ref=e358]:
+          - generic [ref=e359]: 기타 품목
+          - generic [ref=e360]: 전기기기·정밀화학·기타 부품 등
+        - generic [ref=e361]:
+          - generic [ref=e362]: "111.7"
+          - generic [ref=e363]: 억 달러
+    - generic [ref=e366]: "* 추정치 — 자동차부품·이차전지·가전·섬유는 산업부 텍스트 발표에 절대금액이 공개되지 않아 근사값으로 표기했습니다(섬유는 4월 9.0억 기준). 관세청 API 연동 시 HS코드 실측값으로 자동 대체됩니다."
+  - generic [ref=e367]:
+    - generic [ref=e368]:
+      - generic [ref=e369]:
+        - heading "품목별 모멘텀 (전년동기비)" [level=2] [ref=e371]
+        - generic [ref=e372]: ↔ 0% 기준
+      - generic [ref=e373]:
+        - generic [ref=e374]:
+          - generic [ref=e375]: 컴퓨터(SSD)
+          - generic [ref=e378]: +290.7%
+        - generic [ref=e379]:
+          - generic [ref=e380]: 반도체 ★
+          - generic [ref=e383]: +169.4%
+        - generic [ref=e384]:
+          - generic [ref=e385]: 석유제품
+          - generic [ref=e388]: +46.6%
+        - generic [ref=e389]:
+          - generic [ref=e390]: 비철금속
+          - generic [ref=e393]: +41.5%
+        - generic [ref=e394]:
+          - generic [ref=e395]: 화장품
+          - generic [ref=e398]: +24.2%
+        - generic [ref=e399]:
+          - generic [ref=e400]: 선박
+          - generic [ref=e403]: +16.7%
+        - generic [ref=e404]:
+          - generic [ref=e405]: 무선통신기기
+          - generic [ref=e408]: +12.6%
+        - generic [ref=e409]:
+          - generic [ref=e410]: 석유화학
+          - generic [ref=e413]: +11.1%
+        - generic [ref=e414]:
+          - generic [ref=e415]: 디스플레이
+          - generic [ref=e418]: +9.4%
+        - generic [ref=e419]:
+          - generic [ref=e420]: 바이오헬스
+          - generic [ref=e423]: +5.2%
+        - generic [ref=e424]:
+          - generic [ref=e425]: 농수산식품
+          - generic [ref=e428]: +4.7%
+        - generic [ref=e429]:
+          - generic [ref=e430]: 섬유
+          - generic [ref=e433]: +4.0%
+        - generic [ref=e434]:
+          - generic [ref=e435]: 철강
+          - generic [ref=e438]: "-2.1%"
+        - generic [ref=e439]:
+          - generic [ref=e440]: 이차전지
+          - generic [ref=e443]: "-5.0%"
+        - generic [ref=e444]:
+          - generic [ref=e445]: 자동차
+          - generic [ref=e448]: "-5.9%"
+        - generic [ref=e449]:
+          - generic [ref=e450]: 가전
+          - generic [ref=e453]: "-6.0%"
+        - generic [ref=e454]:
+          - generic [ref=e455]: 일반기계
+          - generic [ref=e458]: "-6.3%"
+        - generic [ref=e459]:
+          - generic [ref=e460]: 자동차부품
+          - generic [ref=e463]: "-12.0%"
+        - generic [ref=e466]: ← 감소 0% 증가 →
+    - generic [ref=e468]:
+      - heading "주요 지역별 수출" [level=2] [ref=e471]
+      - generic [ref=e472]:
+        - generic [ref=e473]:
+          - generic [ref=e474]: 중국
+          - generic [ref=e477]:
+            - generic [ref=e478]: 189억$
+            - generic [ref=e479]:
+              - generic [ref=e480]: ▲
+              - text: 80.9%
+        - generic [ref=e481]:
+          - generic [ref=e482]: 미국
+          - generic [ref=e485]:
+            - generic [ref=e486]: 159.7억$
+            - generic [ref=e487]:
+              - generic [ref=e488]: ▲
+              - text: 59.1%
+        - generic [ref=e489]:
+          - generic [ref=e490]: 아세안
+          - generic [ref=e493]:
+            - generic [ref=e494]: 158.5억$
+            - generic [ref=e495]:
+              - generic [ref=e496]: ▲
+              - text: 58.4%
+        - generic [ref=e497]:
+          - generic [ref=e498]: EU
+          - generic [ref=e501]:
+            - generic [ref=e502]: 61.9억$
+            - generic [ref=e503]:
+              - generic [ref=e504]: ▲
+              - text: 2.4%
+        - generic [ref=e505]:
+          - generic [ref=e506]: 중동
+          - generic [ref=e509]:
+            - generic [ref=e510]: 12.7억$
+            - generic [ref=e511]:
+              - generic [ref=e512]: ▼
+              - text: 7.7%
+  - generic [ref=e513]:
+    - generic [ref=e514]:
+      - generic [ref=e515]:
+        - heading "수입 구조" [level=2] [ref=e517]
+        - generic [ref=e518]: 에너지 vs 비에너지
+      - generic [ref=e519]:
+        - generic [ref=e520]:
+          - generic [ref=e521]:
+            - generic [ref=e522]: 에너지
+            - generic [ref=e523]: 117.5억$
+          - generic [ref=e524]:
+            - generic [ref=e525]: 비에너지
+            - generic [ref=e526]: 490.5억$
+        - generic [ref=e527]:
+          - text: 에너지
+          - generic [ref=e528]:
+            - generic [ref=e529]: ▲
+            - text: 15.9%
+          - text: · 비에너지
+          - generic [ref=e530]:
+            - generic [ref=e531]: ▲
+            - text: 22.0%
+          - generic [ref=e532]: (전년동기비)
+        - generic [ref=e533]:
+          - generic [ref=e534]: 🛢️
+          - generic [ref=e535]:
+            - generic [ref=e536]:
+              - text: 원유 수입 84.7억$
+              - generic [ref=e537]:
+                - generic [ref=e538]: ▲
+                - text: 25.0%
+            - generic [ref=e539]: 유가 상승이 수입 증가를 주도. 무역수지 흑자는 수출 증가폭이 이를 앞섰기 때문입니다.
+    - generic [ref=e540]:
+      - heading "핵심 포인트" [level=2] [ref=e543]
+      - generic [ref=e545]:
+        - generic [ref=e546]: 🏆
+        - generic [ref=e547]:
+          - generic [ref=e548]: 누적 무역수지 +1,019.1억$
+          - generic [ref=e549]: 1~5월 누적 흑자. 2017년 연간 최대(952억)를 5개월 만에 조기 경신한 사상 최대치.
+  - generic [ref=e550]:
+    - heading "발표 주기 & 데이터 업데이트" [level=2] [ref=e551]
+    - generic [ref=e552]: 수출입 실적은 한 달에 세 번, 1·11·21일에 단계적으로 공개됩니다.
+    - generic [ref=e553]:
+      - generic [ref=e554]:
+        - generic [ref=e555]: 11일
+        - generic [ref=e556]: 1~10일 순별 속보
+        - generic [ref=e557]: 관세청 · 총괄과 반도체 등 주요 품목 중심의 '첫 읽기'. 조업일수 영향이 큼.
+      - generic [ref=e558]:
+        - generic [ref=e559]: 21일
+        - generic [ref=e560]: 1~20일 순별 속보
+        - generic [ref=e561]: 관세청 · 누계 잠정치. 품목·지역 증감률이 더 채워짐.
+      - generic [ref=e562]:
+        - generic [ref=e563]: 1일
+        - generic [ref=e564]: 전월 월간 동향
+        - generic [ref=e565]: 산업부 · 15대+ 품목과 9대 지역까지 가장 상세한 확정 그림.
+  - contentinfo [ref=e566]:
+    - text: "현재 화면: 2026년 5월 (1~31일) · 월간 잠정 (산업통상자원부, 2026.06.01 발표)"
+    - text: 출처 · 산업통상자원부 월간 수출입동향, 관세청 순별 수출입현황(잠정치). 순별 통계는 단기 지표로 조업일수 등에 따라 변동될 수 있습니다.

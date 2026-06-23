@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1782026074227,
+  "lastScanned": 1782127023246,
   "projectRoot": "/Users/haunpapa/Documents/GitHub/fromus-reports",
   "techStack": {
     "languages": [],
@@ -38,7 +38,7 @@
       "path": "__pycache__",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1782026074216,
+      "lastAccessed": 1782127023237,
       "keyFiles": [
         "merge_hub.cpython-311.pyc"
       ]
@@ -47,7 +47,7 @@
       "path": "build",
       "purpose": "Build output",
       "fileCount": 3,
-      "lastAccessed": 1782026074216,
+      "lastAccessed": 1782127023238,
       "keyFiles": [
         "_probe_dartlab.py",
         "_probe_schema.json",
@@ -58,14 +58,14 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1782026074217,
+      "lastAccessed": 1782127023238,
       "keyFiles": []
     },
     "generator": {
       "path": "generator",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1782026074217,
+      "lastAccessed": 1782127023238,
       "keyFiles": [
         "README.md",
         "chat_to_kb.py",
@@ -78,7 +78,7 @@
       "path": "icons",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1782026074218,
+      "lastAccessed": 1782127023238,
       "keyFiles": [
         "icon-192.png",
         "icon-512.png"
@@ -88,75 +88,27 @@
       "path": "reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1782026074218,
+      "lastAccessed": 1782127023239,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
-      "path": "hub_template.html",
-      "accessCount": 4,
-      "lastAccessed": 1782026235743,
+      "path": "trade.html",
+      "accessCount": 7,
+      "lastAccessed": 1782129574217,
       "type": "file"
     },
     {
-      "path": "ai_digest.py",
-      "accessCount": 3,
-      "lastAccessed": 1782026229866,
+      "path": "docs/superpowers/specs/2026-06-22-trade-release-pipeline-design.md",
+      "accessCount": 5,
+      "lastAccessed": 1782129904754,
       "type": "file"
     },
     {
-      "path": "merge_hub.py",
-      "accessCount": 3,
-      "lastAccessed": 1782026245012,
-      "type": "file"
-    },
-    {
-      "path": "generator/chat_to_kb.py",
-      "accessCount": 3,
-      "lastAccessed": 1782026510161,
-      "type": "file"
-    },
-    {
-      "path": "generator/README.md",
+      "path": "docs/superpowers/plans/2026-06-22-trade-release-pipeline.md",
       "accessCount": 1,
-      "lastAccessed": 1782026112750,
-      "type": "file"
-    },
-    {
-      "path": "generator/update_archive.py",
-      "accessCount": 1,
-      "lastAccessed": 1782026201584,
-      "type": "file"
-    },
-    {
-      "path": "knowledge_base.json",
-      "accessCount": 1,
-      "lastAccessed": 1782026216984,
-      "type": "file"
-    },
-    {
-      "path": "apply_hub_patch.py",
-      "accessCount": 1,
-      "lastAccessed": 1782026224924,
-      "type": "file"
-    },
-    {
-      "path": "generator/fromus_taxonomy.py",
-      "accessCount": 1,
-      "lastAccessed": 1782026225238,
-      "type": "file"
-    },
-    {
-      "path": "manifest.webmanifest",
-      "accessCount": 1,
-      "lastAccessed": 1782026241004,
-      "type": "file"
-    },
-    {
-      "path": "sw.js",
-      "accessCount": 1,
-      "lastAccessed": 1782026241232,
+      "lastAccessed": 1782130131667,
       "type": "file"
     }
   ],
