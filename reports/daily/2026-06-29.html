@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════
+  프롬어스 Daily Report — 참조 템플릿
+═══════════════════════════════════════════════════════════════════════════
+
+  사용법:
+  1. 이 파일을 복사한 뒤 파일명을 "프롬어스_Daily_Report_{YYYY-MM-DD}.html"로 변경
+  2. <title> · 커버 · 데이터 카드 · 타임라인 등 콘텐츠를 새 날짜로 갱신
+  3. CSS(:root, 컴포넌트 클래스, 다크모드 오버라이드)는 절대 건드리지 않기
+  4. 작업 완료 후 lint_report.py로 품질 검사 실행
+
+  비협상 요구사항 (모든 출력에 예외 없이 적용):
+  ✓ <meta name="color-scheme" content="light only">  ← <head>에 존재
+  ✓ :root { color-scheme: light only; }                ← CSS 변수 블록 안
+  ✓ @media (prefers-color-scheme: dark) { ... }        ← 다크모드 오버라이드
+  ✓ html, body { background-color: #faf8f5 !important; }
+  ✓ 푸터에 면책 문구: "본 리포트는 ... 투자 권유가 아닙니다."
+
+  호칭 규칙 (members.json 참고):
+  - 이혜나 → "이혜나 대표님"
+  - 밝쌤 · 김병철쌤 · 김은지쌤 · 황유정쌤 · 문지영쌤 · 탱이쌤 등 (~쌤)
+  - 임희성 · 구자민 → "~ 멘토"
+  - 나현석 → "나현석썜"
+  - 단, 여러 사람 동시 언급 시에는 호칭 생략 가능
+
+  콘텐츠 섹션 구성 (7섹션):
+  01. Market Temperature  — 시장 온도 카드 + 수급 테이블
+  02. Today's Timeline     — 시간별 흐름 (crisis/turn/hope/info 점)
+  03. Team Insights        — 이혜나 · 탱이 · 팀 서포트 3카드
+  04. Key Moves            — 외인·기관 매수 TOP 섹터 카드
+  05. Key Reading          — 대표님 공유 자료 + 탱이 교육 카드
+  06. Action Plan          — 체크리스트 (do/dont/watch)
+  07. Tomorrow             — 내일 체크포인트
+═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>프롬어스 Daily Report | 2026.06.29</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light only;
+  --bg: #faf8f5;
+  --white: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f5f2ed;
+  --surface-3: #eeebe5;
+  --border: #e4dfd6;
+  --border-light: #f0ece5;
+  --gold: #b8860b;
+  --gold-bg: #fef9ec;
+  --gold-border: #f5e6b8;
+  --blue: #2563eb;
+  --blue-bg: #eff6ff;
+  --blue-border: #bfdbfe;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --red-border: #fecaca;
+  --green: #16a34a;
+  --green-bg: #f0fdf4;
+  --green-border: #bbf7d0;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --purple-border: #ddd6fe;
+  --cyan: #0891b2;
+  --cyan-bg: #ecfeff;
+  --pink: #db2777;
+  --pink-bg: #fdf2f8;
+  --text: #1a1612;
+  --text-2: #4a4540;
+  --text-3: #8a847a;
+  --text-4: #b0a898;
+}
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: light only; }
+  html, body { background-color: #faf8f5 !important; color: #1a1612 !important; }
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { background-color: #faf8f5 !important; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+.serif { font-family: 'Playfair Display', serif; }
+
+/* ── COVER ── */
+.cover {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 24px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdfcfa 0%, #f8f4ee 100%);
+}
+.cover::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse 700px 500px at 25% 35%, rgba(184,134,11,0.07), transparent),
+    radial-gradient(ellipse 600px 600px at 75% 65%, rgba(220,38,38,0.04), transparent);
+}
+.cover::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Ccircle cx='20' cy='20' r='.5' fill='%23c8b88a' fill-opacity='.15'/%3E%3C/svg%3E");
+}
+.cover-content { position:relative; z-index:1; }
+.cover-label {
+  font-size: 11px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 32px;
+  font-weight: 600;
+}
+.cover-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 8vw, 68px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.cover-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.cover-sub {
+  font-size: 16px;
+  color: var(--text-2);
+  font-weight: 400;
+  margin-bottom: 48px;
+  max-width: 520px;
+  line-height: 1.8;
+}
+.cover-meta {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cover-meta-item { text-align: center; }
+.cover-meta-item .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.cover-meta-item .lbl {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.divider-gold {
+  width: 50px;
+  height: 2px;
+  background: var(--gold);
+  margin: 36px auto;
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+/* ── LAYOUT ── */
+.page { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+.section { margin-bottom: 56px; }
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+.section-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  opacity: 0.5;
+  margin-top: 2px;
+}
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.section-subtitle {
+  font-size: 12px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+/* ── CALLOUT BOX ── */
+.callout {
+  padding: 20px 24px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.9;
+  margin-bottom: 20px;
+  border-left: 4px solid;
+  position: relative;
+}
+.callout.gold { background: var(--gold-bg); border-color: var(--gold); }
+.callout.blue { background: var(--blue-bg); border-color: var(--blue); }
+.callout.red { background: var(--red-bg); border-color: var(--red); }
+.callout.green { background: var(--green-bg); border-color: var(--green); }
+.callout.purple { background: var(--purple-bg); border-color: var(--purple); }
+.callout-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout b { color: var(--text); }
+
+/* ── MARKET TEMP ── */
+.temp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.temp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.temp-card .top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+}
+.temp-card .top-bar.up { background: var(--red); }
+.temp-card .top-bar.down { background: var(--blue); }
+.temp-card .top-bar.warn { background: var(--gold); }
+.temp-label {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.temp-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+.temp-chg {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+.temp-chg.up { color: var(--red); }
+.temp-chg.down { color: var(--blue); }
+.temp-chg.warn { color: var(--gold); }
+.temp-explain {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.6;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-light);
+}
+
+/* ── SUPPLY TABLE ── */
+.supply-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.supply-table th {
+  background: var(--surface-2);
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+}
+.supply-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.supply-table td:first-child { font-family: 'Noto Sans KR', sans-serif; font-weight: 500; }
+.supply-table tr:last-child td { border-bottom: none; }
+.supply-table .pos { color: var(--red); font-weight: 600; }
+.supply-table .neg { color: var(--blue); font-weight: 600; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px; top: 12px; bottom: 12px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--blue), var(--gold), var(--red));
+  border-radius: 1px;
+}
+.tl-item { position: relative; padding: 0 0 28px 28px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot {
+  position: absolute;
+  left: -28px; top: 8px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 3px solid;
+  background: var(--bg);
+  z-index: 1;
+}
+.tl-dot.crisis { border-color: var(--red); }
+.tl-dot.turn { border-color: var(--gold); }
+.tl-dot.hope { border-color: var(--green); }
+.tl-dot.info { border-color: var(--blue); }
+.tl-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.tl-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.tl-desc { font-size: 14px; color: var(--text-2); line-height: 1.85; }
+.tl-impact {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tl-tag {
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.tl-tag.bad { background: var(--red-bg); color: var(--red); }
+.tl-tag.good { background: var(--green-bg); color: var(--green); }
+.tl-tag.neutral { background: var(--gold-bg); color: var(--gold); }
+
+/* ── INSIGHT CARDS ── */
+.insight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.insight-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.insight-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700;
+  color: #fff; flex-shrink: 0;
+}
+.insight-name { font-weight: 700; font-size: 16px; }
+.insight-role {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+}
+.insight-body {
+  font-size: 14.5px;
+  color: var(--text-2);
+  line-height: 2;
+}
+.insight-body b { color: var(--text); font-weight: 600; }
+.insight-quote {
+  margin-top: 18px;
+  padding: 16px 20px;
+  background: var(--gold-bg);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+  font-size: 14px;
+  color: var(--text-2);
+  font-style: italic;
+  line-height: 1.8;
+}
+.insight-bullets {
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+}
+.insight-bullets li {
+  padding: 8px 0 8px 28px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border-light);
+}
+.insight-bullets li:last-child { border-bottom: none; }
+.insight-bullets li::before {
+  position: absolute;
+  left: 0; top: 8px;
+  width: 18px; height: 18px;
+  font-size: 13px;
+  text-align: center;
+}
+.insight-bullets li.warn::before { content:'⚠️'; }
+.insight-bullets li.tip::before { content:'💡'; }
+.insight-bullets li.chart::before { content:'📊'; }
+.insight-bullets li.news::before { content:'📰'; }
+.insight-bullets li.edu::before { content:'📚'; }
+.insight-bullets li.robot::before { content:'🤖'; }
+.insight-bullets li.money::before { content:'💰'; }
+.insight-bullets li.eye::before { content:'👁'; }
+
+/* ── KEY MESSAGE BOX ── */
+.key-message-box {
+  background: var(--surface);
+  border: 2px solid var(--gold-border);
+  border-radius: 18px;
+  padding: 32px;
+  margin: 24px 0;
+  box-shadow: 0 4px 16px rgba(184,134,11,0.08);
+  position: relative;
+}
+.key-message-box::before {
+  content: '💛 이혜나 대표님의 핵심 메시지';
+  position: absolute;
+  top: -12px;
+  left: 24px;
+  background: var(--gold);
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.key-row {
+  display: flex; gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+  align-items: flex-start;
+}
+.key-row:last-child { border-bottom: none; }
+.key-num {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--gold-bg);
+  color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+.key-content { flex: 1; }
+.key-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.key-desc { font-size: 14px; color: var(--text-2); line-height: 1.9; }
+
+/* ── SECTOR CARDS ── */
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.sector-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.sector-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.sector-icon {
+  font-size: 26px;
+  width: 42px; height: 42px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sector-name { font-size: 15px; font-weight: 700; }
+.sector-name-sub { font-size: 11px; color: var(--text-3); }
+.sector-stocks {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 12px;
+}
+.sector-stocks span {
+  padding: 4px 10px;
+  background: var(--surface-2);
+  border-radius: 100px;
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.sector-note {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.8;
+}
+
+/* ── CHECKLIST ── */
+.checklist { display: grid; gap: 10px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  line-height: 1.7;
+}
+.check-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; font-weight: 700;
+  margin-top: 1px;
+}
+.check-icon.do { background: var(--green-bg); color: var(--green); }
+.check-icon.dont { background: var(--red-bg); color: var(--red); }
+.check-icon.watch { background: var(--gold-bg); color: var(--gold); }
+
+/* ── EDU ── */
+.edu-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.edu-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+}
+.edu-tag.gold { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); }
+.edu-tag.blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.edu-tag.purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
+.edu-tag.green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.edu-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; line-height: 1.4; }
+.edu-body { font-size: 14.5px; color: var(--text-2); line-height: 2; }
+.edu-body b { color: var(--text); }
+.edu-box {
+  margin: 12px 0;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.9;
+}
+.edu-box.example { background: var(--surface-2); border: 1px dashed var(--border); }
+.edu-box.formula { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+.edu-box.warning { background: var(--red-bg); border: 1px solid var(--red-border); }
+.edu-box.tip { background: var(--green-bg); border: 1px solid var(--green-border); }
+
+/* ── FOOTER ── */
+.report-footer {
+  text-align: center;
+  padding: 48px 24px 64px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.report-footer .logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+/* ── DAILY QUOTE ── */
+.daily-quote {
+  text-align: center;
+  padding: 40px 32px;
+  background: var(--surface);
+  border: 1px solid var(--gold-border);
+  border-radius: 18px;
+  margin-bottom: 48px;
+  box-shadow: 0 2px 12px rgba(184,134,11,0.06);
+}
+.daily-quote blockquote {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px, 4vw, 26px);
+  font-style: italic;
+  color: var(--gold);
+  line-height: 1.6;
+  max-width: 550px;
+  margin: 0 auto 16px;
+}
+.daily-quote cite {
+  font-style: normal;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .cover-meta { gap: 24px; }
+  .temp-grid { grid-template-columns: 1fr 1fr; }
+  .sector-grid { grid-template-columns: 1fr; }
+  .insight-card, .edu-card { padding: 22px; }
+  .supply-table { font-size: 12px; }
+  .supply-table th, .supply-table td { padding: 9px 10px; }
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.section { animation: fadeUp 0.5s ease both; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- COVER -->
+<!-- ══════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="cover-label">From Us · Daily Report</div>
+    <h1 class="cover-title">
+      <em>쏠림</em>이 풀리고,<br>키를 맞춰가다
+    </h1>
+    <p class="cover-sub">
+      외국인 7.7조 폭풍매도 vs 코스닥 +8% 급등<br>
+      "반도체 업황 무너짐? 다운사이클? 둘 다 아닙니다"
+    </p>
+    <div class="divider-gold"></div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="val">06.29</div><div class="lbl">월요일</div></div>
+      <div class="cover-meta-item"><div class="val">-0.20%</div><div class="lbl">KOSPI</div></div>
+      <div class="cover-meta-item"><div class="val">+8.13%</div><div class="lbl">KOSDAQ</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 01. MARKET TEMPERATURE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-title">오늘의 시장 온도</div>
+      <div class="section-subtitle">Market Temperature · 6월 29일 마감 기준</div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">🎢</span>
+    <b>"코스피와 코스닥이 정반대로 움직인 날"</b> — 외국인이 코스피에서만 7.76조원을 던지며 장중 8,127.99(약 -3.3%)까지 급락했지만, 오후 <b>3대 메가프로젝트(1,000조 투자) 발표</b>로 낙폭을 줄여 8,394.65(-0.20%)에 마감했어요. 반면 코스닥은 기관 매수가 쏟아지며 <b>매수 사이드카(매수 주문이 급격히 몰릴 때 일시 발동되는 안전장치)</b>까지 켜진 끝에 +8.13% 급등. 이혜나 대표님은 <b>"반도체 업황이 무너진 게 아니라, 쏠림이 풀리며 시장이 키를 맞춰가는 단계"</b>라고 이야기했습니다.
+  </div>
+
+  <div class="temp-grid">
+    <div class="temp-card">
+      <div class="top-bar down"></div>
+      <div class="temp-label">코스피</div>
+      <div class="temp-val">8,394.65</div>
+      <div class="temp-chg down">-16.56p (-0.20%)</div>
+      <div class="temp-explain">2일 연속 하락. 장중 8,127.99까지 밀렸다가 메가프로젝트 발표로 낙폭 축소. 거래대금 42.3조원.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar up"></div>
+      <div class="temp-label">코스닥</div>
+      <div class="temp-val">920.57</div>
+      <div class="temp-chg up">+69.20p (+8.13%)</div>
+      <div class="temp-explain">3일 만에 반등. 장중 매수 사이드카 발동. 금융 +17.5%, 제약 +11.2%, 금속 +10.9% 강세. 거래대금 8.1조원.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar warn"></div>
+      <div class="temp-label">원/달러 환율</div>
+      <div class="temp-val">1,543.5</div>
+      <div class="temp-chg warn">+7.7원 (하루 만에 약세)</div>
+      <div class="temp-explain">외국인 대규모 매도로 장중 상승 압력. 환율↑ = 원화 가치↓ = 외국인 입장에선 한국 주식이 비싸 보임.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar warn"></div>
+      <div class="temp-label">WTI 유가</div>
+      <div class="temp-val">$70.21</div>
+      <div class="temp-chg warn">+1.42% (하루 만에 상승)</div>
+      <div class="temp-explain">중동 휴전 합의로 70달러대 안착(브렌트유는 -3.27%). 6월 FOMC 이후 70달러대로 레벨 다운된 상태 유지.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar down"></div>
+      <div class="temp-label">美 10년물 금리</div>
+      <div class="temp-val">4.367%</div>
+      <div class="temp-chg down">-2.4bp</div>
+      <div class="temp-explain">소폭 하락. 한국 국채 3년물은 3.732%(+0.5bp), 10년물 4.145%(+2.8bp)로 소폭 상승.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar down"></div>
+      <div class="temp-label">美 나스닥 (전 거래일)</div>
+      <div class="temp-val">25,298</div>
+      <div class="temp-chg down">-0.2%</div>
+      <div class="temp-explain">나스닥 15개월 만에 최대 월간 하락. 애플발 악재로 마이크론 -7% 등 반도체주 급락(유가·금리 하락이 낙폭은 제한).</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:24px 0 12px">📊 수급 데이터 — "외국인 폭풍매도 vs 코스닥 기관 매수"</h3>
+
+  <div class="callout blue">
+    <span class="callout-icon">⚔️</span>
+    오늘은 <b>외국인이 코스피에서 7.76조원을 던지고, 개인(+4.60조)과 기관(+2.93조)이 받아낸</b> 날이었어요. 외국인 매도는 전기·전자에서만 7.34조원에 집중. 그런데 같은 시각 <b>코스닥은 기관이 +5,038억원을 주도 매수</b>하며 +8% 급등을 만들었습니다. 김병철쌤은 <b>"외국인은 메모리 수요·실적엔 의구심이 없지만, 해당 기업이 속한 국가의 지정학·정치 리스크를 고려할 수밖에 없는 상황"</b>이라고 짚었어요.
+  </div>
+
+  <table class="supply-table">
+    <thead>
+      <tr>
+        <th>구분 (억원)</th>
+        <th>외국인</th>
+        <th>기관</th>
+        <th>개인</th>
+        <th>핵심 포인트</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>코스피 현물</td>
+        <td class="neg">-77,560</td>
+        <td class="pos">+29,325</td>
+        <td class="pos">+45,971</td>
+        <td>전기·전자 -73,353억 집중</td>
+      </tr>
+      <tr>
+        <td>코스닥 현물</td>
+        <td class="pos">+382</td>
+        <td class="pos">+5,038</td>
+        <td class="neg">-5,266</td>
+        <td>기관 주도 매수 → +8.13% 급등</td>
+      </tr>
+      <tr>
+        <td>코스피 선물</td>
+        <td class="pos">+9,176</td>
+        <td class="neg">-8,832</td>
+        <td class="neg">-62</td>
+        <td>프로그램 차익 +3,386억 / 비차익 -51,508억</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout gold">
+    <span class="callout-icon">🔍</span>
+    재미있는 포인트: <b>코스닥은 외국인도 +382억 순매수</b>로 돌아섰어요. 코스피 반도체에서 빠진 자금 일부가 코스닥 바이오·2차전지로 순환매되는 그림. 이혜나 대표님이 평소 강조한 <b>"시장 전체 자금은 한정적이라 섹터별로 돌고 돈다"</b>는 흐름이 그대로 나타난 하루였습니다.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 02. TIMELINE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-title">오늘 무슨 일이 있었나요?</div>
+      <div class="section-subtitle">Today's Timeline · 시간별 흐름</div>
+    </div>
+  </div>
+
+  <div class="callout purple">
+    <span class="callout-icon">🗓️</span>
+    오늘은 <b>"새벽 메모리 리서치 폭격 → 오전 외국인 폭풍매도 → 오후 1,000조 발표"</b>로 이어진 빅 이벤트 데이였어요. 지난주 금요일(6/26) 코스피·코스닥이 크게 무너진 뒤라, 프벤져스는 "업황 우려는 과도하다"는 메시지로 멘탈을 잡아가며 하루를 보냈습니다.
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">새벽 06시 — 차세대 주도주 & 메모리 리서치</div>
+      <div class="tl-title">🔵 "FAANG 가고, M7 가시고, MANGOS 어서오고"</div>
+      <div class="tl-desc">
+        탱이쌤이 차세대 나스닥 주도주 <b>MANGOS</b>(Microsoft·Apple·NVIDIA·Google·Oracle·Space X)를 소개했어요. 밝쌤은 모건스탠리·제프리스 리서치를 공유 — <b>DDR4·SLC NAND·NOR 같은 구형 메모리까지 공급 부족으로 기업들이 패닉 바잉(공황 구매) 중</b>이고, 제프리스는 메모리 가격이 3분기 +40~50%, 4분기 +30~40% 추가 상승할 수 있다고 전망했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">MANGOS 세대교체</span>
+        <span class="tl-tag good">메모리 슈퍼사이클</span>
+        <span class="tl-tag neutral">구형 메모리 패닉 바잉</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot turn"></div>
+      <div class="tl-date">07시 — 애플 변수 & 미-이란 휴전</div>
+      <div class="tl-title">🟡 애플의 'CXMT 카드' + 미국-이란 공격 중단 합의</div>
+      <div class="tl-desc">
+        탱이쌤이 짚은 <b>"애플 만행"</b> — 메모리 값이 급등하자 애플이 중국 CXMT 메모리를 자사 제품에 도입하려 로비 중이라는 소식. 한편 임희성 멘토는 <b>미국과 이란이 상선·원유 공격을 상호 중단하고, 30일 카타르에서 호르무즈 문제 실무 협상을 갖기로 합의</b>했다는 외신 보도를 전했어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag bad">애플 CXMT 로비</span>
+        <span class="tl-tag good">미-이란 공격 중단</span>
+        <span class="tl-tag neutral">호르무즈 협상 예정</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">08시 — 블룸버그 5가지 & 키움 위클리</div>
+      <div class="tl-title">🔵 "AI 슈퍼버블 경고" vs "6월 수출이 진짜 관전 포인트"</div>
+      <div class="tl-desc">
+        황유정쌤이 블룸버그 5가지를 정리 — 그중 <b>중국 유명 헤지펀드 매니저들이 "AI는 슈퍼 버블, 붕괴 시점이 머지않았다"고 경고</b>한 점이 눈길을 끌었어요. 다만 키움 한지영 위클리는 <b>"매크로 이벤트보다 한국 6월 수출, 특히 반도체 수출 모멘텀이 메인 관전 포인트"</b>라며 중심을 잡아줬습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag bad">AI 슈퍼버블 경고</span>
+        <span class="tl-tag good">6월 수출 관전</span>
+        <span class="tl-tag neutral">변동성 증폭 장세</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot turn"></div>
+      <div class="tl-date">09시 30분 — 대표님 진정 메시지</div>
+      <div class="tl-title">🟡 "업황 무너짐? 다운사이클? 둘 다 아닙니다"</div>
+      <div class="tl-desc">
+        외국인 폭풍매도에 코스피가 흔들리자 이혜나 대표님이 직접 나섰어요. <b>"반도체 업황 무너짐? 다운사이클 시작? 둘 다 아닙니다. 쏠림현상 해소 + 시장이 키를 맞춰나가는 단계로 보시죠."</b> 단지 많이 올라 조정이 나온 것뿐이니, 그럼 우리는 다시 무엇을 봐야 하느냐 — <b>"반.도.체."</b>라는 메시지였습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">쏠림 해소 진단</span>
+        <span class="tl-tag good">반도체 코어 유지</span>
+        <span class="tl-tag neutral">지정학 리스크 인지</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">14시 38분 — 국민보고회 LIVE</div>
+      <div class="tl-title">🔵 대한민국 대도약 3대 메가프로젝트 국민보고회 생중계</div>
+      <div class="tl-desc">
+        이혜나 대표님이 청와대 국민보고회 생중계 링크를 공유했어요. <b>이재용 삼성전자 회장과 최태원 SK그룹 회장이 직접 참석</b>해 초대형 투자 계획을 발표하는 자리. 새벽에 밝쌤이 예고했던 "숫자가 낯설 것"이라는 김용범 정책실장의 말이 현실이 되는 순간이었습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">이재용·최태원 참석</span>
+        <span class="tl-tag good">1,000조 투자 발표</span>
+        <span class="tl-tag neutral">국가 총력전</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot hope"></div>
+      <div class="tl-date">15시 20분 — 초대형 투자 발표</div>
+      <div class="tl-title">🟢 "서남권 800조 메모리 팹 + 용인 12년 단축"</div>
+      <div class="tl-desc">
+        이재용 회장은 <b>반도체 후보지 광주, HBM5 충청권 집중 투자, 로봇 투자 구미</b>를 발표했고, 최태원 회장은 <b>"SK하이닉스 용인 600조·청주 100조 투자를 앞당기고, 2035년까지 총 15GW AI 데이터센터에 1,000조 투자"</b>를 선언했어요. 호남 반도체 클러스터 기대감에 금호건설이 상한가로 직행했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">서남권 800조</span>
+        <span class="tl-tag good">용인 팹 12년 단축</span>
+        <span class="tl-tag good">금호건설 상한가</span>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot hope"></div>
+      <div class="tl-date">15시 41분 — 마감 브리핑</div>
+      <div class="tl-title">🟢 코스닥 +8.13% 급등 마감 · 바이오·2차전지 잔치</div>
+      <div class="tl-desc">
+        김병철쌤이 마감 브리핑을 정리했어요. <b>코스피는 외국인 폭풍매도로 -0.20% 마감했지만, 코스닥은 기관 주도로 +8.13% 급등</b>. 져스텍이 상장 첫날 +40%, 롯데손해보험이 인수설에 상한가, 에코프로(+23.69%)·에코프로비엠(+15.56%) 등 2차전지와 바이오가 동반 급등했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">코스닥 +8.13%</span>
+        <span class="tl-tag good">에코프로 +23.69%</span>
+        <span class="tl-tag good">져스텍 +40.24%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 03. INSIGHTS -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-title">프벤져스 핵심 한마디</div>
+      <div class="section-subtitle">Team Insights · 오늘 우리 리더들이 전한 메시지</div>
+    </div>
+  </div>
+
+  <!-- 이혜나 -->
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#d4a84b,#b8922f)">혜</div>
+      <div><div class="insight-name">이혜나 대표님</div><div class="insight-role">리드 전략가 · 오늘 30건 발언 · 전략 총괄</div></div>
+    </div>
+    <div class="insight-body">
+      오늘 이혜나 대표님의 발언은 <b>"외국인 폭풍매도 = 위기가 아니라 키 맞추기"</b>라는 한 가지 메시지로 모였어요. 코스피가 흔들리던 오전, 직접 등장해 다음과 같은 핵심을 전했습니다.
+    </div>
+
+    <div class="key-message-box">
+      <div class="key-row">
+        <div class="key-num">1</div>
+        <div class="key-content">
+          <div class="key-title">반도체 업황 무너짐? 다운사이클 시작? 둘 다 아니다</div>
+          <div class="key-desc">지난주 급락에 "업황이 꺾인 것 아니냐"는 공포가 퍼졌지만, 대표님은 <b>둘 다 아니라고 단언</b>했어요. 메모리 가격 결정권은 여전히 공급자에게 있고, AI 수요도 강하다는 판단입니다.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">2</div>
+        <div class="key-content">
+          <div class="key-title">쏠림현상 해소 + 시장이 키를 맞춰나가는 단계</div>
+          <div class="key-desc">그동안 돈이 반도체에 과하게 쏠려 있었기에, 외국인 차익실현으로 그 쏠림이 풀리는 것뿐이라는 해석. <b>"단지 많이 올랐으니 조정의 사유가 나오고 주가 눌림이 발생하는 것"</b>이라고 이야기했어요.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">3</div>
+        <div class="key-content">
+          <div class="key-title">그럼 그땐 우리 뭐 봐야죠? — "반.도.체"</div>
+          <div class="key-desc">조정이 나오면 다시 무엇을 보느냐는 질문에, 대표님의 답은 한결같았어요. <b>"뭐긴 뭐겠어요, 반도체."</b> 쏠림이 풀린 자리에서 핵심 자산을 다시 본다는 관점입니다.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">4</div>
+        <div class="key-content">
+          <div class="key-title">결론: 기다림의 미학</div>
+          <div class="key-desc"><b>"기다려봅시다. 일단 우리 애들 회복 좀 하고 오오🙊🌸"</b> 공포에 휩쓸려 던지기보다, 회복을 기다리며 호흡을 고르자는 멘탈케어 메시지로 마무리했습니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-quote">
+      "단지 많이 올랐으니 조정의 사유가 나오고 주가 눌림이 발생하는 것 뿐이라고. 그럼 그땐 우리 뭐 봐야죠?"
+    </div>
+  </div>
+
+  <!-- 탱이 -->
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#9b7ae8,#7c5ccc)">탱</div>
+      <div><div class="insight-name">탱이쌤</div><div class="insight-role">교육 담당 · 오늘 13건 발언 · 쉬운 경제 설명</div></div>
+    </div>
+    <div class="insight-body">
+      오늘 탱이쌤은 <b>차세대 주도주의 세대교체</b>와 <b>메모리 업황의 진짜 그림</b>을 짚어줬어요. 새벽에 분위기를 띄우고, 저녁엔 글로벌 리서치까지 챙기는 하루였습니다.
+    </div>
+    <ul class="insight-bullets">
+      <li class="chart"><b>MANGOS 등장</b> — "FAANG 가고, M7 가시고, MANGOS 🥭 어서오고." Microsoft·Apple·NVIDIA·Google·Oracle·Space X가 차세대 나스닥 주도주로 부상 중이라고 소개.</li>
+      <li class="news"><b>애플 CXMT 정리</b> — 메모리 값이 치솟자 애플이 중국 CXMT 메모리를 도입하려 로비 중. "꼬루에.. 50배"라며 메모리 슈퍼사이클의 강도를 체감하게 해줬어요.</li>
+      <li class="tip"><b>샌디스크 리포트</b> — 제프리스가 샌디스크($SNDK) 목표주가를 1,400 → <b>3,000달러로 상향</b>. eSSD 매출 점유율이 4%에서 8%로 급증한 점이 근거. SLC NAND 선호도 상승도 주목.</li>
+    </ul>
+    <div class="insight-quote">
+      "FAANG 가고, M7 가시고, MANGOS 🥭 어서오고 😉 (메타 계속 끼워주는 거… 맞나…?ㅎㅎㅎ)"
+    </div>
+  </div>
+
+  <!-- 팀 서포트 -->
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#4a8fe7,#2563eb)">팀</div>
+      <div><div class="insight-name">밝쌤 · 김병철쌤 · 황유정쌤 · 임희성 멘토 · 나현석썜 · 문지영쌤</div><div class="insight-role">시황 · 뉴스 · 데이터 · 실시간 서포트</div></div>
+    </div>
+    <ul class="insight-bullets">
+      <li class="news"><b>밝쌤</b> — 모건스탠리·제프리스 메모리 리서치를 정리하고 <b>"메모리 투자, 계속해도 될까?"</b> 핵심 인사이트를 공유. "물량보다 가격이 중요하니, 대형주는 코어로 보유하되 급등 구간엔 일부 수익실현, 조정 구간엔 소외주 분할 접근"이라고 이야기했어요.</li>
+      <li class="news"><b>김병철쌤</b> — <b>"외국인은 메모리 수요·실적엔 의구심이 없지만, 해당 국가의 지정학·정치 리스크를 고려하지 않을 수 없는 상황"</b>이라는 핵심 진단. 블룸버그도 같은 맥락을 보도했다고 덧붙였습니다.</li>
+      <li class="chart"><b>황유정쌤</b> — 키움 한지영 위클리("반복되는 변동성 증폭 장세에서 중심 잡기")와 블룸버그 5가지를 배포. 삼성증권 져스텍 상장일 <b>시초가 매도 방법</b>까지 친절히 안내했어요.</li>
+      <li class="news"><b>임희성 멘토</b> — 오늘 30건의 뉴스를 큐레이션. 반도체 1,000조 투자, 1,800조 로봇시장, K-바이오 기술수출 30조, 미-이란 휴전 등 핵심 헤드라인을 빠르게 전달했습니다.</li>
+      <li class="chart"><b>나현석썜 · 문지영쌤</b> — 나현석썜이 M7 주가·국채 금리 차트와 금주 경제 일정을 정리하고, 문지영쌤이 마감 후 외인·기관 순매수 TOP 10 데이터를 공유했어요.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 04. KEY MOVES -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-title">오늘의 수급 포인트</div>
+      <div class="section-subtitle">Key Moves · 외인·기관이 산 종목들</div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-icon">🎯</span>
+    외국인이 코스피에서 삼성전자·SK하이닉스를 중심으로 7.76조원을 던졌지만, <b>전력·2차전지·바이오 일부 종목은 오히려 담았어요</b>. 기관은 낙폭과대 반도체 대형주와 코스닥150 ETF, 그리고 바이오를 주도 매수했습니다. (등락률은 빨강=상승, 파랑=하락)
+  </div>
+
+  <div class="sector-grid">
+    <div class="sector-card">
+      <div class="sector-head">
+        <div class="sector-icon">🌐</div>
+        <div><div class="sector-name">코스피 외인 순매수 TOP</div><div class="sector-name-sub">전기전자는 던졌지만…</div></div>
+      </div>
+      <div class="sector-stocks">
+        <span>삼성전기 +2.26%</span>
+        <span>KODEX 삼성전자 ETF -7.67%</span>
+        <span>TIGER SK하이닉스 -2.43%</span>
+        <span>LG에너지솔루션 +20.81%</span>
+        <span>두산에너빌리티 +8.51%</span>
+      </div>
+      <div class="sector-note">
+        외국인은 전기·전자를 7.34조 던지면서도 <b>LG에너지솔루션(+20.81%)·두산에너빌리티(+8.51%)</b> 같은 전력·2차전지는 순매수. 미국의 'DC 전력' 규제 완화로 ESS 수혜 기대가 반영된 흐름. 삼성바이오로직스(+7.82%)도 매수 상위권에 올랐어요.
+      </div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-head">
+        <div class="sector-icon">🏛️</div>
+        <div><div class="sector-name">코스피 기관 순매수 TOP</div><div class="sector-name-sub">낙폭과대 + ETF 저점</div></div>
+      </div>
+      <div class="sector-stocks">
+        <span>삼성전자 -4.86%</span>
+        <span>SK하이닉스 -1.68%</span>
+        <span>SK스퀘어 -4.65%</span>
+        <span>삼성SDI +12.53%</span>
+        <span>KODEX 코스닥150 +18.31%</span>
+      </div>
+      <div class="sector-note">
+        기관은 외국인이 던진 <b>삼성전자·SK하이닉스·SK스퀘어를 받아내며</b> 낙폭과대 매수에 나섰고, 삼성SDI(+12.53%)와 <b>KODEX 코스닥150(+18.31%)</b> ETF로 코스닥 반등에도 베팅했어요.
+      </div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-head">
+        <div class="sector-icon">💊</div>
+        <div><div class="sector-name">코스닥 외인 순매수 TOP</div><div class="sector-name-sub">반도체 소부장 + 바이오</div></div>
+      </div>
+      <div class="sector-stocks">
+        <span>HPSP +1.90%</span>
+        <span>솔브레인 +2.85%</span>
+        <span>리노공업 +1.19%</span>
+        <span>ISC +1.03%</span>
+        <span>디앤디파마텍 +19.05%</span>
+      </div>
+      <div class="sector-note">
+        외국인은 코스닥에서 <b>HPSP·솔브레인·리노공업·ISC 등 반도체 소부장(소재·부품·장비)</b>을 고르게 담았어요. 코스닥 외국인이 +382억 순매수로 돌아선 배경.
+      </div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-head">
+        <div class="sector-icon">🧬</div>
+        <div><div class="sector-name">코스닥 기관 순매수 TOP</div><div class="sector-name-sub">바이오 순환매 주도</div></div>
+      </div>
+      <div class="sector-stocks">
+        <span>주성엔지니어링 +6.64%</span>
+        <span>알테오젠 +8.59%</span>
+        <span>올릭스 +24.22%</span>
+        <span>에이비엘바이오 +20.18%</span>
+        <span>리가켐바이오 +14.00%</span>
+      </div>
+      <div class="sector-note">
+        오늘 코스닥 +8% 급등의 주역. 기관이 <b>알테오젠·올릭스(+24.22%)·에이비엘바이오(+20.18%)·리가켐바이오</b> 등 바이오를 대거 매수하며 순환매를 이끌었어요.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 05. KEY READING -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-title">오늘 읽어둘 리포트</div>
+      <div class="section-subtitle">Key Reading · 프벤져스가 공유한 핵심 자료</div>
+    </div>
+  </div>
+
+  <!-- 메모리 사이클 -->
+  <div class="edu-card">
+    <div class="edu-tag purple">🧠 밝쌤 핵심 인사이트</div>
+    <div class="edu-title">메모리 투자, 계속해도 될까? — 모건스탠리·제프리스 리서치 종합</div>
+    <div class="edu-body">
+      밝쌤 曰: <b>"메모리 업황은 아직 꺾였다고 보기 어렵습니다. 핵심은 물량이 아니라 가격 결정권입니다."</b><br><br>
+
+      AI 데이터센터 수요가 폭발하며 HBM·서버 DRAM에 생산능력이 집중되자, 일반 PC·스마트폰용 메모리까지 공급이 부족해지고 있어요. 그 결과 <b>DDR4·SLC NAND·NOR Flash 같은 구형 메모리</b>까지 가격이 오르고 있습니다.
+
+      <div class="edu-box formula">
+        <b>🔍 제프리스 메모리 가격 전망</b><br><br>
+        ① <b>2026년 3분기</b> — 전분기 대비 <span class="mono">+40~50%</span><br>
+        ② <b>2026년 4분기</b> — 전분기 대비 <span class="mono">+30~40%</span><br>
+        ③ <b>2027년</b> — 전년 대비 <span class="mono">+40~45%</span><br><br>
+        메모리 생산능력의 약 50%가 빅테크와의 장기계약(LTA)에 묶여 있고, '값싼 중국산 메모리'는 환상에 가깝다는 분석. 2028년에야 제한적 안정화가 예상됩니다.
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 밝쌤이 전한 대응 원칙</b><br><br>
+        메모리주는 <b>사이클 주식</b>이라, 가격 상승기엔 실적 추정치가 계속 올라 주가도 강하게 움직여요. 하지만 시장이 2028년 공급 증가나 수요 둔화를 먼저 보기 시작하면, 실적이 좋아도 주가는 먼저 흔들릴 수 있습니다.<br><br>
+        → 대형 메모리주는 <b>코어로 보유</b><br>
+        → 급등 구간에서는 <b>일부 수익실현으로 현금 확보</b><br>
+        → 조정 구간에서는 실적이 받쳐주는 소외주를 <b>분할 접근</b>
+      </div>
+
+      <b>한 줄 정리</b>: "메모리 투자는 계속 관심 가져도 됩니다. 다만 무조건 추격매수하기보다, 수익을 지키며 가져가는 구간"이라고 이야기했어요.
+    </div>
+  </div>
+
+  <!-- 3대 메가프로젝트 -->
+  <div class="edu-card">
+    <div class="edu-tag gold">🏗️ 오늘의 빅 이벤트</div>
+    <div class="edu-title">대한민국 대도약 3대 메가프로젝트 — 1,000조 국가 총력전 (SK증권 정리)</div>
+    <div class="edu-body">
+      이재용·최태원 회장이 직접 발표한 초대형 투자 계획을, SK증권(한동희·이동주)이 보도자료 기준으로 정리한 내용입니다.
+
+      <div class="edu-box example">
+        <b>📊 ① 반도체 — 투자 규모 & 속도전</b><br><br>
+        • <b>서남권(전남광주통합특별시)</b>: 800조 원 — 메모리 팹 4기 (삼성 2기 + SK하이닉스 2기)<br>
+        • <b>충청권</b>: 81조 원 — HBM 패키징 팹<br>
+        • 차세대 반도체 R&D: 15년간 30조 원 이상<br>
+        • 5년 내 D램 생산능력 2배 확대<br>
+        • 용인 팹 완공 단축: <b>SK하이닉스 12년 · 삼성전자 7년 단축</b>
+      </div>
+
+      <div class="edu-box example">
+        <b>🤖 ② 피지컬 AI & AI 데이터센터</b><br><br>
+        • <b>피지컬 AI</b>: 2028년 상용화 목표 10대 산업 특화 휴머노이드. 새만금·대경권 양대 로봇 생산기지<br>
+        • <b>AI 데이터센터</b>: 1단계(~2029) 8.4GW / 550조 원 → 2단계(~2035) 10GW 추가 → <b>총 18.4GW</b><br>
+        • 2030년 아시아·태평양 AIDC의 25% 수준 목표
+      </div>
+
+      <b>💡 시장 반응</b>: 호남 반도체 클러스터 기대감에 <b>금호건설이 상한가(+29.86%)</b>로 직행했고, 전력 인프라·소부장 종목들로 기대가 번졌어요. 김용범 정책실장이 예고한 대로 "숫자가 낯설" 만큼 규모가 컸습니다.
+    </div>
+  </div>
+
+  <!-- 탱이의 쉬운 설명 -->
+  <div class="edu-card">
+    <div class="edu-tag green">🧩 탱이쌤의 쉬운 경제 교실</div>
+    <div class="edu-title">왜 코스피는 빠지고 코스닥은 +8% 급등했을까?</div>
+    <div class="edu-body">
+      오늘 가장 헷갈리는 장면 — 같은 날인데 코스피는 마이너스, 코스닥은 폭등. 쉽게 풀어볼게요.
+
+      <div class="edu-box example">
+        <b>📖 쉽게 말하면: 쏠림이 풀리는 '순환매'</b><br><br>
+        그동안 시장의 돈은 <b>반도체(코스피 삼성전자·SK하이닉스)에 잔뜩 쏠려</b> 있었어요. 오늘 외국인이 그 반도체를 7.76조원어치 차익실현하자, 빠진 돈의 일부가 <b>그동안 소외됐던 코스닥 바이오·2차전지로 이동</b>했습니다.<br><br>
+        매수 주문이 한꺼번에 몰리자 코스닥엔 <b>매수 사이드카(매수 폭주 시 5분간 프로그램 매수를 멈추는 안전장치)</b>까지 발동됐어요.
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 우리에게 의미는?</b><br><br>
+        이혜나 대표님이 늘 강조하는 <b>"시장 전체 자금은 한정적이라 섹터별로 돌고 돈다"</b>는 원리가 그대로 나타난 날이에요.<br><br>
+        → 한 섹터가 쉴 때 다른 섹터가 뜨는 구조<br>
+        → 그래서 한 종목·한 섹터에만 '몰빵'하기보다 흐름을 넓게 보는 게 중요<br>
+        → 오늘 코스피 약세를 "업황 붕괴"가 아니라 "키 맞추기"로 읽는 이유
+      </div>
+
+      <b>참고</b>: 코스닥은 지난주 고점 대비 약 31%까지 빠졌던 터라(키움 한지영), 낙폭과대에 따른 기술적 반등 성격도 컸습니다.
+    </div>
+  </div>
+
+  <!-- 전력 인프라 -->
+  <div class="edu-card">
+    <div class="edu-tag blue">⚡ 이혜나 대표님 공유 자료</div>
+    <div class="edu-title">전력기기 초호황 2030년대 중반까지 — 효성중공업 인터뷰</div>
+    <div class="edu-body">
+      이혜나 대표님이 공유한 효성중공업 연구소장 인터뷰. <b>AI 데이터센터가 늘수록 '전력'이 병목</b>이 된다는 게 핵심입니다.
+
+      <div class="edu-box example">
+        <b>📊 왜 전력기기가 초호황일까?</b><br><br>
+        • 매켄지 등은 <b>2050년 글로벌 전력 수요가 2023년 대비 약 2배</b>로 급증할 것으로 전망<br>
+        • 미국 텍사스(ERCOT)는 향후 10년 내 <b>한국 전체 전력량을 넘는 135GW</b> 규모 데이터센터 계획 발표<br>
+        • 반면 송전망 확충은 민원 등으로 10년 이상 걸려 <b>공급 부족이 구조적</b>
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 우리에게 의미는?</b><br><br>
+        "AI = 반도체"만 보기 쉽지만, 그 반도체를 돌리려면 <b>전력 인프라(변압기·HVDC·전력기기)</b>가 반드시 필요해요. 효성중공업은 수주잔고가 20조 원을 돌파했고, 800㎸ 가스절연개폐장치·반도체 변압기(SST) 상용화를 추진 중입니다.<br><br>
+        오늘 외국인이 <b>두산에너빌리티(+8.51%)</b>를 담은 것도 같은 맥락. 3대 메가프로젝트에서도 "원전·화력발전까지 총동원, 전력은 국가가 책임"이 강조됐어요.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 06. ACTION PLAN -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-title">오늘 우리가 할 일</div>
+      <div class="section-subtitle">Action Plan · 프로미 체크리스트</div>
+    </div>
+  </div>
+
+  <div class="callout gold">
+    <span class="callout-icon">🎯</span>
+    오늘 핵심 원칙: <b>"쏠림 해소는 위기가 아니라 키 맞추기. 대형주는 코어로 보유, 급등은 일부 수익실현, 공포 매도는 금지."</b> 이혜나 대표님이 말한 것처럼 <b>"업황이 무너진 게 아니라 쏠림이 풀리는 중"</b>이라는 관점에서, 공포에 던지는 매매가 가장 위험합니다.
+  </div>
+
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>반도체 대형주는 코어로 보유</b> — "업황 무너짐? 다운사이클? 둘 다 아닙니다. 쏠림 해소 단계"라고 이혜나 대표님이 진단. 핵심 자산을 흔들림에 던지지 않기</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>급등 구간은 일부 수익실현으로 현금 확보</b> — "이미 수익이 많이 난 종목은 일부 수익실현"이라고 밝쌤이 권고. 현금은 다음 기회의 총알</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>조정 구간엔 실적 받쳐주는 소외주 분할 접근</b> — 메모리 소부장·후공정·전력 인프라(변압기·HVDC) 등 수혜 확산 가능성 체크</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>목요일 발행어음 이자 수령 확인</b> — 이혜나 대표님 안내: "이번 주 목요일 오전 중 브채(발행어음) 이자 5%(비과세) 지급" 미리 체크</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>7/1(수) 한국 6월 수출</b> — 반도체 수출 증가율 +100%대 중후반 유지 여부가 메인 관전 포인트(한지영). 메모리 피크아웃 노이즈를 해소할 환기점</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>7/2(목) 미국 6월 고용보고서</b> — 컨센서스 12.5만건(vs 5월 17.2만건). 서프라이즈 시 연준 긴축 우려가 다시 불거질 수 있음</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>코스닥 30주년 행사(7/1~3)</b> — 승강제·밸류업·기술특례 등 정책 기대감. 코스닥 반등 강도를 가를 단기 트리거</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>공포에 의한 반도체 전량 매도 금지</b> — "기다려봅시다. 일단 우리 애들 회복 좀 하고 오오"라고 이혜나 대표님이 당부. 단기 흔들림에 추세 자산을 던지지 말 것</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>'AI 슈퍼버블' 경고에 과민반응 금지</b> — 블룸버그가 전한 경고는 참고하되, 노이즈와 추세를 구분. 6월 수출 같은 실제 데이터로 확인하기</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>무조건 추격매수 금지</b> — "무조건 추격매수하기보다 분할로 접근"이라는 밝쌤 원칙. 급등에 휩쓸려 고점 추격하지 않기</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 07. TOMORROW -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-title">이번 주 체크포인트</div>
+      <div class="section-subtitle">This Week's Watchlist · 7월 첫째 주에 주목할 것</div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface);border:2px solid var(--blue-border);border-radius:18px;padding:32px;margin:24px 0;box-shadow:0 4px 16px rgba(37,99,235,0.08);position:relative">
+    <div class="key-row">
+      <div class="key-num" style="background:var(--red-bg);color:var(--red)">⚡</div>
+      <div class="key-content">
+        <div class="key-title">7/1(수) 한국 6월 수출 — 최대 관전 포인트</div>
+        <div class="key-desc">컨센서스 +60.7%(YoY, vs 5월 +53.4%)로 모멘텀 강화 기대. 특히 <b>반도체 수출 증가율(3월 +151%→4월 +174%→5월 +169%)이 +100%대 중후반을 유지</b>하는지가 메모리 피크아웃 노이즈를 잠재울 핵심.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--gold-bg);color:var(--gold)">📋</div>
+      <div class="key-content">
+        <div class="key-title">7/2(목) 미국 6월 고용보고서</div>
+        <div class="key-desc">신규 고용 컨센서스 12.5만건(vs 5월 17.2만건). 서프라이즈 시 "연준 긴축 우려"가 재부각될 수 있어요. 다만 6월 FOMC로 초점이 인플레→고용으로 이동한 만큼, 6월 2주차 같은 급락 확률은 낮다는 게 한지영의 판단.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--green-bg);color:var(--green)">🎉</div>
+      <div class="key-content">
+        <div class="key-title">7/1~3 코스닥 30주년 'KOSDAQ CONNECT 2026'</div>
+        <div class="key-desc">부실기업 퇴출 강화(상장 유지 시총 150억→<b>200억</b>, 동전주 상폐 요건)와 성장기업 자금 공급이 핵심. 제약·바이오·로봇·반도체 소부장·2차전지가 세션 주제로 등장. 코스닥 반등의 정책 트리거가 될지 주목.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--blue-bg);color:var(--blue)">🌏</div>
+      <div class="key-content">
+        <div class="key-title">6/30 미국-이란 카타르 협상 & 7/1 케빈 워시 연설</div>
+        <div class="key-desc">미-이란이 호르무즈 문제 실무 협상을 갖기로 한 만큼, 진전 시 유가·환율 안정 가능. 케빈 워시 연준 의장 연설은 6월 FOMC 입장에서 크게 벗어나지 않는, 증시 중립적 수준으로 예상(한지영).</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--purple-bg);color:var(--purple)">💎</div>
+      <div class="key-content">
+        <div class="key-title">7/3(금) 미국 휴장 — 거래 공백 유의</div>
+        <div class="key-desc">독립기념일 대체휴장으로 미국 증시가 쉬어요. 7월 첫 주는 한국 수출·미국 고용·코스닥 행사가 몰린 빅위크인 만큼, 변동성에 대비해 호흡을 길게 가져가는 게 좋습니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAILY QUOTE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="daily-quote">
+  <blockquote>"반도체 업황 무너짐? 다운사이클 시작? 둘 다 아닙니다."</blockquote>
+  <cite>— 이혜나 대표님, 2026년 6월 29일 오전 9시 30분</cite>
+  <div class="divider-gold"></div>
+  <p style="font-size:14px;color:var(--text-3);max-width:520px;margin:0 auto;line-height:1.9">
+    "쏠림현상 해소 + 시장이 키를 맞춰나가는 단계로 보시죠.<br>
+    기다려봅시다. 일단 우리 애들 회복 좀 하고 오오🙊🌸"<br><br>
+    <span style="font-size:12px">외국인이 7.7조를 던진 날에도, 우리가 봐야 할 건 여전히 '반도체' 였습니다 💛</span>
+  </p>
+</div>
+
+</div><!-- .page end -->
+
+<!-- FOOTER -->
+<div class="report-footer">
+  <div class="logo serif">From Us</div>
+  <p>프롬어스 Daily Report · 2026.06.29 (월)</p>
+  <p style="margin-top:8px">카카오톡 대화 분석 기반 · 프로미를 위한 일일 리포트</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--text-4)">본 리포트는 프롬어스 내부 대화를 분석하여 생성되었으며, 투자 권유가 아닙니다.</p>
+</div>
+
+</body>
+</html>
