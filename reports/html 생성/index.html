@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ko" style="background:#F7F4EF !important; color:#1A1A2E !important; color-scheme:light only !important;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#F7F4EF">
+<meta name="description" content="프롬어스 2026년 2분기 결산 리포트 — 전쟁의 공포에서 9,000선의 새 역사까지, 우리가 함께 통과한 90일의 기록. From Us Quarterly Review.">
+<meta property="og:title" content="프롬어스 2026 2분기 결산 · From Us Quarterly Review">
+<meta property="og:description" content="실대화 8,400건 · 참여자 71명 · 데일리 리포트 56편. 코스피 5,800에서 9,385까지, 프벤져스와 프로미가 함께 쓴 분기.">
+<meta property="og:type" content="website">
+<title>프롬어스 2026 2분기 결산 · From Us Quarterly Review</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:wght@600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  background:#F7F4EF !important;
+  color:#1A1A2E !important;
+  color-scheme: light only;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+  overflow-x:hidden;
+}
+body{
+  font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  font-weight:400;line-height:1.7;font-size:16px;min-height:100vh;position:relative;
+}
+img,svg,canvas{max-width:100%;display:block;filter:none !important}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;cursor:pointer;color:inherit}
+ul,ol{list-style:none}
+.serif{font-family:'Playfair Display',serif}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.up{color:#E0392B !important}
+.down{color:#2D5BE3 !important}
+
+/* ===== LOADER ===== */
+#loader{position:fixed;inset:0;background:#F7F4EF !important;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s ease,visibility .8s ease}
+#loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.ld-mark{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.2rem,7vw,3.6rem);letter-spacing:-.02em;color:#1A1A2E;display:flex;align-items:baseline;gap:.1em}
+.ld-mark .us{color:#2D5BE3}
+.ld-sub{margin-top:14px;font-size:.74rem;letter-spacing:.42em;text-transform:uppercase;color:#8A8A9C;font-weight:600}
+.ld-bar{margin-top:30px;width:min(220px,60vw);height:3px;background:#E4DFD6;border-radius:3px;overflow:hidden}
+.ld-fill{height:100%;width:0%;background:linear-gradient(90deg,#2D5BE3,#0FA3A3);border-radius:3px;transition:width .3s ease}
+
+/* ===== NAV ===== */
+#nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(16px,4vw,42px);background:rgba(247,244,239,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(26,26,46,.07);transform:translateY(-100%);transition:transform .5s ease}
+#nav.show{transform:translateY(0)}
+.nav-brand{font-family:'Playfair Display',serif;font-weight:900;font-size:1.18rem;letter-spacing:-.01em}
+.nav-brand .us{color:#2D5BE3}
+.nav-links{display:flex;gap:26px}
+.nav-links a{font-size:.82rem;font-weight:600;color:#4A4A63;letter-spacing:.01em;transition:color .25s;position:relative}
+.nav-links a:hover{color:#2D5BE3}
+.nav-cta{font-size:.78rem;font-weight:700;color:#fff !important;background:#1A1A2E;padding:8px 16px;border-radius:100px}
+@media(max-width:760px){.nav-links{display:none}}
+
+/* ===== LAYOUT ===== */
+section{position:relative;padding:clamp(72px,11vw,140px) clamp(18px,5vw,40px)}
+.wrap{max-width:1120px;margin:0 auto;position:relative;z-index:2}
+.kick{font-size:.74rem;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:#2D5BE3;margin-bottom:18px}
+.kick.teal{color:#0E8C92}
+.kick.gold{color:#9A6E1D}
+.kick.pink{color:#D23B72}
+.sec-title{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.9rem,5.2vw,3.2rem);line-height:1.12;letter-spacing:-.015em;color:#1A1A2E;margin-bottom:22px}
+.sec-lead{font-size:clamp(1rem,2.4vw,1.18rem);font-weight:400;color:#4A4A63;max-width:660px;line-height:1.85}
+.sec-lead b{font-weight:700;color:#1A1A2E}
+.reveal{opacity:0;transform:translateY(34px)}
+
+/* ===== HERO ===== */
+#hero{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:90px;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;z-index:0;opacity:.9}
+.hero-glow{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 70% 55% at 50% 42%,rgba(247,244,239,0) 0%,rgba(247,244,239,.55) 70%,#F7F4EF 100%);pointer-events:none}
+.hero-inner{position:relative;z-index:3;max-width:920px}
+.hero-badge{display:inline-flex;align-items:center;gap:9px;font-size:.72rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#2D5BE3;background:rgba(255,255,255,.7);border:1px solid rgba(45,91,227,.22);padding:9px 18px;border-radius:100px;margin-bottom:30px;box-shadow:0 8px 30px rgba(45,91,227,.08)}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:#E0392B;box-shadow:0 0 0 0 rgba(224,57,43,.5);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,57,43,.45)}70%{box-shadow:0 0 0 12px rgba(224,57,43,0)}100%{box-shadow:0 0 0 0 rgba(224,57,43,0)}}
+.hero-h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.6rem,8.4vw,5.6rem);line-height:1.04;letter-spacing:-.02em;color:#1A1A2E;margin-bottom:8px}
+.hero-h1 .em{background:linear-gradient(120deg,#2D5BE3,#0FA3A3 55%,#9A6E1D);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent !important;color:transparent !important;display:inline}
+.hero-kr{font-family:'Noto Sans KR',sans-serif;font-weight:900;font-size:clamp(1.5rem,5.6vw,2.9rem);line-height:1.2;letter-spacing:-.02em;color:#1A1A2E;margin-top:6px}
+.hero-sub{margin:30px auto 0;max-width:600px;font-size:clamp(1rem,2.5vw,1.18rem);line-height:1.85;color:#4A4A63;font-weight:500}
+.hero-sub b{color:#1A1A2E;font-weight:700}
+.hero-meta{margin-top:36px;display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center}
+.hero-chip{font-size:.8rem;font-weight:600;color:#4A4A63;background:rgba(255,255,255,.66);border:1px solid rgba(26,26,46,.1);padding:8px 15px;border-radius:100px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hero-chip b{color:#2D5BE3;font-weight:800}
+.scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px;color:#8A8A9C;font-size:.66rem;letter-spacing:.24em;font-weight:600}
+.scroll-cue .ln{width:1px;height:34px;background:linear-gradient(#8A8A9C,transparent);animation:cueln 1.8s ease-in-out infinite}
+@keyframes cueln{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ===== STAT STRIP ===== */
+#pulse{background:#1A1A2E !important}
+#pulse .kick{color:#7FA8FF}
+#pulse .sec-title,#pulse .sec-lead b{color:#FCFAF6}
+#pulse .sec-lead{color:#B6B6C6}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:20px;overflow:hidden;margin-top:46px}
+.stat-cell{background:#1A1A2E;padding:clamp(24px,4vw,40px) clamp(16px,3vw,30px);text-align:center;min-width:0}
+.stat-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(2rem,6vw,3.4rem);line-height:1;letter-spacing:-.02em;color:#FCFAF6;font-variant-numeric:tabular-nums}
+.stat-num .u{font-size:.42em;font-weight:600;color:#7FA8FF;margin-left:3px}
+.stat-num.t{color:#5FE3D8}.stat-num.t .u{color:#5FE3D8}
+.stat-num.g{color:#E8C36B}.stat-num.g .u{color:#E8C36B}
+.stat-lab{margin-top:12px;font-size:.82rem;font-weight:600;color:#9A9AAE;letter-spacing:.02em}
+.stat-sub{margin-top:5px;font-size:.7rem;color:#6E6E82;font-weight:500}
+@media(max-width:680px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.stat-grid{grid-template-columns:1fr}}
+
+/* ===== NARRATIVE ===== */
+.arc-band{display:flex;flex-wrap:wrap;gap:14px;margin-top:40px}
+.arc-step{flex:1 1 200px;min-width:0;background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-radius:18px;padding:26px 24px;position:relative;box-shadow:0 10px 34px rgba(26,26,46,.05)}
+.arc-step .no{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:#C2BEB4}
+.arc-step h4{font-size:1.12rem;font-weight:800;margin:8px 0 8px;color:#1A1A2E;letter-spacing:-.01em}
+.arc-step p{font-size:.9rem;color:#5A5A70;line-height:1.7}
+.arc-step .tag{display:inline-block;margin-top:14px;font-size:.72rem;font-weight:700;padding:5px 11px;border-radius:100px}
+.t-blue{background:rgba(45,91,227,.1);color:#2D5BE3}
+.t-teal{background:rgba(15,140,146,.12);color:#0E8C92}
+.t-pink{background:rgba(210,59,114,.1);color:#D23B72}
+
+/* ===== KOSPI CHART ===== */
+#index{background:linear-gradient(180deg,#F7F4EF 0%,#EFEAE1 100%) !important}
+.chart-card{margin-top:46px;background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-radius:24px;padding:clamp(20px,3.5vw,38px);box-shadow:0 20px 60px rgba(26,26,46,.07)}
+.chart-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:24px}
+.chart-head .big{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.8rem,5vw,2.7rem);color:#1A1A2E;line-height:1}
+.chart-head .big .pct{color:#E0392B;font-size:.6em}
+.chart-head .lab{font-size:.82rem;color:#6E6E82;font-weight:600;margin-top:6px}
+.chart-wrap{position:relative;height:380px;width:100%}
+.chart-note{margin-top:16px;font-size:.74rem;color:#8A8A9C;line-height:1.6;font-weight:500}
+@media(max-width:560px){.chart-wrap{height:300px}}
+
+/* ===== MONTH ACTS ===== */
+.month-act{display:grid;grid-template-columns:0.85fr 1.15fr;gap:clamp(20px,4vw,52px);align-items:center;margin-top:64px}
+.month-act:nth-child(even) .ma-visual{order:2}
+.ma-tag{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;letter-spacing:.1em;color:#8A8A9C}
+.ma-h{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.4rem,7vw,4.2rem);line-height:1;letter-spacing:-.02em;margin:10px 0 6px}
+.ma-h.apr{color:#2D5BE3}.ma-h.may{color:#0E8C92}.ma-h.jun{color:#D23B72}
+.ma-title{font-size:clamp(1.15rem,3vw,1.5rem);font-weight:800;color:#1A1A2E;margin-bottom:16px;letter-spacing:-.01em}
+.ma-desc{font-size:.96rem;color:#5A5A70;line-height:1.85}
+.ma-desc b{color:#1A1A2E;font-weight:700}
+.ma-stats{display:flex;gap:22px;margin-top:22px;flex-wrap:wrap}
+.ma-stat .n{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;color:#1A1A2E}
+.ma-stat .l{font-size:.72rem;color:#8A8A9C;font-weight:600;margin-top:2px}
+.ma-visual{min-width:0}
+.ma-card{background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-radius:22px;padding:clamp(18px,3vw,30px);box-shadow:0 16px 48px rgba(26,26,46,.06)}
+.ma-card .cap{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#A8A29A;margin-bottom:18px}
+.ev{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid rgba(26,26,46,.07)}
+.ev:last-child{border-bottom:none}
+.ev .d{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:#8A8A9C;flex-shrink:0;width:42px}
+.ev .x{font-size:.9rem;color:#3A3A50;line-height:1.5;min-width:0}
+.ev .x b{color:#1A1A2E;font-weight:700}
+.ev .v{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;flex-shrink:0}
+@media(max-width:820px){.month-act{grid-template-columns:1fr;gap:24px}.month-act:nth-child(even) .ma-visual{order:0}}
+
+/* ===== QUOTES ===== */
+#voices{background:#15233F !important}
+#voices .kick{color:#7FB0FF}
+#voices .sec-title{color:#FCFAF6}
+#voices .sec-lead{color:#AEB9D0}#voices .sec-lead b{color:#fff}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;margin-top:46px}
+.q-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:30px 26px;min-width:0;position:relative;transition:transform .4s ease,background .4s ease}
+.q-card:hover{transform:translateY(-6px);background:rgba(255,255,255,.09)}
+.q-mark{font-family:'Playfair Display',serif;font-size:3rem;line-height:.5;color:#5FE3D8;height:24px;display:block}
+.q-text{font-size:1.04rem;font-weight:600;line-height:1.7;color:#F2F4FA;margin:6px 0 18px;letter-spacing:-.01em}
+.q-by{display:flex;align-items:center;gap:11px}
+.q-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;color:#15233F;flex-shrink:0}
+.q-name{font-size:.84rem;font-weight:700;color:#DDE3F0}
+.q-date{font-size:.7rem;color:#8895B2;font-family:'JetBrains Mono',monospace}
+
+/* ===== ACTIVITY ===== */
+.act-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;margin-top:46px}
+.panel{background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-radius:22px;padding:clamp(20px,3vw,32px);box-shadow:0 14px 44px rgba(26,26,46,.05);min-width:0}
+.panel h4{font-size:1.04rem;font-weight:800;color:#1A1A2E;margin-bottom:4px;letter-spacing:-.01em}
+.panel .sub{font-size:.78rem;color:#8A8A9C;font-weight:600;margin-bottom:22px}
+.hb{display:flex;align-items:flex-end;gap:3px;height:150px;margin-top:8px}
+.hb .bar{flex:1;background:linear-gradient(180deg,#4361EE,#2D5BE3);border-radius:3px 3px 0 0;min-height:3px;position:relative;transition:height 1s cubic-bezier(.22,1,.36,1)}
+.hb .bar.peak{background:linear-gradient(180deg,#E0392B,#C42718)}
+.hb-axis{display:flex;justify-content:space-between;margin-top:8px;font-size:.62rem;color:#A8A29A;font-family:'JetBrains Mono',monospace}
+.mo-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.mo-row .ml{width:38px;font-weight:800;font-size:.9rem;color:#1A1A2E;flex-shrink:0}
+.mo-track{flex:1;height:30px;background:#EFEAE1;border-radius:8px;overflow:hidden;min-width:0}
+.mo-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:#fff;font-size:.76rem;font-weight:700;font-family:'JetBrains Mono',monospace;width:0;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+@media(max-width:820px){.act-grid{grid-template-columns:1fr}}
+
+/* ===== CONTRIBUTORS ===== */
+.lead-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(244px,1fr));gap:16px;margin-top:46px}
+.lead-card{background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-radius:18px;padding:22px 22px;display:flex;align-items:center;gap:16px;min-width:0;box-shadow:0 8px 28px rgba(26,26,46,.04);transition:transform .35s ease,box-shadow .35s ease}
+.lead-card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(26,26,46,.1)}
+.lead-card.lead{background:linear-gradient(135deg,#1A1A2E,#26365C);border-color:transparent}
+.lead-av{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:#fff;flex-shrink:0}
+.lead-meta{min-width:0}
+.lead-name{font-size:1rem;font-weight:800;color:#1A1A2E;letter-spacing:-.01em;white-space:normal}
+.lead-card.lead .lead-name{color:#fff}
+.lead-role{font-size:.74rem;font-weight:600;color:#8A8A9C;margin-top:1px}
+.lead-card.lead .lead-role{color:#9FB0E0}
+.lead-n{margin-left:auto;text-align:right;flex-shrink:0}
+.lead-n .nn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.16rem;color:#2D5BE3}
+.lead-card.lead .lead-n .nn{color:#7FB0FF}
+.lead-n .nl{font-size:.62rem;color:#A8A29A;font-weight:600}
+
+/* ===== SECTORS ===== */
+#sectors{background:#15233F !important}
+#sectors .kick{color:#7FB0FF}#sectors .sec-title{color:#FCFAF6}
+#sectors .sec-lead{color:#AEB9D0}#sectors .sec-lead b{color:#fff}
+.sect-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(96px,auto);gap:12px;margin-top:46px}
+.sect{border-radius:18px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;position:relative;overflow:hidden;color:#fff;border:1px solid rgba(255,255,255,.1)}
+.sect .sn{font-size:1.04rem;font-weight:800;letter-spacing:-.01em}
+.sect .sv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;margin-top:8px}
+.sect .sl{font-size:.68rem;font-weight:600;opacity:.78;margin-top:2px}
+.sz-xl{grid-column:span 2;grid-row:span 2}
+.sz-l{grid-column:span 2}
+.sc-1{background:linear-gradient(135deg,#2D5BE3,#1A3D9E)}
+.sc-2{background:linear-gradient(135deg,#0FA3A3,#0A7374)}
+.sc-3{background:linear-gradient(135deg,#D23B72,#9E2552)}
+.sc-4{background:linear-gradient(135deg,#C8923B,#9A6E1D)}
+.sc-5{background:linear-gradient(135deg,#5B6BC0,#3A4690)}
+.sc-d{background:rgba(255,255,255,.06)}
+@media(max-width:760px){.sect-grid{grid-template-columns:repeat(2,1fr)}.sz-xl{grid-column:span 2;grid-row:span 1}.sz-l{grid-column:span 2}}
+@media(max-width:380px){.sect-grid{grid-template-columns:1fr}.sz-xl,.sz-l{grid-column:span 1}}
+
+/* ===== HOLDINGS ===== */
+.hold-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(282px,1fr));gap:16px;margin-top:46px}
+.hold-card{background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-top:3px solid #2D5BE3;border-radius:18px;padding:24px 24px;min-width:0;box-shadow:0 10px 30px rgba(26,26,46,.05);transition:transform .35s ease,box-shadow .35s ease}
+.hold-card:hover{transform:translateY(-5px);box-shadow:0 20px 46px rgba(26,26,46,.1)}
+.hold-card.c-robot{border-top-color:#0FA3A3}
+.hold-card.c-chip{border-top-color:#C8923B}
+.hold-card.c-us{border-top-color:#D23B72}
+.hc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.hc-tk{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.32rem;color:#1A1A2E;letter-spacing:-.02em;min-width:0}
+.hc-tag{font-size:.64rem;font-weight:700;letter-spacing:.06em;padding:5px 10px;border-radius:100px;background:rgba(45,91,227,.1);color:#2D5BE3;flex-shrink:0;white-space:normal}
+.hc-tag.t-robot{background:rgba(15,140,146,.12);color:#0E8C92}
+.hc-tag.t-chip{background:rgba(154,110,29,.13);color:#9A6E1D}
+.hc-tag.t-us{background:rgba(210,59,114,.1);color:#D23B72}
+.hc-name{font-size:.9rem;font-weight:700;color:#3A3A50;margin-bottom:12px}
+.hc-why{font-size:.86rem;color:#5A5A70;line-height:1.72}
+.hc-why b{color:#1A1A2E;font-weight:700}
+.hc-foot{margin-top:15px;padding-top:13px;border-top:1px solid rgba(26,26,46,.07);font-size:.76rem;font-weight:600;color:#8A8A9C;display:flex;align-items:center;gap:7px}
+.hc-foot .mono{color:#2D5BE3;font-weight:700}
+
+/* ===== ARCHIVE ===== */
+.arch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:46px}
+.arch{background:#FCFAF6;border:1px solid rgba(26,26,46,.09);border-radius:16px;padding:22px 22px;min-width:0;border-left:3px solid #2D5BE3;transition:transform .3s ease,box-shadow .3s ease}
+.arch:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(26,26,46,.09)}
+.arch.may{border-left-color:#0FA3A3}.arch.jun{border-left-color:#D23B72}
+.arch .ad{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:#A8A29A}
+.arch .ah{font-size:1.04rem;font-weight:800;color:#1A1A2E;margin:7px 0 7px;line-height:1.34;letter-spacing:-.01em}
+.arch .ax{font-size:.84rem;color:#6A6A80;line-height:1.6}
+.arch .av{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700}
+
+/* ===== CLOSE ===== */
+#close{text-align:center;background:linear-gradient(180deg,#EFEAE1,#F7F4EF) !important}
+.close-h{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.1rem,6vw,3.6rem);line-height:1.12;letter-spacing:-.02em;color:#1A1A2E;max-width:720px;margin:0 auto 24px}
+.close-h .em{color:#2D5BE3}
+.close-p{font-size:clamp(1rem,2.5vw,1.15rem);color:#4A4A63;max-width:560px;margin:0 auto;line-height:1.9}
+.close-p b{color:#1A1A2E;font-weight:700}
+.close-sig{margin-top:40px;font-family:'Playfair Display',serif;font-weight:900;font-size:1.5rem;color:#1A1A2E}
+.close-sig .us{color:#2D5BE3}
+.close-meta{margin-top:8px;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;color:#8A8A9C;font-weight:600}
+
+/* ===== FOOTER ===== */
+footer{padding:46px 20px 60px;text-align:center;background:#F7F4EF !important;border-top:1px solid rgba(26,26,46,.08)}
+.foot-disc{max-width:680px;margin:0 auto;font-size:.74rem;color:#9A9AAE;line-height:1.8}
+.foot-disc b{color:#6A6A80;font-weight:700}
+.foot-copy{margin-top:18px;font-size:.7rem;color:#B4B0A6;font-weight:500}
+
+/* ===== DARK MODE OVERRIDE (force light) ===== */
+@media (prefers-color-scheme: dark){
+  html,body{background:#F7F4EF !important;color:#1A1A2E !important}
+  #pulse,#voices,#sectors{ }
+  .hero-h1 .em{-webkit-text-fill-color:transparent !important;color:transparent !important}
+  canvas,img,svg{filter:none !important}
+  .sec-title,.ma-title,.panel h4,.lead-name,.arch .ah,.close-h{color:#1A1A2E}
+  #pulse .sec-title,#voices .sec-title,#sectors .sec-title,#pulse .stat-num{color:#FCFAF6}
+}
+</style>
+</head>
+<body style="background:#F7F4EF !important;color:#1A1A2E !important">
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-mark">From<span class="us">Us</span></div>
+  <div class="ld-sub">Quarterly Review</div>
+  <div class="ld-bar"><div class="ld-fill" id="ldFill"></div></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-brand">From<span class="us">Us</span> · 2Q</div>
+  <div class="nav-links">
+    <a href="#index">지수</a>
+    <a href="#months">3개월</a>
+    <a href="#voices">어록</a>
+    <a href="#activity">활동</a>
+    <a href="#holdings">종목</a>
+    <a href="#archive">리포트</a>
+  </div>
+  <a href="#close" class="nav-cta">3분기로 →</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="dot"></span>2026 · 2nd Quarter · Apr–Jun</div>
+    <h1 class="hero-h1">90일, 우리가 함께<br><span class="em serif">통과한 시장</span></h1>
+    <div class="hero-kr">전쟁의 공포에서 9,000선까지</div>
+    <p class="hero-sub">코스피가 <b>5,800에서 9,385까지</b> 달려간 한 분기. 프벤져스가 길을 밝히고 프로미가 함께 걸은 <b>프롬어스의 2분기</b>를 한 장에 담았습니다.</p>
+    <div class="hero-meta">
+      <span class="hero-chip">실대화 <b>8,400+</b></span>
+      <span class="hero-chip">참여자 <b>71명</b></span>
+      <span class="hero-chip">데일리 리포트 <b>56편</b></span>
+      <span class="hero-chip">위클리 <b>8편</b></span>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>SCROLL</span><span class="ln"></span></div>
+</section>
+
+<!-- PULSE / STAT STRIP -->
+<section id="pulse">
+  <div class="wrap">
+    <div class="kick reveal">By the Numbers</div>
+    <h2 class="sec-title reveal">숫자로 보는 2분기</h2>
+    <p class="sec-lead reveal">90일 동안 프롬어스 단톡방에 쌓인 기록입니다. 매일 아침 리포트가 올라왔고, 폭락과 신고가가 번갈아 오는 동안 우리는 <b>한 번도 대화를 멈추지 않았습니다.</b></p>
+    <div class="stat-grid reveal">
+      <div class="stat-cell"><div class="stat-num" data-to="8407">0</div><div class="stat-lab">실대화 메시지</div><div class="stat-sub">시스템 메시지 제외 · 4–6월</div></div>
+      <div class="stat-cell"><div class="stat-num t" data-to="71">0</div><div class="stat-lab">함께한 참여자</div><div class="stat-sub">2분기 발화 기준</div></div>
+      <div class="stat-cell"><div class="stat-num g" data-to="56">0</div><div class="stat-lab">데일리 리포트</div><div class="stat-sub">+ 위클리 8편</div></div>
+      <div class="stat-cell"><div class="stat-num" data-to="2340">0</div><div class="stat-lab">공유한 링크·자료</div><div class="stat-sub">뉴스·증권사 리포트·텔레그램</div></div>
+      <div class="stat-cell"><div class="stat-num t" data-to="5">0</div><div class="stat-lab">6월 서킷브레이커</div><div class="stat-sub">올해 누적 5회</div></div>
+      <div class="stat-cell"><div class="stat-num g" data-pct="1" data-to="62">0</div><div class="stat-lab">코스피 분기 상승폭</div><div class="stat-sub">5,800 → 9,385 장중 기준</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- NARRATIVE ARC -->
+<section id="arc">
+  <div class="wrap">
+    <div class="kick reveal">The Story of Q2</div>
+    <h2 class="sec-title reveal">한 문장으로 요약하면</h2>
+    <p class="sec-lead reveal"><b>"전쟁의 공포에서 시작해, 실적으로 증명하고, 9,000선의 새 역사를 쓴 분기."</b> 4월엔 중동 전쟁과 실적이 줄다리기를 했고, 5월엔 7천·8천피 시대가 열렸으며, 6월엔 9천피와 다섯 번의 서킷브레이커가 함께 왔습니다.</p>
+    <div class="arc-band">
+      <div class="arc-step reveal"><div class="no">01 · APRIL</div><h4>전쟁 vs 실적</h4><p>이란 최후통첩과 휴전 협상이 오가는 사이, 삼성전자 57.2조·SK하이닉스 37.6조 어닝 서프라이즈가 시장을 끌어올렸습니다.</p><span class="tag t-blue">코스피 6,600 돌파</span></div>
+      <div class="arc-step reveal"><div class="no">02 · MAY</div><h4>7천·8천피 시대</h4><p>엔비디아의 중국 빗장이 풀리고 SK하이닉스 시총이 1조 달러를 넘었습니다. "하반기는 미장"이라는 대표님의 시나리오가 나온 달.</p><span class="tag t-teal">코스피 8,476 신고가</span></div>
+      <div class="arc-step reveal"><div class="no">03 · JUNE</div><h4>9천피와 변동성</h4><p>사상 첫 9,000선 돌파, 그리고 하이닉스가 삼성전자를 제치고 시총 1위로. 다섯 번의 서킷브레이커 속에서도 추세는 살아있었습니다.</p><span class="tag t-pink">코스피 9,385 장중</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- KOSPI INDEX CHART -->
+<section id="index">
+  <div class="wrap">
+    <div class="kick teal reveal">KOSPI · The Climb</div>
+    <h2 class="sec-title reveal">5,800에서 9,385까지,<br>코스피의 90일</h2>
+    <p class="sec-lead reveal">프롬어스 데일리 리포트에 기록된 코스피 마일스톤입니다. 한 칸씩 6,000 · 7,000 · 8,000 · 9,000을 차례로 밟았습니다. <b>한국 증시 기준 상승은 빨강, 하락은 파랑.</b></p>
+    <div class="chart-card reveal">
+      <div class="chart-head">
+        <div>
+          <div class="big mono">9,385<span class="pct"> ▲ 장중 최고</span></div>
+          <div class="lab">2026.06.19 기록 · 분기 시작 대비 약 +62%</div>
+        </div>
+        <div>
+          <div class="big mono" style="font-size:clamp(1.2rem,3.5vw,1.6rem);color:#2D5BE3">5회</div>
+          <div class="lab">6월 서킷브레이커 발동</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="kospiChart"></canvas></div>
+      <p class="chart-note">🚨 본 차트는 프롬어스 데일리 리포트 커버에 기록된 코스피 마일스톤(종가·장중 혼재)을 시각화한 것으로, 커뮤니티 내부 기록 기준입니다. 일부 구간은 흐름 표현을 위한 추정치를 포함합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MONTH ACTS -->
+<section id="months">
+  <div class="wrap">
+    <div class="kick reveal">Three Acts</div>
+    <h2 class="sec-title reveal">3개월, 세 개의 장면</h2>
+
+    <div class="month-act">
+      <div class="reveal">
+        <div class="ma-tag">ACT 01 · 2026.04</div>
+        <div class="ma-h apr serif">April</div>
+        <div class="ma-title">전쟁과 실적의 줄다리기</div>
+        <p class="ma-desc">트럼프의 이란 최후통첩과 휴전 협상이 매일 헤드라인을 바꾸는 사이, 삼성전자가 <b>57.2조 어닝 서프라이즈</b>를 냈습니다. 4/8 휴전 기대에 코스피는 하루 <b>+6.87%</b> 급등했고, 외국인이 돌아오며 6,000선을 재탈환·돌파했습니다. 월말 한 달 만에 31% 오른 뒤 첫 조정으로 마감.</p>
+        <div class="ma-stats">
+          <div class="ma-stat"><div class="n up">+6.87%</div><div class="l">4/8 휴전 급등</div></div>
+          <div class="ma-stat"><div class="n">6,600</div><div class="l">코스피 첫 돌파</div></div>
+          <div class="ma-stat"><div class="n">3,084</div><div class="l">4월 대화량</div></div>
+        </div>
+      </div>
+      <div class="ma-visual reveal">
+        <div class="ma-card">
+          <div class="cap">April · Key Days</div>
+          <div class="ev"><span class="d">04/07</span><span class="x"><b>삼성전자</b> 57.2조 사상 최대 실적</span><span class="v up">서프라이즈</span></div>
+          <div class="ev"><span class="d">04/08</span><span class="x"><b>2주 휴전</b> 합의, 코스피 역사적 급등</span><span class="v up">+6.87%</span></div>
+          <div class="ev"><span class="d">04/23</span><span class="x"><b>SK하이닉스</b> 영업익 37.6조 (+72%)</span><span class="v up">서프라이즈</span></div>
+          <div class="ev"><span class="d">04/24</span><span class="x"><b>코스닥 1,200p</b> 26년의 기다림</span><span class="v up">신고가</span></div>
+          <div class="ev"><span class="d">04/28</span><span class="x">코스피 사상최고 — <b>"한국이 영국을 넘었다"</b></span><span class="v up">신고가</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="month-act">
+      <div class="reveal">
+        <div class="ma-tag">ACT 02 · 2026.05</div>
+        <div class="ma-h may serif">May</div>
+        <div class="ma-title">7천·8천피 시대의 개막</div>
+        <p class="ma-desc">연휴 직후 외국인 3조 폭매수로 6,900을 찍더니, 5/6 <b>코스피 7,000 시대</b>가 열렸습니다. 엔비디아 H200의 중국 판매가 승인된 "혜나님의 날", 12분기 연속 매출 신기록까지. SK하이닉스 시총이 <b>1조 달러</b>를 넘었고, 월말 코스피는 <b>8,476 신고가</b>를 그렸습니다.</p>
+        <div class="ma-stats">
+          <div class="ma-stat"><div class="n">7,000</div><div class="l">5/6 시대 개막</div></div>
+          <div class="ma-stat"><div class="n">$1조</div><div class="l">하이닉스 시총</div></div>
+          <div class="ma-stat"><div class="n">2,338</div><div class="l">5월 대화량</div></div>
+        </div>
+      </div>
+      <div class="ma-visual reveal">
+        <div class="ma-card">
+          <div class="cap">May · Key Days</div>
+          <div class="ev"><span class="d">05/06</span><span class="x"><b>코스피 7,000</b> 시대 개막, 외인 이틀 7조</span><span class="v up">+6.45%</span></div>
+          <div class="ev"><span class="d">05/14</span><span class="x"><b>엔비디아 H200</b> 중국 판매 승인</span><span class="v up">미·중</span></div>
+          <div class="ev"><span class="d">05/15</span><span class="x">사상 첫 <b>8,000선</b> 돌파 후 매도 사이드카</span><span class="v">변동성</span></div>
+          <div class="ev"><span class="d">05/21</span><span class="x">엔비디아 12분기 연속 최고 · <b>"하반기는 미장"</b></span><span class="v up">+8.42%</span></div>
+          <div class="ev"><span class="d">05/27</span><span class="x"><b>SK하이닉스 시총 1조 달러</b> 돌파</span><span class="v up">8,228</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="month-act">
+      <div class="reveal">
+        <div class="ma-tag">ACT 03 · 2026.06</div>
+        <div class="ma-h jun serif">June</div>
+        <div class="ma-title">9천피, 그리고 다섯 번의 서킷</div>
+        <p class="ma-desc">6/18 코스피가 <b>사상 첫 9,000선</b>을 밟았고, 6/22 <b>SK하이닉스가 삼성전자를 제치고 시총 1위</b>에 올랐습니다(25년 7개월 만). 미·이란 종전 기대가 현실이 되는 사이, 쌍 서킷브레이커(-8.29%)와 -9.99% 폭락이 번갈아 왔지만 — 대표님 말처럼 <b>"펀더멘탈이 무너진 게 아니라, 그간 너무 올라서"</b>였습니다.</p>
+        <div class="ma-stats">
+          <div class="ma-stat"><div class="n">9,000</div><div class="l">6/18 첫 돌파</div></div>
+          <div class="ma-stat"><div class="n up">1위</div><div class="l">하이닉스 시총</div></div>
+          <div class="ma-stat"><div class="n">2,985</div><div class="l">6월 대화량</div></div>
+        </div>
+      </div>
+      <div class="ma-visual reveal">
+        <div class="ma-card">
+          <div class="cap">June · Key Days</div>
+          <div class="ev"><span class="d">06/08</span><span class="x">쌍 서킷브레이커 — <b>"많이 올랐으니 하락하는 것"</b></span><span class="v down">-8.29%</span></div>
+          <div class="ev"><span class="d">06/18</span><span class="x">코스피 사상 첫 <b>9,000선</b> 마감</span><span class="v up">신기록</span></div>
+          <div class="ev"><span class="d">06/22</span><span class="x"><b>하이닉스, 삼성전자 제치고 시총 1위</b></span><span class="v up">대전환</span></div>
+          <div class="ev"><span class="d">06/25</span><span class="x">마이크론發 +5.42% — 피크아웃 우려 해소</span><span class="v up">8,930</span></div>
+          <div class="ev"><span class="d">06/30</span><span class="x">외인 3.8조 매도에도 반등, <b>변동성 진정</b></span><span class="v up">+0.97%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICES / QUOTES -->
+<section id="voices">
+  <div class="wrap">
+    <div class="kick reveal">Team Insights · 프벤져스 핵심 한마디</div>
+    <h2 class="sec-title reveal">폭락에도 흔들리지 않은 말들</h2>
+    <p class="sec-lead reveal">2분기 내내 리포트 커버를 채운 프벤져스의 문장들. 공포를 사고 소음을 파는 <b>프롬어스의 투자 철학</b>이 그대로 담겨 있습니다.</p>
+    <div class="q-grid">
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">전쟁을 위한 휴전이 아니라, 종전을 위한 휴전입니다.</p><div class="q-by"><span class="q-av" style="background:#5FE3D8">혜</span><span><span class="q-name">이혜나 대표님</span> <span class="q-date">· 04.08</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">사이클의 끝이 아니라, 주식시대의 시작이라는 신호.</p><div class="q-by"><span class="q-av" style="background:#7FB0FF">프</span><span><span class="q-name">프벤져스</span> <span class="q-date">· 04.27</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">하락장에 용기를 가졌던 분들이 승자가 됩니다.</p><div class="q-by"><span class="q-av" style="background:#5FE3D8">혜</span><span><span class="q-name">이혜나 대표님</span> <span class="q-date">· 05.06</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">환희 열심히 즐겼으니, 적정한 조정도 기다려봅니다.</p><div class="q-by"><span class="q-av" style="background:#E8C36B">밝</span><span><span class="q-name">밝쌤</span> <span class="q-date">· 05.15</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">하반기는 미장입니다.</p><div class="q-by"><span class="q-av" style="background:#5FE3D8">혜</span><span><span class="q-name">이혜나 대표님</span> <span class="q-date">· 05.21</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">신호를 사고, 소음을 팝니다.</p><div class="q-by"><span class="q-av" style="background:#7FB0FF">프</span><span><span class="q-name">프벤져스</span> <span class="q-date">· 05.26</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">많이 올랐으니, 하락하는 겁니다. 추세는 살아있어요.</p><div class="q-by"><span class="q-av" style="background:#5FE3D8">혜</span><span><span class="q-name">이혜나 대표님</span> <span class="q-date">· 06.08</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">기회라는 건 늘 오니까요. 차분히 기다려요.</p><div class="q-by"><span class="q-av" style="background:#5FE3D8">혜</span><span><span class="q-name">이혜나 대표님</span> <span class="q-date">· 06.10</span></span></div></div>
+      <div class="q-card reveal"><span class="q-mark serif">&ldquo;</span><p class="q-text">현금 비중 확대보다, 분할 매수로 대응할 자리.</p><div class="q-by"><span class="q-av" style="background:#E8C36B">탱</span><span><span class="q-name">탱이쌤</span> <span class="q-date">· 06.24</span></span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ACTIVITY -->
+<section id="activity">
+  <div class="wrap">
+    <div class="kick gold reveal">Community Pulse</div>
+    <h2 class="sec-title reveal">우리는 언제 가장 뜨거웠나</h2>
+    <p class="sec-lead reveal">대화는 <b>아침 8시</b>에 정점을 찍었습니다. 모닝 리포트가 올라오는 시간. 그리고 미국장이 열린 밤 <b>9시</b>에 다시 한 번 불이 붙었죠.</p>
+    <div class="act-grid">
+      <div class="panel reveal">
+        <h4>시간대별 대화량</h4>
+        <div class="sub">2분기 실대화 기준 · 아침 8시 피크</div>
+        <div class="hb" id="hourBars"></div>
+        <div class="hb-axis"><span>0시</span><span>6시</span><span>8시</span><span>12시</span><span>18시</span><span>21시</span><span>23시</span></div>
+      </div>
+      <div class="panel reveal">
+        <h4>월별 대화량 추이</h4>
+        <div class="sub">실대화 메시지 기준</div>
+        <div style="margin-top:18px">
+          <div class="mo-row"><span class="ml">4월</span><div class="mo-track"><div class="mo-fill" style="background:linear-gradient(90deg,#4361EE,#2D5BE3)" data-w="100">3,084</div></div></div>
+          <div class="mo-row"><span class="ml">5월</span><div class="mo-track"><div class="mo-fill" style="background:linear-gradient(90deg,#14B8C4,#0FA3A3)" data-w="76">2,338</div></div></div>
+          <div class="mo-row"><span class="ml">6월</span><div class="mo-track"><div class="mo-fill" style="background:linear-gradient(90deg,#E5447D,#D23B72)" data-w="97">2,985</div></div></div>
+        </div>
+        <p style="margin-top:24px;font-size:.84rem;color:#6A6A80;line-height:1.7">5월 황금연휴로 잠시 숨을 골랐지만, <b style="color:#1A1A2E">6월 변동성 장세</b>에서 다시 대화가 폭발했습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTORS -->
+<section id="sectors">
+  <div class="wrap">
+    <div class="kick reveal">What We Talked About</div>
+    <h2 class="sec-title reveal">우리가 가장 많이 이야기한 것</h2>
+    <p class="sec-lead reveal">2분기 대화 속 키워드 언급 빈도입니다. 한 단어로 요약하면 — <b>반도체</b>. 그 뒤를 로봇·엔비디아·하이닉스가 따랐습니다.</p>
+    <div class="sect-grid">
+      <div class="sect sz-xl sc-1 reveal"><div class="sn">반도체 · HBM</div><div><div class="sv">2,243</div><div class="sl">분기 최다 언급 · 메모리 슈퍼사이클</div></div></div>
+      <div class="sect sz-l sc-2 reveal"><div class="sn">로봇 · 휴머노이드</div><div><div class="sv">960</div><div class="sl">현대차·테슬라 옵티머스</div></div></div>
+      <div class="sect sc-3 reveal"><div class="sn">엔비디아</div><div><div class="sv">722</div><div class="sl">H200·신기록</div></div></div>
+      <div class="sect sc-4 reveal"><div class="sn">삼성전자</div><div><div class="sv">598</div><div class="sl">57.2조 실적</div></div></div>
+      <div class="sect sc-5 reveal"><div class="sn">SK하이닉스</div><div><div class="sv">503</div><div class="sl">시총 1위 등극</div></div></div>
+      <div class="sect sc-d reveal"><div class="sn">2차전지</div><div><div class="sv">391</div><div class="sl">ESS·배터리</div></div></div>
+      <div class="sect sc-d reveal"><div class="sn">방산·조선</div><div><div class="sv">346</div><div class="sl">슈퍼사이클</div></div></div>
+      <div class="sect sc-d reveal"><div class="sn">테슬라</div><div><div class="sv">446</div><div class="sl">로보택시</div></div></div>
+      <div class="sect sc-d reveal"><div class="sn">원전·태양광</div><div><div class="sv">110</div><div class="sl">에너지</div></div></div>
+    </div>
+    <p style="margin-top:18px;font-size:.74rem;color:#8895B2;font-weight:500" class="reveal">※ 키워드 단순 언급 빈도 기준(중복·유사어 포함)이며, 투자 비중·수익률과는 무관합니다.</p>
+  </div>
+</section>
+
+<!-- HOLDINGS -->
+<section id="holdings">
+  <div class="wrap">
+    <div class="kick reveal">Key Trades · 주요 매매종목</div>
+    <h2 class="sec-title reveal">2분기, 우리가 담은 종목들</h2>
+    <p class="sec-lead reveal">대화방에서 가장 자주 오간 매매·관심 종목입니다. 중심엔 대표님의 시그니처 <b>TQQQ</b>, 로봇 대장 <b>현대차</b>, 그리고 메모리 삼총사가 있었습니다.</p>
+    <div class="hold-grid">
+
+      <div class="hold-card reveal">
+        <div class="hc-top"><span class="hc-tk">TQQQ</span><span class="hc-tag">레버리지 ETF</span></div>
+        <div class="hc-name">나스닥100 · 3배 레버리지</div>
+        <p class="hc-why">대표님의 시그니처 매매. <b>브라질채권을 매도</b>해 원금은 발행어음에, 이자는 <b>TQQQ로 2분할 매수</b>. 4월 세금시즌 종료 후 유동성 방출 + 종전 기대가 진입 근거였습니다.</p>
+        <div class="hc-foot">진입 시그널 · <span class="mono">나스닥 밑꼬리 추세전환</span></div>
+      </div>
+
+      <div class="hold-card c-robot reveal">
+        <div class="hc-top"><span class="hc-tk">현대차</span><span class="hc-tag t-robot">로봇·피지컬AI</span></div>
+        <div class="hc-name">005380 · 로봇 대장주</div>
+        <p class="hc-why">신한 리포트 <b>"1Q는 숨고르기, Physical AI로 달릴 하반기"</b>. 보스턴다이나믹스를 품은 그룹으로, 대표님 섹터 픽 흐름에서 핵심 자리를 차지했습니다.</p>
+        <div class="hc-foot">섹터 우선순위 · <span class="mono">방산 &gt; 현대차그룹 &gt; 로봇</span></div>
+      </div>
+
+      <div class="hold-card c-robot reveal">
+        <div class="hc-top"><span class="hc-tk">로봇 밸류체인</span><span class="hc-tag t-robot">테마</span></div>
+        <div class="hc-name">두산로보틱스 · 레인보우 · 명신산업</div>
+        <p class="hc-why">탱이쌤의 픽. <b>2030년 피지컬AI 실용화</b>를 더 빠르게 보는 시각. 명신산업은 로보택시 부품 턴어라운드 스토리로 주목받았습니다.</p>
+        <div class="hc-foot">테마 · <span class="mono">휴머노이드 상용화 원년</span></div>
+      </div>
+
+      <div class="hold-card c-chip reveal">
+        <div class="hc-top"><span class="hc-tk">삼성전자</span><span class="hc-tag t-chip">반도체·HBM</span></div>
+        <div class="hc-name">005930 · 메모리 대장</div>
+        <p class="hc-why">1Q26 영업익 <b>57.2조 어닝 서프라이즈</b>(+755%). HBM3E·HBM4 효과로 4월 한 달에만 약 <b>+30%</b> 급등했습니다.</p>
+        <div class="hc-foot">1Q26 영업익 · <span class="mono">57.2조 사상최대</span></div>
+      </div>
+
+      <div class="hold-card c-chip reveal">
+        <div class="hc-top"><span class="hc-tk">SK하이닉스</span><span class="hc-tag t-chip">반도체·HBM</span></div>
+        <div class="hc-name">000660 · HBM 1위</div>
+        <p class="hc-why">영업익 <b>37.6조(+72% 서프라이즈)</b>. 5월 시총 1조 달러를 넘고, <b>6/22 삼성전자를 제치고 코스피 시총 1위</b>에 올랐습니다.</p>
+        <div class="hc-foot">25년 7개월 만 · <span class="mono">시총 1위 등극</span></div>
+      </div>
+
+      <div class="hold-card c-us reveal">
+        <div class="hc-top"><span class="hc-tk">마이크론 · MU</span><span class="hc-tag t-us">미장·메모리</span></div>
+        <div class="hc-name">메모리 업황 풍향계</div>
+        <p class="hc-why">KeyBanc <b>비중확대 · 목표가 $600</b>. 메모리 가격 상승의 트리거로, <b>6/25 마이크론發 코스피 +5.42%</b>를 이끌며 피크아웃 우려를 한 방에 날렸습니다.</p>
+        <div class="hc-foot">6/25 반등 · <span class="mono">코스피 +5.42%</span></div>
+      </div>
+
+      <div class="hold-card c-us reveal">
+        <div class="hc-top"><span class="hc-tk">엔비디아 · NVDA</span><span class="hc-tag t-us">미장·AI반도체</span></div>
+        <div class="hc-name">AI 사이클의 심장</div>
+        <p class="hc-why"><b>H200 중국 판매 승인</b>("혜나님의 날", 5/14). 12분기 연속 매출 신기록과 영업익 80조로 "갓비디아"라 불렸습니다.</p>
+        <div class="hc-foot">5/21 · <span class="mono">12분기 연속 신기록</span></div>
+      </div>
+
+      <div class="hold-card c-us reveal">
+        <div class="hc-top"><span class="hc-tk">테슬라 · TSLA</span><span class="hc-tag t-us">미장·로보택시</span></div>
+        <div class="hc-name">로보택시 · 옵티머스</div>
+        <p class="hc-why"><b>FSD 14.3</b> 배포와 옵티머스 자기복제 생산 스토리. 전쟁통에도 기술 개발은 이어졌고, 캐시우드의 매수 행렬이 더해졌습니다.</p>
+        <div class="hc-foot">피지컬AI · <span class="mono">로보택시 본격화</span></div>
+      </div>
+
+    </div>
+    <p style="margin-top:20px;font-size:.74rem;color:#8A8A9C;font-weight:500;line-height:1.7" class="reveal">※ 본 정리는 프롬어스 대화방에서 오간 매매·관심 종목을 회고 목적으로 추린 것이며, <b style="color:#6A6A80">특정 종목의 매수·매도를 권유하지 않습니다.</b> 레버리지 ETF(TQQQ 등)는 변동성과 손실 위험이 큰 상품입니다. 모든 투자 판단과 책임은 투자자 본인에게 있습니다.</p>
+  </div>
+</section>
+
+<!-- ARCHIVE -->
+<section id="archive">
+  <div class="wrap">
+    <div class="kick reveal">Report Archive · 56편의 기록</div>
+    <h2 class="sec-title reveal">분기를 관통한 헤드라인</h2>
+    <p class="sec-lead reveal">매 거래일 아침 발행된 데일리 리포트 중, 2분기를 가장 잘 보여주는 <b>아홉 장면</b>을 골랐습니다.</p>
+    <div class="arch-grid">
+      <div class="arch reveal"><div class="ad">2026.04.08 · DAILY</div><div class="ah">휴전, 그리고 봄이 왔다</div><div class="ax">트럼프 2주 휴전 합의 · 코스피 역사적 급등</div><div class="av up">코스피 +6.87%</div></div>
+      <div class="arch reveal"><div class="ad">2026.04.23 · DAILY</div><div class="ah">하이닉스의 72%, 서프라이즈의 날</div><div class="ax">SK하이닉스 영업익 37.6조 · GDP +1.7% 깜짝 성장</div><div class="av up">실적 증명</div></div>
+      <div class="arch reveal"><div class="ad">2026.04.28 · DAILY</div><div class="ah">한국이 영국을 넘었다</div><div class="ax">코스피 사상최고 · KoAct ETF 41%</div><div class="av up">신고가</div></div>
+      <div class="arch may reveal"><div class="ad">2026.05.06 · DAILY</div><div class="ah">코스피 7,000 시대 개막</div><div class="ax">외인 이틀 7조 매수 · 삼전+하이닉스 2,700조</div><div class="av up">+6.45%</div></div>
+      <div class="arch may reveal"><div class="ad">2026.05.21 · DAILY</div><div class="ah">역사를 갈아치우고도, 또 갈아치우다</div><div class="ax">엔비디아 12분기 연속 신기록 · "하반기는 미장"</div><div class="av up">+8.42%</div></div>
+      <div class="arch may reveal"><div class="ad">2026.05.27 · DAILY</div><div class="ah">삼닉의, 삼닉에 의한, 삼닉을 위한</div><div class="ax">SK하이닉스 시총 1조 달러 돌파 · KOSPI 8,228</div><div class="av up">+2.25%</div></div>
+      <div class="arch jun reveal"><div class="ad">2026.06.18 · DAILY</div><div class="ah">9000이라는 새 역사</div><div class="ax">코스피 사상 첫 9,000선 마감 · 추세는 살아있다</div><div class="av up">+2.25%</div></div>
+      <div class="arch jun reveal"><div class="ad">2026.06.22 · DAILY</div><div class="ah">왕좌가 바뀐 날, 하이닉스가 1위에</div><div class="ax">25년 7개월 만의 시총 1위 대전환</div><div class="av up">대전환</div></div>
+      <div class="arch jun reveal"><div class="ad">2026.06.30 · DAILY</div><div class="ah">가라앉는 변동성, 그건 좋은 신호</div><div class="ax">외인 3.8조 매도에도 반등 마감 · 2분기의 끝</div><div class="av up">+0.97%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSE -->
+<section id="close">
+  <div class="wrap">
+    <h2 class="close-h reveal">전쟁의 공포로 시작해<br><span class="em serif">9,000선의 역사</span>로 끝난 분기.</h2>
+    <p class="close-p reveal">신고가에 취하지 않았고, 폭락에 도망가지 않았습니다. <b>흔들렸지만, 훼손되지 않았다</b> — 2분기 우리가 함께 증명한 한 문장입니다. 3분기에도, 같은 자리에서 만나요.</p>
+    <div class="close-sig serif reveal">From<span class="us">Us</span></div>
+    <div class="close-meta reveal">Quarterly Review · 2026 Q2</div>
+  </div>
+</section>
+
+<footer>
+  <p class="foot-disc"><b>투자 유의 안내</b> · 본 결산 리포트는 프롬어스 커뮤니티의 2분기 활동을 정리한 회고 자료이며, 특정 종목의 매수·매도를 권유하지 않습니다. 인용된 지수·실적·종목 수치는 커뮤니티 데일리 리포트 기록 및 카카오톡 대화 기반으로, 일부 추정치를 포함하며 실제 시장 데이터와 차이가 있을 수 있습니다. 모든 투자 판단과 책임은 투자자 본인에게 있습니다.</p>
+  <p class="foot-copy">© 2026 From-Us (프롬어스) · 데이터 기간 2026.04.01–06.30 · 카카오톡 대화록 8,407건 분석 기반</p>
+</footer>
+
+<script>
+/* ============ HERO · Three.js particle field ============ */
+(function(){
+  if(typeof THREE==='undefined') return;
+  var canvas=document.getElementById('hero-canvas');
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,1,1600);
+  camera.position.z=520;
+  var renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});}catch(e){return;}
+  renderer.setClearColor(0x000000,0);
+  var isMobile=window.innerWidth<760;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+  renderer.setSize(window.innerWidth,window.innerHeight);
+
+  /* circular sprite via CanvasTexture (avoids square pixels) */
+  function makeSprite(hex){
+    var c=document.createElement('canvas');c.width=64;c.height=64;
+    var x=c.getContext('2d');
+    var g=x.createRadialGradient(32,32,0,32,32,32);
+    g.addColorStop(0,hex);g.addColorStop(0.45,hex);g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g;x.beginPath();x.arc(32,32,32,0,Math.PI*2);x.fill();
+    var t=new THREE.CanvasTexture(c);t.needsUpdate=true;return t;
+  }
+  var palette=['#2D5BE3','#0FA3A3','#C8923B','#D23B72','#1A1A2E'];
+  var groups=[];
+  var count=isMobile?46:80;
+  palette.forEach(function(hex,gi){
+    var geo=new THREE.BufferGeometry();
+    var n=count;var pos=new Float32Array(n*3);
+    for(var i=0;i<n;i++){
+      pos[i*3]=(Math.random()-0.5)*1100;
+      pos[i*3+1]=(Math.random()-0.5)*720;
+      pos[i*3+2]=(Math.random()-0.5)*640;
+    }
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    var mat=new THREE.PointsMaterial({
+      size:gi===4?7:11,map:makeSprite(hex),transparent:true,
+      opacity:gi===4?0.32:0.62,depthWrite:false,blending:THREE.NormalBlending,
+      sizeAttenuation:true
+    });
+    var pts=new THREE.Points(geo,mat);
+    pts.userData={sx:0.00006+gi*0.00003};
+    scene.add(pts);groups.push(pts);
+  });
+
+  var mx=0,my=0,tmx=0,tmy=0;
+  window.addEventListener('mousemove',function(e){
+    tmx=(e.clientX/window.innerWidth-0.5);tmy=(e.clientY/window.innerHeight-0.5);
+  },{passive:true});
+
+  var sy=0;
+  window.addEventListener('scroll',function(){sy=window.pageYOffset||0;},{passive:true});
+
+  var raf;
+  function animate(){
+    raf=requestAnimationFrame(animate);
+    mx+=(tmx-mx)*0.04;my+=(tmy-my)*0.04;
+    var t=Date.now();
+    for(var i=0;i<groups.length;i++){
+      groups[i].rotation.y=t*groups[i].userData.sx+mx*0.5;
+      groups[i].rotation.x=my*0.3+Math.sin(t*0.0002+i)*0.05;
+    }
+    camera.position.x+=(mx*60-camera.position.x)*0.05;
+    camera.position.y+=(-my*40-camera.position.y+ (sy*0.05))*0.05;
+    camera.lookAt(scene.position);
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  var lastW=window.innerWidth;
+  window.addEventListener('resize',function(){
+    var w=window.innerWidth;
+    if(Math.abs(w-lastW)<2) return; /* ignore iOS address-bar height-only changes */
+    lastW=w;
+    camera.aspect=w/window.innerHeight;camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+    renderer.setSize(w,window.innerHeight);
+  });
+})();
+
+/* ============ LOADER + NAV + HERO reveal ============ */
+(function(){
+  var fill=document.getElementById('ldFill');var p=0;
+  var iv=setInterval(function(){p+=Math.random()*22;if(p>100)p=100;if(fill)fill.style.width=p+'%';if(p>=100){clearInterval(iv);finish();}},150);
+  function finish(){
+    setTimeout(function(){
+      var ld=document.getElementById('loader');if(ld)ld.classList.add('done');
+      document.getElementById('nav').classList.add('show');
+      heroIn();
+    },360);
+  }
+  function heroIn(){
+    var els=document.querySelectorAll('#hero .hero-badge,#hero .hero-h1,#hero .hero-kr,#hero .hero-sub,#hero .hero-meta,#hero .scroll-cue');
+    if(typeof gsap!=='undefined'){
+      gsap.set(els,{opacity:0,y:30});
+      gsap.to(els,{opacity:1,y:0,duration:1,stagger:0.12,ease:'power3.out',delay:0.1});
+    }else{
+      els.forEach(function(e){e.style.opacity=1;});
+    }
+  }
+  /* hard fallback: if anything stalls, force-finish after 3.2s */
+  setTimeout(function(){var ld=document.getElementById('loader');if(ld&&!ld.classList.contains('done')){clearInterval(iv);ld.classList.add('done');document.getElementById('nav').classList.add('show');heroIn();}},3200);
+})();
+
+/* ============ COUNT-UP ============ */
+function countUp(el){
+  var target=parseFloat(el.getAttribute('data-to'));
+  var isPct=el.getAttribute('data-pct')==='1';
+  var dur=1500,start=null;
+  function step(ts){
+    if(!start)start=ts;
+    var pr=Math.min((ts-start)/dur,1);
+    var eased=1-Math.pow(1-pr,3);
+    var val=target*eased;
+    var out;
+    if(target>=1000){out=Math.floor(val).toLocaleString('en-US');}
+    else{out=Math.floor(val).toString();}
+    el.textContent=(isPct?'+':'')+out+(isPct?'%':'');
+    if(pr<1)requestAnimationFrame(step);
+    else{el.textContent=(isPct?'+':'')+(target>=1000?Math.round(target).toLocaleString('en-US'):Math.round(target))+(isPct?'%':'');}
+  }
+  requestAnimationFrame(step);
+}
+
+/* ============ SCROLL REVEALS + triggers ============ */
+(function(){
+  var counted=new WeakSet();
+  function fireCount(root){
+    root.querySelectorAll('[data-to]').forEach(function(el){
+      if(!counted.has(el)){counted.add(el);countUp(el);}
+    });
+  }
+  if(typeof gsap!=='undefined'&&typeof ScrollTrigger!=='undefined'){
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ignoreMobileResize:true});
+    document.querySelectorAll('.reveal').forEach(function(el){
+      gsap.set(el,{opacity:0,y:34});
+      ScrollTrigger.create({trigger:el,start:'top 86%',once:true,onEnter:function(){
+        gsap.to(el,{opacity:1,y:0,duration:0.9,ease:'power3.out'});
+        fireCount(el);
+      }});
+    });
+    /* section-level count triggers for grids */
+    ['#pulse'].forEach(function(sel){
+      var s=document.querySelector(sel);if(!s)return;
+      ScrollTrigger.create({trigger:s,start:'top 70%',once:true,onEnter:function(){fireCount(s);}});
+    });
+    /* hour bars + month fills */
+    ScrollTrigger.create({trigger:'#activity',start:'top 68%',once:true,onEnter:buildBars});
+    /* kospi chart */
+    ScrollTrigger.create({trigger:'#index',start:'top 64%',once:true,onEnter:drawKospi});
+    /* sector reveal already handled; ensure sectors count via reveal */
+  }else{
+    document.querySelectorAll('.reveal').forEach(function(el){el.style.opacity=1;el.style.transform='none';});
+    fireCount(document);buildBars();drawKospi();
+  }
+})();
+
+/* ============ HOUR HEATMAP BARS ============ */
+function buildBars(){
+  var data=[42,2,0,2,0,111,686,790,1698,1221,785,391,412,383,463,557,394,452,735,432,600,830,478,147];
+  var max=Math.max.apply(null,data);
+  var host=document.getElementById('hourBars');
+  if(!host||host.childElementCount)return;
+  data.forEach(function(v,h){
+    var b=document.createElement('div');
+    b.className='bar'+(h===8?' peak':'');
+    b.style.height='3px';
+    host.appendChild(b);
+    setTimeout(function(){b.style.height=Math.max(3,(v/max)*100)+'%';},30+h*26);
+  });
+  /* month fills */
+  document.querySelectorAll('.mo-fill').forEach(function(f,i){
+    var w=f.getAttribute('data-w');
+    setTimeout(function(){f.style.width=w+'%';},200+i*180);
+  });
+}
+
+/* ============ KOSPI CHART ============ */
+var _kospiDrawn=false;
+function drawKospi(){
+  if(_kospiDrawn||typeof Chart==='undefined')return;_kospiDrawn=true;
+  var cv=document.getElementById('kospiChart');if(!cv)return;
+  var ctx=cv.getContext('2d');
+  var labels=['4/06','4/08','4/16','4/21','4/27','5/04','5/06','5/11','5/15','5/26','5/29','6/01','6/15','6/18','6/19','6/25','6/30'];
+  var data=[5400,5800,6226,6388,6600,6900,7000,7800,8010,8067,8476,8788,8546,9010,9385,8930,9050];
+  var grad=ctx.createLinearGradient(0,0,0,360);
+  grad.addColorStop(0,'rgba(224,57,43,0.26)');
+  grad.addColorStop(1,'rgba(224,57,43,0.01)');
+  var existing=Chart.getChart(cv);if(existing)existing.destroy();
+  new Chart(ctx,{
+    type:'line',
+    data:{labels:labels,datasets:[{
+      label:'코스피',data:data,
+      borderColor:'#E0392B',borderWidth:2.5,
+      backgroundColor:grad,fill:true,
+      tension:0.35,pointRadius:3.2,pointHoverRadius:6,
+      pointBackgroundColor:'#fff',pointBorderColor:'#E0392B',pointBorderWidth:2
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{intersect:false,mode:'index'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1A1A2E',titleColor:'#fff',bodyColor:'#9FB0E0',
+          padding:12,cornerRadius:10,displayColors:false,
+          titleFont:{family:"'JetBrains Mono',monospace",size:12},
+          bodyFont:{family:"'JetBrains Mono',monospace",size:14,weight:'700'},
+          callbacks:{label:function(c){return '코스피 '+c.parsed.y.toLocaleString('en-US')+' p';}}
+        }
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#A8A29A',font:{family:"'JetBrains Mono',monospace",size:11},maxRotation:0,autoSkip:true,maxTicksLimit:9}},
+        y:{grid:{color:'rgba(26,26,46,0.06)'},ticks:{color:'#A8A29A',font:{family:"'JetBrains Mono',monospace",size:11},callback:function(v){return (v/1000).toFixed(0)+'k';}},min:5000,max:9800}
+      },
+      animation:{duration:1600,easing:'easeOutQuart'}
+    }
+  });
+}
+
+/* ============ smooth anchor scroll ============ */
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var id=a.getAttribute('href');if(id.length<2)return;
+    var t=document.querySelector(id);if(!t)return;
+    e.preventDefault();
+    window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-60,behavior:'smooth'});
+  });
+});
+</script>
+
+</body>
+</html>
