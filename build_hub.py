@@ -18,7 +18,7 @@ self-contained 인터랙티브 허브(hub.html)로 빌드.
 
 GitHub Actions에서 새 리포트 커밋 시 이 스크립트를 자동 실행하도록 구성합니다.
 """
-import argparse, json, os, re, sys, glob, datetime, html as _html, subprocess
+import argparse, hashlib, json, os, re, sys, glob, datetime, html as _html, subprocess
 from collections import defaultdict, OrderedDict
 
 KST = datetime.timezone(datetime.timedelta(hours=9), "KST")
@@ -1210,17 +1210,25 @@ def main():
     if os.path.exists(tpl):
         with open(tpl, encoding="utf-8") as f:
             shell = f.read()
-        payload = json.dumps(data, ensure_ascii=False)
-        # /*DATA*/ ... /*ENDDATA*/ 사이를 재빌드 가능하게 치환
-        new_block = "/*DATA*/" + payload + "/*ENDDATA*/"
-        if "/*DATA*/" in shell and "/*ENDDATA*/" in shell:
-            shell = re.sub(r"/\*DATA\*/.*?/\*ENDDATA\*/", lambda _m: new_block, shell,
-                           count=1, flags=re.S)
+        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+        kb_hash = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:10]
+        kb_name = f"kb.{kb_hash}.json"
+        out_dir = os.path.dirname(os.path.abspath(args.out)) or "."
+        # 이전 해시 파일 정리 후 새 파일 기록 (셸 캐시 무효화를 위해 파일명에 해시)
+        for old in glob.glob(os.path.join(out_dir, "kb.*.json")):
+            os.remove(old)
+        with open(os.path.join(out_dir, kb_name), "w", encoding="utf-8") as f:
+            f.write(payload)
+        # /*KBURL*/ ... /*ENDKBURL*/ 사이를 새 해시 파일명으로 치환
+        if "/*KBURL*/" in shell and "/*ENDKBURL*/" in shell:
+            shell = re.sub(r"/\*KBURL\*/.*?/\*ENDKBURL\*/",
+                           f'/*KBURL*/"{kb_name}"/*ENDKBURL*/', shell, count=1, flags=re.S)
         else:
-            sys.exit("템플릿에 /*DATA*/ … /*ENDDATA*/ 마커가 없습니다.")
+            sys.exit("템플릿에 /*KBURL*/ … /*ENDKBURL*/ 마커가 없습니다.")
         with open(args.out, "w", encoding="utf-8") as f:
             f.write(shell)
-        print(f"→ {args.out} 빌드 완료 ({os.path.getsize(args.out)//1024} KB)")
+        print(f"→ {args.out} 셸 빌드 완료 ({os.path.getsize(args.out)//1024} KB) "
+              f"+ {kb_name} ({len(payload)//1024//1024}MB)")
     else:
         print(f"⚠ 템플릿 없음({tpl}) — JSON만 생성했습니다.")
 
