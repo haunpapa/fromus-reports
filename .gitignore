@@ -7,6 +7,13 @@ build/_probe_*
 build/parse_cache.json
 hub_preview.html
 
+# CI 생성물 (Actions artifact로 배포 — 커밋 금지). trade.html 은 폴백 스냅샷이라 추적 유지.
+index.html
+hub.html
+knowledge_base.json
+ai_digest.json
+kb.*.json
+
 # OMC 휘발성 런타임 상태 (세션마다 변경 → 추적 제외)
 .omc/state/
 
