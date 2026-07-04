@@ -99,7 +99,7 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     daily = [r for r in reports if r["type"] == "daily"]
     weekly = [r for r in reports if r["type"] == "weekly"]
     data = {
-        "build": {"generated": _fmt_kst(), "timezone": "Asia/Seoul", "timezone_label": "한국시간(KST)",
+        "build": {"schema": 2, "generated": _fmt_kst(), "timezone": "Asia/Seoul", "timezone_label": "한국시간(KST)",
                   "reports": len(reports), "daily": len(daily), "weekly": len(weekly),
                   "from": daily[0]["date"] if daily else (reports[0]["id"] if reports else ""),
                   "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else ""),

@@ -27,6 +27,7 @@ def test_collect_then_render(tmp_path):
     kb = json.loads((src / "kb_raw.json").read_text(encoding="utf-8"))
     assert kb["ai_digest"] is None          # collect 단계에서는 다이제스트 미주입
     assert kb["build"]["reports"] >= 1
+    assert kb["build"]["schema"] == 2       # 스키마 버전 필드
 
     # 가짜 다이제스트를 두고 render — 주입되는지 확인
     (src / "ai_digest.json").write_text(
