@@ -13,13 +13,13 @@ FIXDIR = os.path.join(os.path.dirname(__file__), "fixtures", "reports")
 FIXTURE_DAILY = os.path.join(FIXDIR, "daily", "2026-05-04.html")
 FIXTURE_WEEKLY = os.path.join(FIXDIR, "weekly", "2026-W15.html")
 
-# 파서/집계 진입점 — Phase 3 리팩토링 후 여기만 바꾼다
+# 파서/집계 진입점 — Phase 3 리팩토링 후 여기만 바꾼다 (build_hub → hublib)
 def _parse_report(path):
-    from build_hub import parse_report
+    from hublib.parse import parse_report
     return parse_report(path)
 
 def _aggregate(reports):
-    from build_hub import aggregate
+    from hublib.aggregate import aggregate
     return aggregate(reports)
 
 # parse_report 가 반드시 포함해야 하는 안정 키(부분집합 — 부수 키 추가에 견고)
