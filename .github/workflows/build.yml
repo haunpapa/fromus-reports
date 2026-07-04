@@ -1,67 +1,89 @@
 # ───────────────────────────────────────────────────────────────
-#  Build Index + Knowledge Hub + AI Digest
-#  1) build_index.py  → 아카이브 index.html
-#  2) build_hub.py    → knowledge_base.json (1차)
-#  3) ai_digest.py    → AI 위클리 다이제스트 (ANTHROPIC_API_KEY 시크릿 있을 때만)
-#  4) build_hub.py    → hub.html (2차 — 다이제스트 반영)
-#  AI 시크릿 설정: repo Settings → Secrets and variables → Actions
-#                  → New repository secret → 이름 ANTHROPIC_API_KEY
+#  Build & Deploy (GitHub Pages — Actions artifact 배포)
+#  생성물(index.html/hub.html/knowledge_base.json 등)은 더 이상 커밋하지 않는다.
+#  Pages 소스가 "GitHub Actions"로 설정되어 있어야 한다 (README/PR 참고).
 # ───────────────────────────────────────────────────────────────
-name: Build Index
+name: Build & Deploy
 
 on:
   push:
+    branches: [main]
     paths:
       - 'reports/**'
+      - 'chat_kb.json'
       - 'build_index.py'
       - 'build_hub.py'
       - 'ai_digest.py'
-      - 'hub_template.html'
-      - 'chat_kb.json'
       - 'merge_hub.py'
+      - 'hub_template.html'
+      - 'sw.js'
+      - 'hublib/**'
+  schedule:
+    - cron: '30 22 * * *'   # 매일 07:30 KST — 시세·trade·다이제스트 자동 갱신
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
-      - name: Install deps (knowledge hub)
+      - name: Install deps
         run: pip install beautifulsoup4 lxml yfinance
 
-      - name: Sync 수출입동향 대시보드 (korea-trade-dashboard → trade.html)
+      - name: Sync 수출입동향 대시보드 (실패 시 리포 내 기존 trade.html 사용)
         run: |
           curl -fsSL -o trade.new.html https://raw.githubusercontent.com/haunpapa/korea-trade-dashboard/main/korea-trade-sector-dashboard.html \
             && tail -c 30 trade.new.html | grep -q '</html>' \
             && mv trade.new.html trade.html \
             || { echo "동기화 실패 — 기존 trade.html 유지"; rm -f trade.new.html; }
 
-      - name: Run build_index.py (아카이브 목록)
+      - name: Build index
         run: python build_index.py
 
-      - name: Run build_hub.py (1차 — knowledge_base.json 생성)
+      - name: Build hub (1차 — knowledge_base.json)
         run: python build_hub.py --src . --out hub.html --json knowledge_base.json
 
-      - name: AI weekly digest (선택 — 시크릿 없으면 자동 생략)
+      - name: AI weekly digest (시크릿 없으면 자동 생략)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python ai_digest.py || echo "AI 다이제스트 생략(실패 무시)"
 
-      - name: Run build_hub.py (2차 — 다이제스트 반영)
+      - name: Build hub (2차 — 다이제스트 반영)
         run: python build_hub.py --src . --out hub.html --json knowledge_base.json
 
-      - name: Commit and push
-        uses: stefanzweifel/git-auto-commit-action@v7
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp index.html hub.html knowledge_base.json trade.html manifest.webmanifest sw.js _site/
+          cp ai_digest.json _site/ 2>/dev/null || true
+          cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
+          cp -r reports icons _site/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
         with:
-          commit_message: 'auto: rebuild index + knowledge hub'
-          file_pattern: 'index.html hub.html knowledge_base.json ai_digest.json trade.html'
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
