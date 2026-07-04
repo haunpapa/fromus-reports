@@ -51,19 +51,29 @@ jobs:
             && mv trade.new.html trade.html \
             || { echo "동기화 실패 — 기존 trade.html 유지"; rm -f trade.new.html; }
 
+      - name: Restore parse cache
+        uses: actions/cache@v4
+        with:
+          path: build/parse_cache.json
+          key: parse-cache-${{ hashFiles('reports/**/*.html', 'hublib/parse.py') }}
+          restore-keys: parse-cache-
+
       - name: Build index
         run: python build_index.py
 
-      - name: Build hub (1차 — knowledge_base.json)
-        run: python build_hub.py --src . --out hub.html --json knowledge_base.json
+      - name: Collect (파싱·집계·시세 — 1회만)
+        run: python build_hub.py --phase collect --src . --json knowledge_base.json
 
       - name: AI weekly digest (시크릿 없으면 자동 생략)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python ai_digest.py || echo "AI 다이제스트 생략(실패 무시)"
 
-      - name: Build hub (2차 — 다이제스트 반영)
-        run: python build_hub.py --src . --out hub.html --json knowledge_base.json
+      - name: Render (hub.html + kb.<hash>.json)
+        run: python build_hub.py --phase render --json knowledge_base.json --out hub.html
+
+      - name: Run tests
+        run: pip install pytest && python -m pytest tests/ generator/test_parse.py -q
 
       - name: Assemble site
         run: |
