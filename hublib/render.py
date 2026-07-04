@@ -71,20 +71,23 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     from hublib.parse import discover, parse_report
     from hublib.aggregate import aggregate, build_search
     from hublib.momentum import fetch_index_series, enrich_market_momentum
+    from hublib.cache import ParseCache
 
     files = files if files else discover(src)
     if not files:
         sys.exit(f"리포트를 찾지 못했습니다 (src={src}). 파일명 규칙을 확인하세요.")
     print(f"발견한 리포트 {len(files)}개:")
+    cache = ParseCache()               # 파일 sha1 기준 증분 캐시 — 바뀐 리포트만 재파싱
     reports = []
     for p in files:
         try:
-            rec = parse_report(p)
+            rec = cache.get_or_parse(p, parse_report)   # 사본 반환 — 캐시 오염 없음
             rec["file"] = os.path.relpath(p, src).replace(os.sep, "/")  # 원문 링크용 상대경로
             reports.append(rec)
             print(f"  ✓ {rec['file']}")
         except Exception as e:
             print(f"  ✗ {os.path.basename(p)}  ({e})")
+    cache.save()
     reports.sort(key=lambda r: r["sort_date"])
     agg = aggregate(reports)
     idx_series = fetch_index_series(reports)      # 야후 정확 지수로 시계열 덮어쓰기
