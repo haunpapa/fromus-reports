@@ -59,6 +59,31 @@ class TestFindInput(unittest.TestCase):
             self.assertTrue(os.path.basename(picked).startswith("KakaoTalk_"))
             self.assertNotEqual(picked, out)
 
+    def test_find_inputs_returns_all_kakao(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = os.path.join(d, "KakaoTalk_a.csv"); open(a, "w").close()
+        time.sleep(0.02)
+        b = os.path.join(d, "KakaoTalk_b.csv"); open(b, "w").close()
+        out = os.path.join(d, "뉴스_전체아카이브.csv"); open(out, "w").close()  # 출력형(미포함)
+        import unittest.mock as mock
+        with mock.patch("os.getcwd", return_value=d), \
+             mock.patch("os.path.expanduser", return_value="/no/such/dir"):
+            got = U.find_inputs(["prog"])
+        names = sorted(os.path.basename(p) for p in got)
+        self.assertEqual(names, ["KakaoTalk_a.csv", "KakaoTalk_b.csv"])  # 둘 다, 출력형 제외
+
+    def test_find_input_wrapper_is_string_and_newest(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        old = os.path.join(d, "KakaoTalk_a.csv"); open(old, "w").close()
+        time.sleep(0.02)
+        new = os.path.join(d, "KakaoTalk_b.csv"); open(new, "w").close()
+        import unittest.mock as mock
+        with mock.patch("os.getcwd", return_value=d), \
+             mock.patch("os.path.expanduser", return_value="/no/such/dir"):
+            picked = U.find_input(["prog"])
+        self.assertIsInstance(picked, str)          # 리스트 아님
+        self.assertEqual(picked, new)               # mtime 최신
+
 class TestFull(unittest.TestCase):
     def _msg(self, idx, body):
         return {"idx": idx, "date": "2026-03-20", "weekday": "금요일",
@@ -195,6 +220,188 @@ class TestTypeNews(unittest.TestCase):
         sig = U.strategy([self._msg("삼성전자 좋게 봐서 추매했어요 https://x.co/a")])
         self.assertTrue(sig)
         self.assertIn(sig[0]["type"], ("view", "position"))
+
+
+class TestRoomOf(unittest.TestCase):
+    def test_regex_name(self):
+        # 실데이터 규칙: KakaoTalk_Chat_<room>_<타임스탬프>.csv
+        self.assertEqual(
+            U.room_of("/x/KakaoTalk_Chat_2026 프롬어스_2026-05-20-20-33-17.csv"),
+            "2026 프롬어스")
+
+    def test_fallback_strips_trailing_timestamp(self):
+        # 규칙 불일치 → basename에서 끝 타임스탬프 제거(있으면), 없으면 확장자만 제거
+        self.assertEqual(U.room_of("/x/KakaoTalk_myroom_2026-05-20.txt"), "KakaoTalk_myroom")
+        self.assertEqual(U.room_of("/x/KakaoTalk_plain.csv"), "KakaoTalk_plain")
+
+
+class TestMerge(unittest.TestCase):
+    def _write(self, d, name, rows):
+        # rows: [(datetime_str, sender, message)] → 카톡 CSV
+        import csv as _csv
+        p = os.path.join(d, name)
+        with open(p, "w", encoding="utf-8-sig", newline="") as f:
+            w = _csv.writer(f); w.writerow(["Date", "User", "Message"])
+            for dt, u, msg in rows: w.writerow([dt, u, msg])
+        return p
+
+    def test_base_verbatim_keeps_same_minute_dupes(self):
+        # 같은 방 최신 1파일: dedup 미적용 → 같은 분·동일 body 2건 둘 다 보존
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        p = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:10", "대성", "ㅋㅋㅋ"),
+            ("2026-05-20 09:00:40", "대성", "ㅋㅋㅋ"),   # 다른 실제 메시지(초만 다름)
+        ])
+        msgs = U.merge_inputs([p])
+        self.assertEqual(len(msgs), 2)                 # 유실 없음
+        self.assertEqual([m["idx"] for m in msgs], [0, 1])
+        self.assertTrue(all(m["room"] == "방A" for m in msgs))
+
+    def test_same_room_snapshots_dedup_via_fold(self):
+        # 같은 방 두 스냅샷(old ⊂ new): 최신만 채택, fold 0건 → 중복 없음
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        old = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "안녕"),
+        ])
+        time.sleep(0.02)
+        new = self._write(d, "KakaoTalk_Chat_방A_2026-05-21-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "안녕"),
+            ("2026-05-21 09:00:00", "대성", "오늘도"),
+        ])
+        msgs = U.merge_inputs([old, new])
+        bodies = [m["body"] for m in msgs]
+        self.assertEqual(bodies, ["안녕", "오늘도"])    # 중복 없이 union
+
+    def test_two_rooms_merged_and_tagged(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "A방 메시지")])
+        b = self._write(d, "KakaoTalk_Chat_방B_2026-06-20-10-00-00.csv", [
+            ("2026-06-20 09:00:00", "밝쌤", "B방 메시지")])
+        msgs = U.merge_inputs([b, a])                  # 순서 무관
+        self.assertEqual(len(msgs), 2)
+        self.assertEqual({m["room"] for m in msgs}, {"방A", "방B"})
+        self.assertEqual([m["idx"] for m in msgs], [0, 1])
+        # 방 그룹은 최초등장 datetime 순 → A(5월) 먼저
+        self.assertEqual(msgs[0]["room"], "방A")
+
+    def test_name_collision_keeps_both_rooms(self):
+        # 동일 표시명 서로 다른 방(내용 disjoint) → fold로 둘 다 보존(방 유실 없음)
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        r1 = self._write(d, "KakaoTalk_Chat_같은이름_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "첫째 방 대화")])
+        time.sleep(0.02)
+        r2 = self._write(d, "KakaoTalk_Chat_같은이름_2026-05-21-10-00-00.csv", [
+            ("2026-05-21 09:00:00", "밝쌤", "둘째 방 대화")])
+        msgs = U.merge_inputs([r1, r2])
+        bodies = sorted(m["body"] for m in msgs)
+        self.assertEqual(bodies, ["둘째 방 대화", "첫째 방 대화"])  # 유실 없음
+
+    def test_build_meta_from_to_min_max(self):
+        # 방 그룹 정렬로 msgs 순서가 시간순이 아닐 때도 from/to는 실제 min/max
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = self._write(d, "KakaoTalk_Chat_방Z_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "중간")])
+        b = self._write(d, "KakaoTalk_Chat_방A_2026-06-20-10-00-00.csv", [
+            ("2026-04-01 09:00:00", "밝쌤", "가장 이른"),
+            ("2026-07-01 09:00:00", "밝쌤", "가장 늦은")])
+        msgs = U.merge_inputs([a, b])
+        kb = C.build(msgs, [], [])
+        self.assertEqual(kb["build"]["from"], "2026-04-01")
+        self.assertEqual(kb["build"]["to"], "2026-07-01")
+
+    def test_integration_two_rooms_idx_and_room(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "학생하나", "이거 어떻게 하나요?")])
+        b = self._write(d, "KakaoTalk_Chat_방B_2026-06-20-10-00-00.csv", [
+            ("2026-06-20 09:00:00", "밝쌤👩🏻‍🏫", "이렇게 하시면 됩니다 자세한 설명 추가")])
+        msgs = U.merge_inputs([a, b])
+        self.assertEqual([m["idx"] for m in msgs], list(range(len(msgs))))  # 연속
+        self.assertTrue(all("room" in m for m in msgs))
+        kb = C.build(msgs, [], [])
+        # 질문(방A)과 교사응답(방B)이 서로 다른 방 → QnA 매칭되면 안 됨
+        self.assertEqual(kb["qna"], [])
+
+
+class TestRoomGuards(unittest.TestCase):
+    def _m(self, idx, room, sender, body):
+        return {"idx": idx, "date": "2026-05-20", "time": "09:00",
+                "weekday": "수요일", "sender": sender, "room": room,
+                "body": body, "lines": body.split("\n")}
+
+    def test_link_title_not_borrowed_across_rooms(self):
+        # A방 링크(제목 없음) 바로 뒤 이웃이 B방 동명이인 → 제목 near-보충 금지
+        msgs = [
+            self._m(0, "방A", "대성", "https://x.co/aaa"),
+            self._m(1, "방B", "대성", "이건 B방 제목 후보 텍스트입니다"),
+        ]
+        recs = U.link_records(msgs)
+        rec = [r for r in recs if r["url"].startswith("https://x.co/aaa")][0]
+        self.assertNotEqual(rec.get("title_src"), "near")   # 방 넘어 빌려오지 않음
+
+    def test_qna_not_matched_across_rooms(self):
+        # A방 질문(idx 0) 바로 뒤 B방 교사 메시지(idx 1) → QnA 미매칭
+        q = self._m(0, "방A", "학생하나", "이거 어떻게 하나요?")
+        a = self._m(1, "방B", "밝쌤👩🏻‍🏫", "이렇게 하시면 됩니다 자세한 설명 추가")
+        kb = C.build([q, a], [], [])
+        self.assertEqual(kb["qna"], [])          # 방 경계 넘어 응답 매칭 금지
+
+    def test_qna_matched_within_room(self):
+        q = self._m(0, "방A", "학생하나", "이거 어떻게 하나요?")
+        a = self._m(1, "방A", "밝쌤👩🏻‍🏫", "이렇게 하시면 됩니다 자세한 설명 추가")
+        kb = C.build([q, a], [], [])
+        self.assertEqual(len(kb["qna"]), 1)      # 같은 방이면 정상 매칭
+
+
+class TestDeterminism(unittest.TestCase):
+    def test_chat_kb_hashseed_independent(self):
+        import subprocess, json
+        ents = list(U.ENTITIES)
+        aliases = [U.ENTITIES[e]["al"][0] for e in ents[:3]]   # 3개 종목 별칭(하드코딩 금지)
+        body = " ".join(aliases) + " 모두 좋게 봅니다"
+        gendir = os.path.dirname(os.path.abspath(U.__file__))
+        code = (
+            f"import sys,json; sys.path.insert(0, {gendir!r}); import chat_to_kb as C;"
+            f"m=[{{'idx':0,'date':'2026-03-20','time':'09:00','weekday':'금요일',"
+            f"'sender':'ㄱ 이혜나','room':'r','body':{body!r},'lines':[{body!r}]}}];"
+            f"print(json.dumps(C.build(m, [], []), ensure_ascii=False))"
+        )
+        def run(seed):
+            env = dict(os.environ, PYTHONHASHSEED=str(seed))
+            return subprocess.check_output([sys.executable, "-c", code], env=env, text=True)
+        outs = {run(s) for s in ("0", "1", "2", "3", "4")}
+        self.assertEqual(len(outs), 1,
+                         "chat_kb.json이 PYTHONHASHSEED에 따라 달라짐(set 반복 sorted() 누락?)")
+
+
+class TestTxtHeaderless(unittest.TestCase):
+    """txt: 첫 날짜 구분선 이전의 고아 메시지(date=None) → 드롭, 하류 크래시 없음."""
+    def _write_txt(self, d, name, text):
+        p = os.path.join(d, name)
+        with open(p, "w", encoding="utf-8") as f: f.write(text)
+        return p
+
+    _TXT = ("[홍길동] [오전 9:00] 헤더 앞 고아 메시지\n"
+            "--------------- 2026년 1월 2일 금요일 ---------------\n"
+            "[홍길동] [오전 10:00] 정상 메시지\n")
+
+    def test_orphan_before_first_date_dropped(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        p = self._write_txt(d, "KakaoTalk_Chat_방A_2026-01-02-10-00-00.txt", self._TXT)
+        msgs = U.parse(p)
+        self.assertTrue(all(m["date"] for m in msgs))                 # date=None 없음
+        self.assertEqual([m["date"] for m in msgs], ["2026-01-02"])   # 고아 드롭, 정상만
+        self.assertEqual([m["idx"] for m in msgs], list(range(len(msgs))))  # idx 연속
+
+    def test_full_pipeline_no_crash(self):
+        # 예전 크래시 경로(merge_inputs 정렬 + chat_to_kb.build meta min/max)를 끝까지 통과
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        p = self._write_txt(d, "KakaoTalk_Chat_방A_2026-01-02-10-00-00.txt", self._TXT)
+        msgs = U.merge_inputs([p])                                    # 정렬 크래시 없어야
+        kb = C.build(msgs, [], [])                                    # meta min/max 크래시 없어야
+        self.assertEqual(kb["build"]["from"], "2026-01-02")
+        self.assertEqual(kb["build"]["to"], "2026-01-02")
 
 
 if __name__ == "__main__":

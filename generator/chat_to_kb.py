@@ -48,9 +48,9 @@ def build(msgs, links, signals, public=False):
     # 전 메시지 스캔: count + 근접도 게이팅 테마(동시출현 노이즈 차단)
     for m in msgs:
         body=m["body"]
-        for canon in T.match_stocks(body):
+        for canon in sorted(T.match_stocks(body)):
             S(canon)["count"]+=1
-            for th in T.match_themes_for_stock(body, canon):
+            for th in sorted(T.match_themes_for_stock(body, canon)):
                 S(canon)["themes"][th]+=1
     # 시그널 기반 mention(스탠스/유형/스니펫)
     for s in signals:
@@ -64,7 +64,7 @@ def build(msgs, links, signals, public=False):
     # ---------- themes ----------
     themes={}
     for m in msgs:
-        for th in T.match_themes(m["body"]):
+        for th in sorted(T.match_themes(m["body"])):
             T_=themes.setdefault(th,{"theme":th,"count":0,"stocks":set(),"mentions":[]})
             T_["count"]+=1
     for s in signals:
@@ -86,7 +86,7 @@ def build(msgs, links, signals, public=False):
              "title":title[:140],"url":l.get("resolved_url") or l["url"],
              "stocks":sorted(CANON(x) for x in sset),"themes":sorted(thset)}
         news.append(rec)
-        for x in sset:
+        for x in sorted(sset):
             S(x)["news"].append({"date":l["date"],"title":title[:120],"outlet":l.get("outlet",""),"url":rec["url"]})
     # ---------- targets ----------
     targets=[]
@@ -156,7 +156,7 @@ def build(msgs, links, signals, public=False):
         ans=None
         for j in range(m["idx"]+1,min(m["idx"]+6,len(msgs))):
             nb=by_idx.get(j)
-            if nb and nb["sender"] in TEACHERS:
+            if nb and nb.get("room")==m.get("room") and nb["sender"] in TEACHERS:
                 at=URL.sub("",nb["body"]).strip()
                 if len(at)>=10: ans={"a":re.sub(r'\s+',' ',at)[:240],"a_by":nb["sender"],"a_date":nb["date"]}; break
         if ans:
@@ -170,7 +170,8 @@ def build(msgs, links, signals, public=False):
     for th in themes.values(): th["stocks"]=sorted(th["stocks"])
     meta={"generated_from":"kakao_chat","messages":len(msgs),
           "members":len(set(m.get("sender") for m in msgs)),
-          "from":msgs[0].get("date",""),"to":msgs[-1].get("date",""),
+          "from":min((m.get("date","") for m in msgs), default=""),
+          "to":max((m.get("date","") for m in msgs), default=""),
           "stocks":len(stocks),"themes":len(themes),"news":len(news)}
     kb={"build":meta,"stocks":stocks,"themes":themes,"news":news,"targets":targets,
             "readings":readings,"glossary":glossary,"actions":actions,"strategy":strategy,"qna":qna}

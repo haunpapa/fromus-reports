@@ -160,18 +160,71 @@ def parse_csv(path):
         print(f"[parse_csv] 스킵된 행: {skipped}건")
     return msgs
 
-def find_input(argv=None):
-    """txt/csv 입력 자동 선택. 명시 인자 우선 → cwd·~/Downloads 의 KakaoTalk_* 최신."""
+_ROOM_RE = re.compile(r"^KakaoTalk_Chat_(.+)_\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.(?:csv|txt)$")
+_TS_TAIL_RE = re.compile(r"_\d{4}-\d{2}-\d{2}(?:[-_]\d{2}){0,3}$")
+def room_of(path):
+    """카톡 export 파일명 → 방 태그(선택/탈락용 아님, 근접 가드·정렬용)."""
+    base = os.path.basename(path)
+    m = _ROOM_RE.match(base)
+    if m:
+        return m.group(1)
+    stem = os.path.splitext(base)[0]
+    return _TS_TAIL_RE.sub("", stem)   # 끝 타임스탬프 있으면 제거, 없으면 그대로
+
+def find_inputs(argv=None):
+    """카톡 export 입력 '전부' 반환(이름 기반 탈락 없음). 명시 인자 우선."""
     argv = sys.argv if argv is None else argv
-    for a in argv[1:]:
-        if a.lower().endswith((".txt", ".csv")) and os.path.exists(a):
-            return a
+    args = [a for a in argv[1:] if a.lower().endswith((".txt", ".csv")) and os.path.exists(a)]
+    if args:
+        return args
     cands = []
     for root in (os.getcwd(), os.path.expanduser("~/Downloads")):
-        for pat in ("KakaoTalk_*.txt", "KakaoTalk_*.csv"):   # 출력 CSV 오선택 방지(prefix 제한)
+        for pat in ("KakaoTalk_*.txt", "KakaoTalk_*.csv"):   # 출력형 CSV는 prefix로 자연 배제
             cands += glob.glob(os.path.join(root, pat))
-    cands = sorted(set(cands), key=os.path.getmtime, reverse=True)
-    return cands[0] if cands else None
+    return sorted(set(cands))
+
+def find_input(argv=None):
+    """레거시 래퍼: 문자열/None + mtime 최신 1개 계약 보존."""
+    r = find_inputs(argv)
+    return max(r, key=os.path.getmtime, default=None)
+
+def _parse_any(path):
+    return parse_csv(path) if path.lower().endswith(".csv") else parse(path)
+
+def _keyed(msgs):
+    """각 msg에 파일 내 occ(동일 (date,time,sender,body) 등장 순번) 부여 → ((key,occ), m)."""
+    counts = {}; out = []
+    for m in msgs:
+        k = (m["date"], m["time"], m["sender"], m["body"])
+        occ = counts.get(k, 0); counts[k] = occ + 1
+        out.append(((k, occ), m))
+    return out
+
+def merge_inputs(paths):
+    """여러 카톡 export → 통합 msgs. 방별 최신 verbatim + 겹치지 않는 파일만 fold. idx 재부여."""
+    groups = defaultdict(list)
+    for p in paths:
+        groups[room_of(p)].append(p)
+    room_lists = {}
+    for tag, files in groups.items():
+        files = sorted(files, key=os.path.getmtime, reverse=True)   # 최신 먼저
+        base = _parse_any(files[0])
+        for m in base: m["room"] = tag; m["src_file"] = files[0]
+        seen = set(ck for ck, _ in _keyed(base))
+        folded = False
+        for f in files[1:]:
+            for ck, m in _keyed(_parse_any(f)):
+                if ck not in seen:
+                    seen.add(ck); m["room"] = tag; m["src_file"] = f
+                    base.append(m); folded = True
+        if folded:
+            base.sort(key=lambda m: (m["date"] or "", m["time"] or ""))   # 안정 정렬(역전 보정, date=None 방어)
+        room_lists[tag] = base
+    def _earliest(ms):
+        return min(((m["date"] or "", m["time"] or "") for m in ms), default=("", ""))
+    merged = [m for ms in sorted(room_lists.values(), key=_earliest) for m in ms]
+    for i, m in enumerate(merged): m["idx"] = i
+    return merged
 
 def to24(ap,h,m):
     h=int(h);m=int(m)
@@ -198,6 +251,8 @@ def parse(txt):
             cur={"idx":len(msgs),"date":date,"weekday":wd,"time":to24(ap,h,mi),"sender":sd.strip(),"lines":[b]}
         elif cur is not None: cur["lines"].append(ln)
     flush()
+    msgs=[m for m in msgs if m.get("date")]        # 날짜 헤더 이전 고아 메시지 제거(date=None → 하류 정렬/집계 크래시 방지)
+    for i,m in enumerate(msgs): m["idx"]=i          # 필터 후 idx 연속 재정렬
     for m in msgs: m["body"]="\n".join(m["lines"])
     return msgs
 
@@ -224,9 +279,10 @@ def link_records(msgs):
     for r in recs:
         if r["title"]: continue
         i=r["msg_idx"]
+        r_room=idx.get(i,{}).get("room")
         for off in (1,-1,2,-2,3,-3):
             nb=idx.get(i+off)
-            if nb and nb["sender"]==r["sharer"] and not URLpat.search(nb["body"]):
+            if nb and nb.get("room")==r_room and nb["sender"]==r["sharer"] and not URLpat.search(nb["body"]):
                 t=tidy(nb["body"])
                 if len(t)>=10: r["title"]=t; r["title_src"]="near"; break
     return recs
@@ -580,11 +636,13 @@ def build_viewer(vd):
 LINKCOUNT={}
 def main():
     do_net="--no-resolve" not in sys.argv
-    path=find_input()
-    if not path: print("[!] 카카오톡 .txt/.csv 를 찾지 못했습니다. 인자로 경로를 주거나 ~/Downloads 에 두세요."); return
-    print(f"▶ 입력: {os.path.basename(path)}")
-    msgs = parse_csv(path) if path.lower().endswith(".csv") else parse(path)
+    paths=find_inputs()
+    if not paths: print("[!] 카카오톡 .txt/.csv 를 찾지 못했습니다. 인자로 경로를 주거나 ~/Downloads 에 두세요."); return
+    print(f"▶ 입력 {len(paths)}개: " + ", ".join(os.path.basename(p) for p in paths))
+    msgs = merge_inputs(paths)
     if not msgs: print("[!] 메시지가 비어 있습니다(파싱 0건)."); return
+    _rooms = sorted(set(m.get("room","") for m in msgs))
+    print(f"▶ 방 {len(_rooms)}개: {', '.join(_rooms)} · 메시지 {len(msgs)}")
     links=link_records(msgs); enrich(links)
     global LINKCOUNT; LINKCOUNT=Counter(l["sharer"] for l in links)
     print(f"▶ 메시지 {len(msgs)} · 링크 {len(links)} · 로컬제목 {sum(1 for l in links if l['title'])}")
@@ -602,7 +660,10 @@ def main():
     uniq=dedup(links)
     personal=[s for s in sig if s["type"]!="research"]; research=[s for s in sig if s["type"]=="research"]
     titled=sum(1 for l in links if l["clean_title"]); resolved=sum(1 for l in links if l.get("resolved_url"))
-    meta={"channel":"프롬어스 오픈카톡(정규반)","date_from":msgs[0]["date"],"date_to":msgs[-1]["date"],
+    _mrooms=sorted(set(m.get("room","") for m in msgs))
+    _channel=_mrooms[0] if len(_mrooms)==1 else f"{_mrooms[0]} 외 {len(_mrooms)-1}개"
+    meta={"channel":_channel,"rooms":_mrooms,
+          "date_from":min(m["date"] for m in msgs),"date_to":max(m["date"] for m in msgs),
       "messages":len(msgs),"members_total":len(set(m["sender"] for m in msgs)),"members_core":len(CORE),
       "links_total":len(links),"news_links":sum(1 for l in links if l["category"]=="news"),
       "strategy_personal":len(personal),"strategy_research":len(research),
@@ -658,7 +719,7 @@ def main():
             for m in msgs:
                 uu=URLpat.findall(m["body"])
                 f.write(json.dumps({"idx":m["idx"],"date":m["date"],"weekday":m.get("weekday"),
-                    "time":m["time"],"sender":m["sender"],"body":m["body"],"urls":uu,"n_urls":len(uu)},
+                    "time":m["time"],"sender":m["sender"],"room":m.get("room"),"body":m["body"],"urls":uu,"n_urls":len(uu)},
                     ensure_ascii=False)+"\n")
     except PermissionError: pass
     # ===== chat_kb.json 생성 (리포 루트, public=False=실명 유지). 병합은 CI build_hub.py 전담 =====
