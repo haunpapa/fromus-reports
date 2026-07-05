@@ -375,5 +375,34 @@ class TestDeterminism(unittest.TestCase):
                          "chat_kb.json이 PYTHONHASHSEED에 따라 달라짐(set 반복 sorted() 누락?)")
 
 
+class TestTxtHeaderless(unittest.TestCase):
+    """txt: 첫 날짜 구분선 이전의 고아 메시지(date=None) → 드롭, 하류 크래시 없음."""
+    def _write_txt(self, d, name, text):
+        p = os.path.join(d, name)
+        with open(p, "w", encoding="utf-8") as f: f.write(text)
+        return p
+
+    _TXT = ("[홍길동] [오전 9:00] 헤더 앞 고아 메시지\n"
+            "--------------- 2026년 1월 2일 금요일 ---------------\n"
+            "[홍길동] [오전 10:00] 정상 메시지\n")
+
+    def test_orphan_before_first_date_dropped(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        p = self._write_txt(d, "KakaoTalk_Chat_방A_2026-01-02-10-00-00.txt", self._TXT)
+        msgs = U.parse(p)
+        self.assertTrue(all(m["date"] for m in msgs))                 # date=None 없음
+        self.assertEqual([m["date"] for m in msgs], ["2026-01-02"])   # 고아 드롭, 정상만
+        self.assertEqual([m["idx"] for m in msgs], list(range(len(msgs))))  # idx 연속
+
+    def test_full_pipeline_no_crash(self):
+        # 예전 크래시 경로(merge_inputs 정렬 + chat_to_kb.build meta min/max)를 끝까지 통과
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        p = self._write_txt(d, "KakaoTalk_Chat_방A_2026-01-02-10-00-00.txt", self._TXT)
+        msgs = U.merge_inputs([p])                                    # 정렬 크래시 없어야
+        kb = C.build(msgs, [], [])                                    # meta min/max 크래시 없어야
+        self.assertEqual(kb["build"]["from"], "2026-01-02")
+        self.assertEqual(kb["build"]["to"], "2026-01-02")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

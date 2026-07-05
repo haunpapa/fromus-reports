@@ -218,10 +218,10 @@ def merge_inputs(paths):
                     seen.add(ck); m["room"] = tag; m["src_file"] = f
                     base.append(m); folded = True
         if folded:
-            base.sort(key=lambda m: (m["date"], m["time"]))         # 안정 정렬(역전 보정)
+            base.sort(key=lambda m: (m["date"] or "", m["time"] or ""))   # 안정 정렬(역전 보정, date=None 방어)
         room_lists[tag] = base
     def _earliest(ms):
-        return min(((m["date"], m["time"]) for m in ms), default=("", ""))
+        return min(((m["date"] or "", m["time"] or "") for m in ms), default=("", ""))
     merged = [m for ms in sorted(room_lists.values(), key=_earliest) for m in ms]
     for i, m in enumerate(merged): m["idx"] = i
     return merged
@@ -251,6 +251,8 @@ def parse(txt):
             cur={"idx":len(msgs),"date":date,"weekday":wd,"time":to24(ap,h,mi),"sender":sd.strip(),"lines":[b]}
         elif cur is not None: cur["lines"].append(ln)
     flush()
+    msgs=[m for m in msgs if m.get("date")]        # 날짜 헤더 이전 고아 메시지 제거(date=None → 하류 정렬/집계 크래시 방지)
+    for i,m in enumerate(msgs): m["idx"]=i          # 필터 후 idx 연속 재정렬
     for m in msgs: m["body"]="\n".join(m["lines"])
     return msgs
 
