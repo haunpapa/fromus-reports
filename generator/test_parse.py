@@ -314,6 +314,19 @@ class TestRoomGuards(unittest.TestCase):
         rec = [r for r in recs if r["url"].startswith("https://x.co/aaa")][0]
         self.assertNotEqual(rec.get("title_src"), "near")   # 방 넘어 빌려오지 않음
 
+    def test_qna_not_matched_across_rooms(self):
+        # A방 질문(idx 0) 바로 뒤 B방 교사 메시지(idx 1) → QnA 미매칭
+        q = self._m(0, "방A", "학생하나", "이거 어떻게 하나요?")
+        a = self._m(1, "방B", "밝쌤👩🏻‍🏫", "이렇게 하시면 됩니다 자세한 설명 추가")
+        kb = C.build([q, a], [], [])
+        self.assertEqual(kb["qna"], [])          # 방 경계 넘어 응답 매칭 금지
+
+    def test_qna_matched_within_room(self):
+        q = self._m(0, "방A", "학생하나", "이거 어떻게 하나요?")
+        a = self._m(1, "방A", "밝쌤👩🏻‍🏫", "이렇게 하시면 됩니다 자세한 설명 추가")
+        kb = C.build([q, a], [], [])
+        self.assertEqual(len(kb["qna"]), 1)      # 같은 방이면 정상 매칭
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

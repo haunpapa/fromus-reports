@@ -156,7 +156,7 @@ def build(msgs, links, signals, public=False):
         ans=None
         for j in range(m["idx"]+1,min(m["idx"]+6,len(msgs))):
             nb=by_idx.get(j)
-            if nb and nb["sender"] in TEACHERS:
+            if nb and nb.get("room")==m.get("room") and nb["sender"] in TEACHERS:
                 at=URL.sub("",nb["body"]).strip()
                 if len(at)>=10: ans={"a":re.sub(r'\s+',' ',at)[:240],"a_by":nb["sender"],"a_date":nb["date"]}; break
         if ans:
