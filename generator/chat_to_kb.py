@@ -170,7 +170,8 @@ def build(msgs, links, signals, public=False):
     for th in themes.values(): th["stocks"]=sorted(th["stocks"])
     meta={"generated_from":"kakao_chat","messages":len(msgs),
           "members":len(set(m.get("sender") for m in msgs)),
-          "from":msgs[0].get("date",""),"to":msgs[-1].get("date",""),
+          "from":min((m.get("date","") for m in msgs), default=""),
+          "to":max((m.get("date","") for m in msgs), default=""),
           "stocks":len(stocks),"themes":len(themes),"news":len(news)}
     kb={"build":meta,"stocks":stocks,"themes":themes,"news":news,"targets":targets,
             "readings":readings,"glossary":glossary,"actions":actions,"strategy":strategy,"qna":qna}

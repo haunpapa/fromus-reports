@@ -658,7 +658,10 @@ def main():
     uniq=dedup(links)
     personal=[s for s in sig if s["type"]!="research"]; research=[s for s in sig if s["type"]=="research"]
     titled=sum(1 for l in links if l["clean_title"]); resolved=sum(1 for l in links if l.get("resolved_url"))
-    meta={"channel":"프롬어스 오픈카톡(정규반)","date_from":msgs[0]["date"],"date_to":msgs[-1]["date"],
+    _mrooms=sorted(set(m.get("room","") for m in msgs))
+    _channel=_mrooms[0] if len(_mrooms)==1 else f"{_mrooms[0]} 외 {len(_mrooms)-1}개"
+    meta={"channel":_channel,"rooms":_mrooms,
+          "date_from":min(m["date"] for m in msgs),"date_to":max(m["date"] for m in msgs),
       "messages":len(msgs),"members_total":len(set(m["sender"] for m in msgs)),"members_core":len(CORE),
       "links_total":len(links),"news_links":sum(1 for l in links if l["category"]=="news"),
       "strategy_personal":len(personal),"strategy_research":len(research),

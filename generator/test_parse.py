@@ -297,6 +297,19 @@ class TestMerge(unittest.TestCase):
         bodies = sorted(m["body"] for m in msgs)
         self.assertEqual(bodies, ["둘째 방 대화", "첫째 방 대화"])  # 유실 없음
 
+    def test_build_meta_from_to_min_max(self):
+        # 방 그룹 정렬로 msgs 순서가 시간순이 아닐 때도 from/to는 실제 min/max
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = self._write(d, "KakaoTalk_Chat_방Z_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "중간")])
+        b = self._write(d, "KakaoTalk_Chat_방A_2026-06-20-10-00-00.csv", [
+            ("2026-04-01 09:00:00", "밝쌤", "가장 이른"),
+            ("2026-07-01 09:00:00", "밝쌤", "가장 늦은")])
+        msgs = U.merge_inputs([a, b])
+        kb = C.build(msgs, [], [])
+        self.assertEqual(kb["build"]["from"], "2026-04-01")
+        self.assertEqual(kb["build"]["to"], "2026-07-01")
+
 
 class TestRoomGuards(unittest.TestCase):
     def _m(self, idx, room, sender, body):
