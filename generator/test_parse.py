@@ -59,6 +59,31 @@ class TestFindInput(unittest.TestCase):
             self.assertTrue(os.path.basename(picked).startswith("KakaoTalk_"))
             self.assertNotEqual(picked, out)
 
+    def test_find_inputs_returns_all_kakao(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = os.path.join(d, "KakaoTalk_a.csv"); open(a, "w").close()
+        time.sleep(0.02)
+        b = os.path.join(d, "KakaoTalk_b.csv"); open(b, "w").close()
+        out = os.path.join(d, "뉴스_전체아카이브.csv"); open(out, "w").close()  # 출력형(미포함)
+        import unittest.mock as mock
+        with mock.patch("os.getcwd", return_value=d), \
+             mock.patch("os.path.expanduser", return_value="/no/such/dir"):
+            got = U.find_inputs(["prog"])
+        names = sorted(os.path.basename(p) for p in got)
+        self.assertEqual(names, ["KakaoTalk_a.csv", "KakaoTalk_b.csv"])  # 둘 다, 출력형 제외
+
+    def test_find_input_wrapper_is_string_and_newest(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        old = os.path.join(d, "KakaoTalk_a.csv"); open(old, "w").close()
+        time.sleep(0.02)
+        new = os.path.join(d, "KakaoTalk_b.csv"); open(new, "w").close()
+        import unittest.mock as mock
+        with mock.patch("os.getcwd", return_value=d), \
+             mock.patch("os.path.expanduser", return_value="/no/such/dir"):
+            picked = U.find_input(["prog"])
+        self.assertIsInstance(picked, str)          # 리스트 아님
+        self.assertEqual(picked, new)               # mtime 최신
+
 class TestFull(unittest.TestCase):
     def _msg(self, idx, body):
         return {"idx": idx, "date": "2026-03-20", "weekday": "금요일",

@@ -171,18 +171,22 @@ def room_of(path):
     stem = os.path.splitext(base)[0]
     return _TS_TAIL_RE.sub("", stem)   # 끝 타임스탬프 있으면 제거, 없으면 그대로
 
-def find_input(argv=None):
-    """txt/csv 입력 자동 선택. 명시 인자 우선 → cwd·~/Downloads 의 KakaoTalk_* 최신."""
+def find_inputs(argv=None):
+    """카톡 export 입력 '전부' 반환(이름 기반 탈락 없음). 명시 인자 우선."""
     argv = sys.argv if argv is None else argv
-    for a in argv[1:]:
-        if a.lower().endswith((".txt", ".csv")) and os.path.exists(a):
-            return a
+    args = [a for a in argv[1:] if a.lower().endswith((".txt", ".csv")) and os.path.exists(a)]
+    if args:
+        return args
     cands = []
     for root in (os.getcwd(), os.path.expanduser("~/Downloads")):
-        for pat in ("KakaoTalk_*.txt", "KakaoTalk_*.csv"):   # 출력 CSV 오선택 방지(prefix 제한)
+        for pat in ("KakaoTalk_*.txt", "KakaoTalk_*.csv"):   # 출력형 CSV는 prefix로 자연 배제
             cands += glob.glob(os.path.join(root, pat))
-    cands = sorted(set(cands), key=os.path.getmtime, reverse=True)
-    return cands[0] if cands else None
+    return sorted(set(cands))
+
+def find_input(argv=None):
+    """레거시 래퍼: 문자열/None + mtime 최신 1개 계약 보존."""
+    r = find_inputs(argv)
+    return max(r, key=os.path.getmtime, default=None)
 
 def to24(ap,h,m):
     h=int(h);m=int(m)
