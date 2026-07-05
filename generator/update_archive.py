@@ -277,9 +277,10 @@ def link_records(msgs):
     for r in recs:
         if r["title"]: continue
         i=r["msg_idx"]
+        r_room=idx.get(i,{}).get("room")
         for off in (1,-1,2,-2,3,-3):
             nb=idx.get(i+off)
-            if nb and nb["sender"]==r["sharer"] and not URLpat.search(nb["body"]):
+            if nb and nb.get("room")==r_room and nb["sender"]==r["sharer"] and not URLpat.search(nb["body"]):
                 t=tidy(nb["body"])
                 if len(t)>=10: r["title"]=t; r["title_src"]="near"; break
     return recs

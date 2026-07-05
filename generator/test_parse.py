@@ -298,5 +298,22 @@ class TestMerge(unittest.TestCase):
         self.assertEqual(bodies, ["둘째 방 대화", "첫째 방 대화"])  # 유실 없음
 
 
+class TestRoomGuards(unittest.TestCase):
+    def _m(self, idx, room, sender, body):
+        return {"idx": idx, "date": "2026-05-20", "time": "09:00",
+                "weekday": "수요일", "sender": sender, "room": room,
+                "body": body, "lines": body.split("\n")}
+
+    def test_link_title_not_borrowed_across_rooms(self):
+        # A방 링크(제목 없음) 바로 뒤 이웃이 B방 동명이인 → 제목 near-보충 금지
+        msgs = [
+            self._m(0, "방A", "대성", "https://x.co/aaa"),
+            self._m(1, "방B", "대성", "이건 B방 제목 후보 텍스트입니다"),
+        ]
+        recs = U.link_records(msgs)
+        rec = [r for r in recs if r["url"].startswith("https://x.co/aaa")][0]
+        self.assertNotEqual(rec.get("title_src"), "near")   # 방 넘어 빌려오지 않음
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
