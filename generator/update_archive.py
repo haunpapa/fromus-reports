@@ -717,7 +717,7 @@ def main():
             for m in msgs:
                 uu=URLpat.findall(m["body"])
                 f.write(json.dumps({"idx":m["idx"],"date":m["date"],"weekday":m.get("weekday"),
-                    "time":m["time"],"sender":m["sender"],"body":m["body"],"urls":uu,"n_urls":len(uu)},
+                    "time":m["time"],"sender":m["sender"],"room":m.get("room"),"body":m["body"],"urls":uu,"n_urls":len(uu)},
                     ensure_ascii=False)+"\n")
     except PermissionError: pass
     # ===== chat_kb.json 생성 (리포 루트, public=False=실명 유지). 병합은 CI build_hub.py 전담 =====
