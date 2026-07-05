@@ -310,6 +310,19 @@ class TestMerge(unittest.TestCase):
         self.assertEqual(kb["build"]["from"], "2026-04-01")
         self.assertEqual(kb["build"]["to"], "2026-07-01")
 
+    def test_integration_two_rooms_idx_and_room(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "학생하나", "이거 어떻게 하나요?")])
+        b = self._write(d, "KakaoTalk_Chat_방B_2026-06-20-10-00-00.csv", [
+            ("2026-06-20 09:00:00", "밝쌤👩🏻‍🏫", "이렇게 하시면 됩니다 자세한 설명 추가")])
+        msgs = U.merge_inputs([a, b])
+        self.assertEqual([m["idx"] for m in msgs], list(range(len(msgs))))  # 연속
+        self.assertTrue(all("room" in m for m in msgs))
+        kb = C.build(msgs, [], [])
+        # 질문(방A)과 교사응답(방B)이 서로 다른 방 → QnA 매칭되면 안 됨
+        self.assertEqual(kb["qna"], [])
+
 
 class TestRoomGuards(unittest.TestCase):
     def _m(self, idx, room, sender, body):
