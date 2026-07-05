@@ -633,11 +633,13 @@ def build_viewer(vd):
 LINKCOUNT={}
 def main():
     do_net="--no-resolve" not in sys.argv
-    path=find_input()
-    if not path: print("[!] 카카오톡 .txt/.csv 를 찾지 못했습니다. 인자로 경로를 주거나 ~/Downloads 에 두세요."); return
-    print(f"▶ 입력: {os.path.basename(path)}")
-    msgs = parse_csv(path) if path.lower().endswith(".csv") else parse(path)
+    paths=find_inputs()
+    if not paths: print("[!] 카카오톡 .txt/.csv 를 찾지 못했습니다. 인자로 경로를 주거나 ~/Downloads 에 두세요."); return
+    print(f"▶ 입력 {len(paths)}개: " + ", ".join(os.path.basename(p) for p in paths))
+    msgs = merge_inputs(paths)
     if not msgs: print("[!] 메시지가 비어 있습니다(파싱 0건)."); return
+    _rooms = sorted(set(m.get("room","") for m in msgs))
+    print(f"▶ 방 {len(_rooms)}개: {', '.join(_rooms)} · 메시지 {len(msgs)}")
     links=link_records(msgs); enrich(links)
     global LINKCOUNT; LINKCOUNT=Counter(l["sharer"] for l in links)
     print(f"▶ 메시지 {len(msgs)} · 링크 {len(links)} · 로컬제목 {sum(1 for l in links if l['title'])}")
