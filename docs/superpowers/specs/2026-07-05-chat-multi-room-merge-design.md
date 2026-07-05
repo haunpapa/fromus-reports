@@ -100,7 +100,7 @@
 4. **전역 idx 재부여**: `for i,m in enumerate(grouped_merged): m["idx"]=i`. **최종 idx는 오직 `grouped_merged` 기준** → 한 방 메시지가 idx 공간에서 연속 → 근접 스캔이 방 내부에 머무름.
 5. `grouped_merged`(=최종 msgs)를 downstream(link_records/strategy/chat_to_kb)에 전달.
 
-- **내용 키** = `(date, time, sender, body, occ)`. `occ`=한 파일 내에서 그 `(date,time,sender,body)` 튜플의 0-based 등장 순번. → **fold 판정 시** 같은 분 동일 발화의 서로 다른 반복(예: 'ㅋㅋㅋ' 2회)을 구분(초 절단이라 순번으로 보강). 흔한 경로(base verbatim)는 이 키를 base 내부 dedup에 **쓰지 않으므로** 유실 원천 없음.
+- **fold 판정 키** = `(date, time, sender, body)` 튜플 + 파일내 `occ` 순번(`occ`=한 파일 내에서 그 튜플의 0-based 등장 순번). → **fold 판정 시** 같은 분 동일 발화의 서로 다른 반복(예: 'ㅋㅋㅋ' 2회)을 구분(초 절단이라 순번으로 보강). 흔한 경로(base verbatim)는 이 키를 base 내부 dedup에 **쓰지 않으므로** 유실 원천 없음.
 
 ### 4.4 방 경계 근접 가드 (정확도)
 - **`update_archive.py:227-231` link_records** — 두 가드 모두 방어적 `.get`(견고성 통일, room 미태깅 직접호출/테스트도 안전):
