@@ -197,5 +197,18 @@ class TestTypeNews(unittest.TestCase):
         self.assertIn(sig[0]["type"], ("view", "position"))
 
 
+class TestRoomOf(unittest.TestCase):
+    def test_regex_name(self):
+        # 실데이터 규칙: KakaoTalk_Chat_<room>_<타임스탬프>.csv
+        self.assertEqual(
+            U.room_of("/x/KakaoTalk_Chat_2026 프롬어스_2026-05-20-20-33-17.csv"),
+            "2026 프롬어스")
+
+    def test_fallback_strips_trailing_timestamp(self):
+        # 규칙 불일치 → basename에서 끝 타임스탬프 제거(있으면), 없으면 확장자만 제거
+        self.assertEqual(U.room_of("/x/KakaoTalk_myroom_2026-05-20.txt"), "KakaoTalk_myroom")
+        self.assertEqual(U.room_of("/x/KakaoTalk_plain.csv"), "KakaoTalk_plain")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

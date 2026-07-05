@@ -160,6 +160,17 @@ def parse_csv(path):
         print(f"[parse_csv] 스킵된 행: {skipped}건")
     return msgs
 
+_ROOM_RE = re.compile(r"^KakaoTalk_Chat_(.+)_\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.(?:csv|txt)$")
+_TS_TAIL_RE = re.compile(r"_\d{4}-\d{2}-\d{2}(?:[-_]\d{2}){0,3}$")
+def room_of(path):
+    """카톡 export 파일명 → 방 태그(선택/탈락용 아님, 근접 가드·정렬용)."""
+    base = os.path.basename(path)
+    m = _ROOM_RE.match(base)
+    if m:
+        return m.group(1)
+    stem = os.path.splitext(base)[0]
+    return _TS_TAIL_RE.sub("", stem)   # 끝 타임스탬프 있으면 제거, 없으면 그대로
+
 def find_input(argv=None):
     """txt/csv 입력 자동 선택. 명시 인자 우선 → cwd·~/Downloads 의 KakaoTalk_* 최신."""
     argv = sys.argv if argv is None else argv
