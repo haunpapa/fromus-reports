@@ -235,5 +235,68 @@ class TestRoomOf(unittest.TestCase):
         self.assertEqual(U.room_of("/x/KakaoTalk_plain.csv"), "KakaoTalk_plain")
 
 
+class TestMerge(unittest.TestCase):
+    def _write(self, d, name, rows):
+        # rows: [(datetime_str, sender, message)] → 카톡 CSV
+        import csv as _csv
+        p = os.path.join(d, name)
+        with open(p, "w", encoding="utf-8-sig", newline="") as f:
+            w = _csv.writer(f); w.writerow(["Date", "User", "Message"])
+            for dt, u, msg in rows: w.writerow([dt, u, msg])
+        return p
+
+    def test_base_verbatim_keeps_same_minute_dupes(self):
+        # 같은 방 최신 1파일: dedup 미적용 → 같은 분·동일 body 2건 둘 다 보존
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        p = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:10", "대성", "ㅋㅋㅋ"),
+            ("2026-05-20 09:00:40", "대성", "ㅋㅋㅋ"),   # 다른 실제 메시지(초만 다름)
+        ])
+        msgs = U.merge_inputs([p])
+        self.assertEqual(len(msgs), 2)                 # 유실 없음
+        self.assertEqual([m["idx"] for m in msgs], [0, 1])
+        self.assertTrue(all(m["room"] == "방A" for m in msgs))
+
+    def test_same_room_snapshots_dedup_via_fold(self):
+        # 같은 방 두 스냅샷(old ⊂ new): 최신만 채택, fold 0건 → 중복 없음
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        old = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "안녕"),
+        ])
+        time.sleep(0.02)
+        new = self._write(d, "KakaoTalk_Chat_방A_2026-05-21-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "안녕"),
+            ("2026-05-21 09:00:00", "대성", "오늘도"),
+        ])
+        msgs = U.merge_inputs([old, new])
+        bodies = [m["body"] for m in msgs]
+        self.assertEqual(bodies, ["안녕", "오늘도"])    # 중복 없이 union
+
+    def test_two_rooms_merged_and_tagged(self):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        a = self._write(d, "KakaoTalk_Chat_방A_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "A방 메시지")])
+        b = self._write(d, "KakaoTalk_Chat_방B_2026-06-20-10-00-00.csv", [
+            ("2026-06-20 09:00:00", "밝쌤", "B방 메시지")])
+        msgs = U.merge_inputs([b, a])                  # 순서 무관
+        self.assertEqual(len(msgs), 2)
+        self.assertEqual({m["room"] for m in msgs}, {"방A", "방B"})
+        self.assertEqual([m["idx"] for m in msgs], [0, 1])
+        # 방 그룹은 최초등장 datetime 순 → A(5월) 먼저
+        self.assertEqual(msgs[0]["room"], "방A")
+
+    def test_name_collision_keeps_both_rooms(self):
+        # 동일 표시명 서로 다른 방(내용 disjoint) → fold로 둘 다 보존(방 유실 없음)
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        r1 = self._write(d, "KakaoTalk_Chat_같은이름_2026-05-20-10-00-00.csv", [
+            ("2026-05-20 09:00:00", "대성", "첫째 방 대화")])
+        time.sleep(0.02)
+        r2 = self._write(d, "KakaoTalk_Chat_같은이름_2026-05-21-10-00-00.csv", [
+            ("2026-05-21 09:00:00", "밝쌤", "둘째 방 대화")])
+        msgs = U.merge_inputs([r1, r2])
+        bodies = sorted(m["body"] for m in msgs)
+        self.assertEqual(bodies, ["둘째 방 대화", "첫째 방 대화"])  # 유실 없음
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

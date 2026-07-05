@@ -188,6 +188,44 @@ def find_input(argv=None):
     r = find_inputs(argv)
     return max(r, key=os.path.getmtime, default=None)
 
+def _parse_any(path):
+    return parse_csv(path) if path.lower().endswith(".csv") else parse(path)
+
+def _keyed(msgs):
+    """각 msg에 파일 내 occ(동일 (date,time,sender,body) 등장 순번) 부여 → ((key,occ), m)."""
+    counts = {}; out = []
+    for m in msgs:
+        k = (m["date"], m["time"], m["sender"], m["body"])
+        occ = counts.get(k, 0); counts[k] = occ + 1
+        out.append(((k, occ), m))
+    return out
+
+def merge_inputs(paths):
+    """여러 카톡 export → 통합 msgs. 방별 최신 verbatim + 겹치지 않는 파일만 fold. idx 재부여."""
+    groups = defaultdict(list)
+    for p in paths:
+        groups[room_of(p)].append(p)
+    room_lists = {}
+    for tag, files in groups.items():
+        files = sorted(files, key=os.path.getmtime, reverse=True)   # 최신 먼저
+        base = _parse_any(files[0])
+        for m in base: m["room"] = tag; m["src_file"] = files[0]
+        seen = set(ck for ck, _ in _keyed(base))
+        folded = False
+        for f in files[1:]:
+            for ck, m in _keyed(_parse_any(f)):
+                if ck not in seen:
+                    seen.add(ck); m["room"] = tag; m["src_file"] = f
+                    base.append(m); folded = True
+        if folded:
+            base.sort(key=lambda m: (m["date"], m["time"]))         # 안정 정렬(역전 보정)
+        room_lists[tag] = base
+    def _earliest(ms):
+        return min(((m["date"], m["time"]) for m in ms), default=("", ""))
+    merged = [m for ms in sorted(room_lists.values(), key=_earliest) for m in ms]
+    for i, m in enumerate(merged): m["idx"] = i
+    return merged
+
 def to24(ap,h,m):
     h=int(h);m=int(m)
     if ap=="오전" and h==12:h=0
