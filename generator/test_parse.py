@@ -341,5 +341,26 @@ class TestRoomGuards(unittest.TestCase):
         self.assertEqual(len(kb["qna"]), 1)      # 같은 방이면 정상 매칭
 
 
+class TestDeterminism(unittest.TestCase):
+    def test_chat_kb_hashseed_independent(self):
+        import subprocess, json
+        ents = list(U.ENTITIES)
+        aliases = [U.ENTITIES[e]["al"][0] for e in ents[:3]]   # 3개 종목 별칭(하드코딩 금지)
+        body = " ".join(aliases) + " 모두 좋게 봅니다"
+        gendir = os.path.dirname(os.path.abspath(U.__file__))
+        code = (
+            f"import sys,json; sys.path.insert(0, {gendir!r}); import chat_to_kb as C;"
+            f"m=[{{'idx':0,'date':'2026-03-20','time':'09:00','weekday':'금요일',"
+            f"'sender':'ㄱ 이혜나','room':'r','body':{body!r},'lines':[{body!r}]}}];"
+            f"print(json.dumps(C.build(m, [], []), ensure_ascii=False))"
+        )
+        def run(seed):
+            env = dict(os.environ, PYTHONHASHSEED=str(seed))
+            return subprocess.check_output([sys.executable, "-c", code], env=env, text=True)
+        outs = {run(s) for s in ("0", "1", "2", "3", "4")}
+        self.assertEqual(len(outs), 1,
+                         "chat_kb.json이 PYTHONHASHSEED에 따라 달라짐(set 반복 sorted() 누락?)")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
