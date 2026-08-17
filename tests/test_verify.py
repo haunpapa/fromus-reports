@@ -212,3 +212,50 @@ def test_aggregate_empty_input_is_safe():
     assert out["summary"]["h20"]["judged"] == 0
     assert out["summary"]["h20"]["hit_rate"] is None      # 0.0 이 아니라 None
     assert out["stocks"] == []
+
+
+# ── 캐시 ─────────────────────────────────────────────────────────
+def test_merge_points_dedupes_and_sorts():
+    from hublib.verify import merge_points
+    old = [("2026-05-04", 100.0), ("2026-05-05", 101.0)]
+    new = [("2026-05-05", 999.0), ("2026-05-06", 102.0)]
+    assert merge_points(old, new) == [
+        ("2026-05-04", 100.0), ("2026-05-05", 999.0), ("2026-05-06", 102.0)
+    ], "겹치는 날짜는 새 값이 이겨야 함"
+
+
+def test_price_cache_roundtrip_and_incremental(tmp_path):
+    from hublib.verify import PriceCache
+    p = str(tmp_path / "price_cache.json")
+    c = PriceCache(p)
+    assert c.get("KR:000660") == []
+    c.put("KR:000660", [("2026-05-04", 100.0)])
+    c.save()
+
+    c2 = PriceCache(p)
+    assert c2.get("KR:000660") == [("2026-05-04", 100.0)]
+    assert c2.last("KR:000660") == "2026-05-04"
+
+
+def test_price_cache_version_bump_invalidates(tmp_path):
+    import json as _json
+    from hublib.verify import PriceCache, CACHE_VERSION
+    p = tmp_path / "price_cache.json"
+    p.write_text(_json.dumps({"v": CACHE_VERSION + 1,
+                              "series": {"KR:000660": {"last": "x", "points": [["d", 1]]}}}),
+                 encoding="utf-8")
+    assert PriceCache(str(p)).get("KR:000660") == [], "버전이 다르면 전량 무효화"
+
+
+def test_price_cache_corrupt_file_falls_back(tmp_path):
+    from hublib.verify import PriceCache
+    p = tmp_path / "price_cache.json"
+    p.write_text("{ not json", encoding="utf-8")
+    assert PriceCache(str(p)).get("anything") == []
+
+
+def test_price_cache_save_is_noop_when_clean(tmp_path):
+    from hublib.verify import PriceCache
+    p = tmp_path / "price_cache.json"
+    PriceCache(str(p)).save()
+    assert not p.exists()

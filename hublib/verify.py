@@ -6,6 +6,9 @@
 순수 함수(extract_calls·judge_call·aggregate_calls)와 네트워크(fetch_prices)를 분리한다.
 순수 함수는 네트워크 없이 전량 테스트되고, 어떤 실패도 허브 빌드를 깨뜨리지 않는다.
 """
+import datetime
+import json
+import os
 
 BOT_SHARER = "김병철(봇)"
 BENCHED_MARKETS = ("KR", "US")     # 대응 벤치마크 지수가 있는 시장
@@ -200,3 +203,49 @@ def aggregate_calls(judged_calls, horizons=HORIZONS):
     stocks.sort(key=lambda s: (s["low_sample"], -s["calls"], s["name"]))
 
     return {"summary": summary, "stocks": stocks}
+
+
+CACHE_VERSION = 1          # 수집·저장 형식이 바뀌면 올린다 (전량 무효화)
+
+
+def merge_points(old, new):
+    """날짜 기준 병합 — 겹치면 새 값 채택, 오름차순 정렬."""
+    m = dict(old)
+    m.update(dict(new))
+    return sorted(m.items())
+
+
+class PriceCache:
+    """종목별 일봉 증분 캐시. 손상·버전불일치 시 조용히 전량 재수집으로 폴백한다."""
+
+    def __init__(self, path="build/price_cache.json"):
+        self.path = path
+        self.data = {}
+        try:
+            with open(path, encoding="utf-8") as f:
+                raw = json.load(f)
+            if raw.get("v") == CACHE_VERSION:
+                self.data = raw.get("series") or {}
+        except Exception:
+            self.data = {}
+        self.dirty = False
+
+    def get(self, key):
+        entry = self.data.get(key)
+        return [(d, v) for d, v in entry["points"]] if entry else []
+
+    def last(self, key):
+        entry = self.data.get(key)
+        return entry.get("last") if entry else None
+
+    def put(self, key, points):
+        self.data[key] = {"last": points[-1][0] if points else "",
+                          "points": [[d, v] for d, v in points]}
+        self.dirty = True
+
+    def save(self):
+        if not self.dirty:
+            return
+        os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump({"v": CACHE_VERSION, "series": self.data}, f, ensure_ascii=False)
