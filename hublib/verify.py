@@ -145,3 +145,58 @@ def judge_call(call, series, bench, horizons=HORIZONS):
             "hit": hit,
         }
     return out
+
+
+LOW_SAMPLE_MIN = 5
+
+
+def _roll(rows):
+    """판정된 구간 결과 목록 → 적중·적중률·초과수익 통계."""
+    hits = sum(1 for r in rows if r["hit"])
+    ex = sorted(r["excess"] for r in rows if r["excess"] is not None)
+    return {
+        "judged": len(rows),
+        "hit": hits,
+        "hit_rate": round(hits / len(rows) * 100, 1) if rows else None,
+        "avg_excess": round(sum(ex) / len(ex), 2) if ex else None,
+        "median_excess": ex[len(ex) // 2] if ex else None,
+    }
+
+
+def aggregate_calls(judged_calls, horizons=HORIZONS):
+    """판정된 콜 → {summary, stocks}. 충돌 콜은 통계에서 제외한다.
+
+    이름이 aggregate 가 아닌 이유는 hublib/aggregate.py 에 리포트 집계용
+    aggregate() 가 이미 있어서다 — 같은 이름이 둘이면 import 마다 확인해야 한다.
+    """
+    scored = [c for c in judged_calls if not c.get("conflict")]
+
+    summary = {}
+    for h in horizons:
+        key = f"h{h}"
+        rows = [c[key] for c in scored if isinstance(c.get(key), dict)]
+        stat = _roll(rows)
+        stat["pending"] = sum(1 for c in scored
+                              if c.get(key) is None and not c.get("error"))
+        stat["failed"] = sum(1 for c in scored if c.get("error"))
+        stat["bullish"] = sum(1 for c in scored if c.get("stance") == "bullish")
+        stat["bearish"] = sum(1 for c in scored if c.get("stance") == "bearish")
+        summary[key] = stat
+
+    by_stock = {}
+    for c in scored:
+        by_stock.setdefault(c["stock"], []).append(c)
+
+    stocks = []
+    for name, cs in sorted(by_stock.items()):
+        row = {"name": name, "market": cs[0].get("market", ""),
+               "ticker": cs[0].get("ticker", ""), "bench": cs[0].get("bench_label", ""),
+               "calls": len(cs), "low_sample": len(cs) < LOW_SAMPLE_MIN}
+        for h in horizons:
+            key = f"h{h}"
+            row[key] = _roll([c[key] for c in cs if isinstance(c.get(key), dict)])
+        stocks.append(row)
+    # 표본 부족은 어떤 점수여도 하단 고정 — 얇은 표본이 랭킹 상위를 차지하지 못하게 한다
+    stocks.sort(key=lambda s: (s["low_sample"], -s["calls"], s["name"]))
+
+    return {"summary": summary, "stocks": stocks}

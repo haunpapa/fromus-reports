@@ -164,3 +164,51 @@ def test_call_after_last_trading_day_is_pending():
     s = _series(10)
     r = judge_call(_call("2026-12-31"), s, [], horizons=(5,))
     assert r["error"] == "no_entry" and r["entry_date"] is None
+
+
+# ── 집계 ─────────────────────────────────────────────────────────
+def _judged(stock, hit, excess, conflict=False, error=None, h20=True):
+    c = {"stock": stock, "market": "KR", "ticker": "000000", "stance": "bullish",
+         "conflict": conflict, "error": error, "h20": None}
+    if h20 and not error:
+        c["h20"] = {"exit_date": "2026-06-01", "ret": excess, "bench": 0.0,
+                    "excess": excess, "hit": hit}
+    return c
+
+
+def test_aggregate_excludes_conflict_pending_and_failed():
+    from hublib.verify import aggregate_calls
+    calls = [
+        _judged("A", True, 5.0),
+        _judged("A", False, -2.0),
+        _judged("A", True, 1.0, conflict=True),       # 충돌 — 제외
+        _judged("A", True, 0.0, h20=False),           # 판정 대기 — 분모 제외
+        _judged("A", True, 0.0, error="no_price"),    # 수집 실패 — 분모 제외
+    ]
+    s = aggregate_calls(calls, horizons=(20,))["summary"]["h20"]
+    assert s["judged"] == 2 and s["hit"] == 1
+    assert s["hit_rate"] == 50.0
+    assert s["pending"] == 1 and s["failed"] == 1
+
+
+def test_aggregate_marks_low_sample_stocks():
+    from hublib.verify import aggregate_calls
+    calls = [_judged("많음", True, 1.0) for _ in range(5)] + [_judged("적음", True, 9.0)]
+    rows = {r["name"]: r for r in aggregate_calls(calls, horizons=(20,))["stocks"]}
+    assert rows["많음"]["low_sample"] is False
+    assert rows["적음"]["low_sample"] is True, "5건 미만은 표본 부족"
+
+
+def test_aggregate_sorts_low_sample_last_regardless_of_score():
+    from hublib.verify import aggregate_calls
+    calls = [_judged("많음", False, -9.0) for _ in range(5)] + [_judged("적음", True, 99.0)]
+    names = [r["name"] for r in aggregate_calls(calls, horizons=(20,))["stocks"]]
+    assert names == ["많음", "적음"], "표본 부족 종목이 상위로 올라오면 안 됨"
+
+
+def test_aggregate_empty_input_is_safe():
+    from hublib.verify import aggregate_calls
+    out = aggregate_calls([], horizons=(20,))
+    assert out["summary"]["h20"]["judged"] == 0
+    assert out["summary"]["h20"]["hit_rate"] is None      # 0.0 이 아니라 None
+    assert out["stocks"] == []
