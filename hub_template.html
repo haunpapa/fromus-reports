@@ -1045,11 +1045,12 @@ function stockRow(s){
   const restM=allM.slice(10);
   const moreM=restM.length?`<div class="st-rest" style="display:none">${restM.map(stMentionHtml).join('')}</div><div class="st-more" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 테마·수급 ${restM.length}개 더보기</div>`:'';
   const chatPill = s.chat ? `<span class="pill" style="background:#f5f3ff;color:#7c3aed">\uD83D\uDCAC ${s.chat.count}</span>` : '';
+  const vPill = verifyChip(s.name);
   return `<div class="strow">
     <div class="strow-head" onclick="this.parentNode.querySelector('.strow-detail').classList.toggle('open')">
       <button class="star ${isWatched('stock',s.name)?'on':''}" data-watch="stock:${esc(s.name)}" title="워치리스트에 추가/제거" onclick="event.stopPropagation();toggleWatchEl(this)">${isWatched('stock',s.name)?'★':'☆'}</button>
       <span class="strow-name">${esc(s.name)}</span>
-      <span class="strow-mini">${momentumChip(s)}${themes}${tags}${chatPill}</span>
+      <span class="strow-mini">${momentumChip(s)}${themes}${tags}${chatPill}${vPill}</span>
       <canvas class="strow-spark" data-spark-name="${esc(s.name)}" width="156" height="52"></canvas>
       <button class="cmp-add ${isComparePicked(s.name)?'on':''}" data-cmp="${esc(s.name)}" onclick="event.stopPropagation();toggleCompare('${esc(s.name)}')">${isComparePicked(s.name)?'비교중':'비교'}</button>
       <span class="strow-cnt">${s.count}회</span>
@@ -1148,6 +1149,16 @@ function vCallRows(name){
       <span class="v-dir ${esc(c.stance)}">${c.stance==='bullish'?'강세':'약세'}</span>
       ${badge} <span style="color:var(--text-3)">${who}</span> ${snip}</div>`;
   }).join('') || '<div class="v-mini">표시할 콜이 없다.</div>';
+}
+
+const VMAP=(()=>{const m={};((D.verify&&D.verify.stocks)||[]).forEach(s=>m[s.name]=s);return m;})();
+function verifyChip(name){
+  const st=VMAP[name]; if(!st) return '';
+  // 표본 부족 종목은 적중률을 아예 노출하지 않는다 — 2콜짜리 100%가 신뢰 근거로 읽히면 안 된다
+  if(st.low_sample) return `<span class="pill" style="background:var(--surface-2,#f3f0ea);color:var(--text-3)">✅ ${st.calls}콜</span>`;
+  const h=st['h'+PRIMARY_H]||{};
+  if(!h.judged) return '';
+  return `<span class="pill" style="background:#e8f6ec;color:#16a34a" title="${h.hit}/${h.judged} 적중 · 평균 초과 ${vPct(h.avg_excess)}">✅ ${h.hit}/${h.judged} · ${vPct(h.avg_excess)}</span>`;
 }
 
 /* ───────── STRATEGY ───────── */
