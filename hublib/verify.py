@@ -70,3 +70,78 @@ def extract_calls(chat_kb):
         "conflict": sum(1 for c in calls if c["conflict"]),
     }
     return calls, stats
+
+
+HORIZONS = (5, 20, 60)
+PRIMARY_HORIZON = 20
+
+
+def _entry_index(series, mention_date):
+    """발화일보다 뒤인 첫 거래일 인덱스. 장 마감 후 발화의 look-ahead 를 막는다."""
+    for i, (d, _v) in enumerate(series):
+        if d > mention_date:
+            return i
+    return None
+
+
+def _asof(series, date):
+    """date 이하 최근 거래일의 값. 거래일 달력이 어긋나도 안전하게 맞춘다."""
+    val = None
+    for d, v in series:
+        if d > date:
+            break
+        val = v
+    return val
+
+
+def judge_call(call, series, bench, horizons=HORIZONS):
+    """콜 1건을 가격 시계열과 대조한다. 네트워크 없음.
+
+    series/bench: [(YYYY-MM-DD, close)] 오름차순.
+    미성숙 구간은 None 으로 남긴다 — 0으로 채우면 적중률 분모가 오염된다.
+    """
+    out = {"entry_date": None, "entry": None, "error": None}
+    for h in horizons:
+        out[f"h{h}"] = None
+
+    if not series:
+        out["error"] = "no_price"
+        return out
+    ei = _entry_index(series, call["date"])
+    if ei is None:
+        out["error"] = "no_entry"
+        return out
+    entry_date, entry_price = series[ei]
+    if not entry_price or entry_price <= 0:
+        out["error"] = "bad_entry"
+        return out
+
+    out["entry_date"] = entry_date
+    out["entry"] = round(entry_price, 4)
+    bench_entry = _asof(bench, entry_date) if bench else None
+
+    for h in horizons:
+        xi = ei + h
+        if xi > len(series) - 1:
+            continue                             # 판정 대기 — None 유지
+        exit_date, exit_price = series[xi]
+        if not exit_price or exit_price <= 0:
+            continue
+        ret = exit_price / entry_price - 1.0
+
+        bench_ret = None
+        bench_exit = _asof(bench, exit_date) if bench else None
+        if bench_entry and bench_exit and bench_entry > 0:
+            bench_ret = bench_exit / bench_entry - 1.0
+        excess = (ret - bench_ret) if bench_ret is not None else None
+
+        basis = excess if excess is not None else ret
+        hit = (basis > 0) if call["stance"] == "bullish" else (basis < 0)
+        out[f"h{h}"] = {
+            "exit_date": exit_date,
+            "ret": round(ret * 100, 2),
+            "bench": round(bench_ret * 100, 2) if bench_ret is not None else None,
+            "excess": round(excess * 100, 2) if excess is not None else None,
+            "hit": hit,
+        }
+    return out
