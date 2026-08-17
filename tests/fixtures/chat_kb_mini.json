@@ -1,0 +1,29 @@
+{
+  "build": {"generated_from": "kakao_chat"},
+  "stocks": {
+    "삼성전자": {
+      "name": "삼성전자", "market": "KR", "ticker": "005930",
+      "mentions": [
+        {"date": "2026-05-04", "sharer": "가", "stance": "bullish", "type": "view", "snippet": "A"},
+        {"date": "2026-05-04", "sharer": "나", "stance": "bullish", "type": "position", "snippet": "B"},
+        {"date": "2026-05-11", "sharer": "가", "stance": "bullish", "type": "view", "snippet": "C"},
+        {"date": "2026-05-11", "sharer": "다", "stance": "bearish", "type": "view", "snippet": "D"},
+        {"date": "2026-05-12", "sharer": "가", "stance": "neutral", "type": "view", "snippet": "E"},
+        {"date": "2026-05-13", "sharer": "김병철(봇)", "stance": "bullish", "type": "view", "snippet": "F"}
+      ]
+    },
+    "비트코인": {
+      "name": "비트코인", "market": "ASSET", "ticker": "BTC",
+      "mentions": [
+        {"date": "2026-05-04", "sharer": "가", "stance": "bullish", "type": "view", "snippet": "G"},
+        {"date": "2026-05-05", "sharer": "김병철(봇)", "stance": "bearish", "type": "view", "snippet": "H"}
+      ]
+    },
+    "무티커": {
+      "name": "무티커", "market": "KR", "ticker": "",
+      "mentions": [
+        {"date": "2026-05-04", "sharer": "가", "stance": "bullish", "type": "view", "snippet": "I"}
+      ]
+    }
+  }
+}
