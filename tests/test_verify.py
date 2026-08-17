@@ -319,3 +319,53 @@ def test_fetch_prices_requests_each_ticker_once(tmp_path):
              for d in ("2026-05-04", "2026-05-11", "2026-06-01")]
     fetch_prices(calls, PriceCache(str(tmp_path / "c.json")), loaders={"KR": loader})
     assert hits == ["000660"], "같은 종목을 콜 수만큼 반복 요청하면 안 됨"
+
+
+# ── 조립 ─────────────────────────────────────────────────────────
+def test_build_verify_end_to_end_with_fake_loaders(tmp_path):
+    from hublib.verify import build_verify
+    def loader(ticker, start):
+        return _series(40)
+    out = build_verify(chat_kb=_mini(), cache_path=str(tmp_path / "c.json"),
+                       loaders={"KR": loader, "US": loader},
+                       market_of=lambda code: "KOSPI")
+    assert out["enabled"] is True
+    assert out["meta"]["calls"] == 1            # 3콜 중 충돌 2 제외
+    assert out["meta"]["excluded"]["conflict"] == 2
+    assert out["summary"]["h20"]["judged"] >= 0
+    assert len(out["calls"]) == 3, "충돌 콜도 근거 화면용으로 남긴다"
+
+
+def test_build_verify_survives_total_collection_failure(tmp_path):
+    from hublib.verify import build_verify
+    def boom(ticker, start):
+        raise RuntimeError("network down")
+    out = build_verify(chat_kb=_mini(), cache_path=str(tmp_path / "c.json"),
+                       loaders={"KR": boom, "US": boom},
+                       market_of=lambda code: "KOSPI")
+    assert out["enabled"] is True, "종목별 실패는 격리 — 레이어 자체는 살아있다"
+    assert out["summary"]["h20"]["failed"] >= 1
+
+
+def test_build_verify_returns_disabled_on_unexpected_error(tmp_path):
+    from hublib.verify import build_verify
+    out = build_verify(chat_kb={"stocks": "not-a-dict"}, cache_path=str(tmp_path / "c.json"))
+    assert out["enabled"] is False and out["reason"]
+
+
+def test_build_verify_returns_none_without_chat_data(tmp_path):
+    from hublib.verify import build_verify
+    assert build_verify(chat_kb=None, cache_path=str(tmp_path / "c.json")) is None
+
+
+def test_aggregate_counts_too_recent_calls_as_pending_not_failed():
+    """며칠 전 콜은 아직 진입할 거래일이 없다 — 수집 실패가 아니라 판정 대기다."""
+    from hublib.verify import aggregate_calls
+    calls = [
+        _judged("A", True, 5.0),
+        _judged("A", True, 0.0, error="no_entry"),    # 콜 이후 거래일 없음 → 대기
+        _judged("A", True, 0.0, error="no_price"),    # 시계열 자체가 없음 → 실패
+    ]
+    s = aggregate_calls(calls, horizons=(20,))["summary"]["h20"]
+    assert s["failed"] == 1, "no_entry 를 실패로 세면 없는 장애를 보고하게 된다"
+    assert s["pending"] == 1

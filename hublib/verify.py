@@ -152,6 +152,10 @@ def judge_call(call, series, bench, horizons=HORIZONS):
 
 LOW_SAMPLE_MIN = 5
 
+# 가격을 못 구한 진짜 장애. no_entry(콜 이후 거래일이 아직 없음)는 여기 없다 —
+# 며칠 전 콜은 진입 자체가 미래라 '판정 대기'지 '수집 실패'가 아니다.
+FAILED_ERRORS = ("no_price", "bad_entry")
+
 
 def _roll(rows):
     """판정된 구간 결과 목록 → 적중·적중률·초과수익 통계."""
@@ -180,8 +184,8 @@ def aggregate_calls(judged_calls, horizons=HORIZONS):
         rows = [c[key] for c in scored if isinstance(c.get(key), dict)]
         stat = _roll(rows)
         stat["pending"] = sum(1 for c in scored
-                              if c.get(key) is None and not c.get("error"))
-        stat["failed"] = sum(1 for c in scored if c.get("error"))
+                              if c.get(key) is None and c.get("error") not in FAILED_ERRORS)
+        stat["failed"] = sum(1 for c in scored if c.get("error") in FAILED_ERRORS)
         stat["bullish"] = sum(1 for c in scored if c.get("stance") == "bullish")
         stat["bearish"] = sum(1 for c in scored if c.get("stance") == "bearish")
         summary[key] = stat
@@ -346,3 +350,77 @@ def fetch_benchmarks(labels, first_date, cache, loaders=None):
             cache.put(key, points)
         out[label] = points
     return out
+
+
+def _krx_market_lookup():
+    """코드 → 'KOSPI'|'KOSDAQ'. 실패하면 전부 코스피로 폴백한다.
+
+    이름이 아니라 코드로 조회한다 — '네이버'/'NAVER' 같은 표기 차이에 걸리지 않는다.
+    """
+    try:
+        from hublib.momentum import _load_krx_listing
+        table = {r["code"]: ("KOSDAQ" if "KOSDAQ" in str(r.get("market", "")).upper()
+                             else "KOSPI") for r in _load_krx_listing()}
+    except Exception as e:
+        print(f"ℹ️ KRX 시장 구분 조회 실패 — 전부 코스피로 간주 ({repr(e)[:80]})")
+        table = {}
+    return lambda code: table.get(code, "KOSPI")
+
+
+def _bench_label(call, market_of):
+    return "US" if call["market"] == "US" else market_of(call["ticker"])
+
+
+def build_verify(chat_kb=None, cache_path="build/price_cache.json",
+                 loaders=None, market_of=None, horizons=HORIZONS):
+    """검증 레이어 전체를 조립한다. chat 데이터가 없으면 None.
+
+    예상 못 한 예외는 {'enabled': False, 'reason': ...} 로 바꿔 반환한다 —
+    검증 레이어 때문에 허브 빌드가 실패해선 안 된다.
+    """
+    if not chat_kb:
+        return None
+    try:
+        from hublib.config import _fmt_kst
+        calls, stats = extract_calls(chat_kb)
+        if not calls:
+            return {"enabled": False, "reason": "no calls"}
+
+        market_of = market_of or _krx_market_lookup()
+        for c in calls:
+            c["bench_label"] = _bench_label(c, market_of)
+
+        cache = PriceCache(cache_path)
+        first = min(c["date"] for c in calls)
+        prices = fetch_prices(calls, cache, loaders=loaders)
+        benches = fetch_benchmarks([c["bench_label"] for c in calls], first, cache,
+                                   loaders=loaders)
+        cache.save()
+
+        judged = []
+        for c in calls:
+            series = prices.get(f"{c['market']}:{c['ticker']}") or []
+            bench = benches.get(c["bench_label"]) or []
+            judged.append({**c, **judge_call(c, series, bench, horizons=horizons)})
+
+        agg = aggregate_calls(judged, horizons=horizons)
+        scored = [c for c in judged if not c["conflict"]]
+        return {
+            "enabled": True,
+            "meta": {
+                "cohort": "core", "calls": len(scored), "merged_from": stats["core"],
+                "stocks": len(agg["stocks"]), "population": stats["population"],
+                "horizons": list(horizons), "primary": PRIMARY_HORIZON,
+                "entry": "next_trading_close", "unit": "trading_days",
+                "excluded": {k: stats[k] for k in
+                             ("bot", "asset", "bot_and_asset", "duplicate", "conflict")},
+                "generated": _fmt_kst(),
+            },
+            "summary": agg["summary"],
+            "stocks": agg["stocks"],
+            "calls": judged,
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"enabled": False, "reason": repr(e)[:200]}

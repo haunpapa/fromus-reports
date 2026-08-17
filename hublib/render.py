@@ -63,6 +63,36 @@ def _merge_chat_kb(data):
     return data
 
 
+def _build_verify_safe(data):
+    """chat_kb.json 원본으로 검증 레이어를 만든다. 실패해도 빌드는 계속된다.
+
+    _merge_chat_kb 와 달리 **cwd 만 본다**(리포 루트 폴백 없음). 검증은 네트워크를
+    타므로, tmp 폴더에서 도는 tests/test_phases.py 가 리포 루트의 실제 chat_kb.json 을
+    집어 시세를 받아버리면 안 된다. CI 는 리포 루트에서 실행하므로 cwd 만으로 충분하다.
+    """
+    import json, sys
+    if os.environ.get("VERIFY_SKIP") in ("1", "true", "TRUE", "yes"):
+        print("ℹ️ VERIFY_SKIP -- 검증 레이어 생략")
+        return None
+    if not os.path.exists("chat_kb.json"):
+        return None
+    try:
+        from hublib.verify import build_verify
+        with open("chat_kb.json", encoding="utf-8") as f:
+            chat = json.load(f)
+        out = build_verify(chat_kb=chat)
+        if out and out.get("enabled"):
+            m = out["meta"]
+            print(f"검증 레이어 -- {m['calls']}콜 / {m['stocks']}종목")
+        elif out:
+            print(f"ℹ️ 검증 레이어 비활성 -- {out.get('reason')}")
+        return out
+    except Exception as e:
+        print(f"[WARN] 검증 레이어 생략 -- {e}", file=sys.stderr)
+        data.setdefault("build", {})["verify_error"] = str(e)
+        return None
+
+
 def collect(src=".", files=None, json_out="knowledge_base.json"):
     """리포트 파싱→집계→시세→모멘텀→검색→chat 병합→knowledge_base.json 기록.
     무거운 단계 — parse/aggregate/momentum 를 지연 import 한다."""
@@ -110,6 +140,7 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
         "reports": reports, "search": search, "ai_digest": None, **agg,
     }
     data = _merge_chat_kb(data)
+    data["verify"] = _build_verify_safe(data)
     with open(json_out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
     print(f"\n→ {json_out} 작성 ({os.path.getsize(json_out)//1024} KB)")

@@ -10,8 +10,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _run(args, cwd):
+    # 검증 레이어는 tests/test_verify.py 가 전담한다 — 2단계 빌드 테스트는 네트워크와 무관해야 한다
+    env = {**os.environ, "VERIFY_SKIP": "1"}
     return subprocess.run([sys.executable, os.path.join(ROOT, "build_hub.py")] + args,
-                          cwd=cwd, capture_output=True, text=True, timeout=300)
+                          cwd=cwd, capture_output=True, text=True, timeout=300, env=env)
 
 
 def test_collect_then_render(tmp_path):
