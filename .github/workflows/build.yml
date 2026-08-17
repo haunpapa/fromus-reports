@@ -58,6 +58,15 @@ jobs:
           key: parse-cache-${{ hashFiles('reports/**/*.html', 'hublib/parse.py') }}
           restore-keys: parse-cache-
 
+      # 가격은 매일 자라므로 내용 해시를 키로 쓸 수 없다 —
+      # 매 실행마다 새로 저장하고 가장 최근 것을 복원한다. v1 은 CACHE_VERSION 과 함께 올린다.
+      - name: Restore price cache (검증 레이어)
+        uses: actions/cache@v4
+        with:
+          path: build/price_cache.json
+          key: price-cache-v1-${{ github.run_id }}
+          restore-keys: price-cache-v1-
+
       - name: Build index
         run: python build_index.py
 

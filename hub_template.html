@@ -290,6 +290,37 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 .strow-cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-3);}
 .strow-spark{width:84px;height:28px;flex-shrink:0;}
 .strow-detail{display:none;border-top:1px dashed var(--border);padding:13px 17px;}
+.v-toggle{display:flex;gap:6px;margin:10px 0 14px;}
+.v-toggle button{border:1px solid var(--border);background:var(--surface);color:var(--text-2);
+  font-size:12px;font-weight:600;border-radius:999px;padding:5px 15px;cursor:pointer;}
+.v-toggle button.on{border-color:var(--gold-border);background:var(--gold-bg);color:var(--gold);}
+.v-score{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.v-cell{border:1px solid var(--border);border-radius:12px;padding:13px 15px;background:var(--surface);}
+.v-cell.vh-warn{border-color:#f0c987;background:#fffaf0;}
+.v-num{font-size:21px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.v-lbl{font-size:11.5px;color:var(--text-3);margin-top:3px;}
+.v-note{font-size:11.5px;color:#b45309;background:#fffaf0;border:1px solid #f0c987;
+  border-radius:9px;padding:9px 13px;margin-bottom:14px;line-height:1.65;}
+.v-row{border-bottom:1px solid var(--border);}
+.v-row.low{opacity:.55;}
+.v-row-head{display:flex;align-items:center;gap:9px;padding:11px 5px;cursor:pointer;font-size:13px;}
+.v-name{font-weight:600;min-width:104px;}
+.v-mini{font-size:11.5px;color:var(--text-3);font-family:'JetBrains Mono',monospace;}
+.v-hr,.v-ex{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;}
+.v-ex{min-width:66px;text-align:right;}
+.v-row-detail{display:none;padding:2px 5px 12px;}
+.v-row-detail.open{display:block;}
+.v-badge{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;}
+.v-badge.hit{background:#e8f6ec;color:#16a34a;}
+.v-badge.miss{background:#fdeceb;color:#dc2626;}
+.v-badge.pend{background:var(--surface-2,#f3f0ea);color:var(--text-3);}
+.v-badge.conf{background:#f5f3ff;color:#7c3aed;}
+.v-badge.low{background:var(--surface-2,#f3f0ea);color:var(--text-3);}
+.v-dir{font-size:11px;font-weight:700;}
+.v-dir.bullish{color:#dc2626;} .v-dir.bearish{color:#2563eb;}
+.v-fold{font-size:12px;color:#16a34a;cursor:pointer;padding:11px 5px;}
+@media(max-width:760px){.v-score{grid-template-columns:repeat(2,1fr);}
+  .v-name{min-width:74px;} .v-row-head{flex-wrap:wrap;gap:6px;}}
 .strow-detail.open{display:block;}
 .stock-meta-line{margin-left:auto;font-size:11px;color:var(--text-4);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .mention{padding:11px 0;border-bottom:1px solid var(--border-light);font-size:12.5px;line-height:1.7;color:var(--text-2);}
@@ -559,6 +590,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
         <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터·테마</button>
         <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
         <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
+        <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
         <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
         <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
         <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
@@ -594,6 +626,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
       <div class="view" id="view-sectors"></div>
       <div class="view" id="view-stocks"></div>
       <div class="view" id="view-strategy"></div>
+      <div class="view" id="view-verify"></div>
       <div class="view" id="view-glossary"></div>
       <div class="view" id="view-graph"></div>
       <div class="view" id="view-chat"></div>
@@ -614,7 +647,8 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터</button>
   <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
   <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
-  <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
+  <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
+        <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
   <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
   <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
   <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입</button>
@@ -678,9 +712,10 @@ function sectorWhy(s){const ms=(s.mentions||[]);
   return ms.length?ms[ms.length-1]:null;}
 
 /* ───────── TABS ───────── */
-const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph','chat'];
+const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph','chat','verify'];
 function showTab(name,fromHash){
   if(!TABS.includes(name))name='home';
+  if(name==='verify' && !verifyOn()) name='home';
   $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));
   if(name==='trade'){const f=document.getElementById('tradeFrame');if(f&&!f.getAttribute('src'))f.setAttribute('src',f.dataset.src);}
@@ -1010,11 +1045,12 @@ function stockRow(s){
   const restM=allM.slice(10);
   const moreM=restM.length?`<div class="st-rest" style="display:none">${restM.map(stMentionHtml).join('')}</div><div class="st-more" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 테마·수급 ${restM.length}개 더보기</div>`:'';
   const chatPill = s.chat ? `<span class="pill" style="background:#f5f3ff;color:#7c3aed">\uD83D\uDCAC ${s.chat.count}</span>` : '';
+  const vPill = verifyChip(s.name);
   return `<div class="strow">
     <div class="strow-head" onclick="this.parentNode.querySelector('.strow-detail').classList.toggle('open')">
       <button class="star ${isWatched('stock',s.name)?'on':''}" data-watch="stock:${esc(s.name)}" title="워치리스트에 추가/제거" onclick="event.stopPropagation();toggleWatchEl(this)">${isWatched('stock',s.name)?'★':'☆'}</button>
       <span class="strow-name">${esc(s.name)}</span>
-      <span class="strow-mini">${momentumChip(s)}${themes}${tags}${chatPill}</span>
+      <span class="strow-mini">${momentumChip(s)}${themes}${tags}${chatPill}${vPill}</span>
       <canvas class="strow-spark" data-spark-name="${esc(s.name)}" width="156" height="52"></canvas>
       <button class="cmp-add ${isComparePicked(s.name)?'on':''}" data-cmp="${esc(s.name)}" onclick="event.stopPropagation();toggleCompare('${esc(s.name)}')">${isComparePicked(s.name)?'비교중':'비교'}</button>
       <span class="strow-cnt">${s.count}회</span>
@@ -1025,6 +1061,104 @@ function stockRow(s){
       ${headM}${moreM}${renderChat(s)}
     </div>
   </div>`;
+}
+
+/* ───────── VERIFY ───────── */
+let vHorizon = 20;
+let vShowLow = false;
+const PRIMARY_H = ((D.verify&&D.verify.meta&&D.verify.meta.primary)||20);
+const vPct = x => x==null ? '—' : (x>0?'+':'')+x.toFixed(1)+'%p';
+
+function verifyOn(){ return !!(D.verify && D.verify.enabled); }
+
+function renderVerify(){
+  const host=$('#view-verify'); if(!host) return;
+  $$('.tab[data-tab="verify"]').forEach(b=>{ b.style.display = verifyOn()?'':'none'; });
+  if(!verifyOn()){ host.innerHTML=''; return; }
+  const V=D.verify, m=V.meta||{}, key='h'+vHorizon, s=(V.summary||{})[key]||{};
+  const toggle=(m.horizons||[5,20,60]).map(h=>
+    `<button data-vh="${h}" class="${h===vHorizon?'on':''}">${h}일</button>`).join('');
+  const warn=(s.pending||0)>(s.judged||0)?' vh-warn':'';
+  host.innerHTML=`
+    <div class="sec-title">✅ 콜 검증 <span class="count-badge">${m.calls||0}</span></div>
+    <div class="sec-sub">채팅에서 방향을 밝힌 발화를 이후 실제 주가와 대조했다 —
+      발화 다음 거래일 종가 진입 · 거래일 기준 구간 · 지수 대비 초과수익</div>
+    <div class="v-toggle" id="vHorizon">${toggle}</div>
+    <div class="v-score">
+      <div class="v-cell"><div class="v-num">${s.hit_rate==null?'—':s.hit_rate.toFixed(1)+'%'}</div>
+        <div class="v-lbl">적중률 (${s.hit||0}/${s.judged||0})</div></div>
+      <div class="v-cell"><div class="v-num">${vPct(s.avg_excess)}</div>
+        <div class="v-lbl">평균 초과수익</div></div>
+      <div class="v-cell${warn}"><div class="v-num">${s.pending||0}</div>
+        <div class="v-lbl">판정 대기</div></div>
+      <div class="v-cell"><div class="v-num">${s.bullish||0} · ${s.bearish||0}</div>
+        <div class="v-lbl">강세 · 약세</div></div>
+    </div>
+    <div class="v-note">강세 ${s.bullish||0}건 대 약세 ${s.bearish||0}건으로 강세 편향이 크다 —
+      사실상 강세 의견의 초과수익 검증이다. 표본이 얇은 종목은 아래로 내렸다. 투자 권유가 아니다.</div>
+    <div id="vRank"></div>`;
+  $('#vHorizon').addEventListener('click',e=>{const b=e.target.closest('button');
+    if(b){vHorizon=+b.dataset.vh;renderVerify();}});
+  drawVerifyRank();
+}
+
+function drawVerifyRank(){
+  const key='h'+vHorizon, all=(D.verify.stocks||[]);
+  const main=all.filter(s=>!s.low_sample), low=all.filter(s=>s.low_sample);
+  const lowCalls=low.reduce((a,s)=>a+(s.calls||0),0);
+  $('#vRank').innerHTML =
+    vRankRows(main,key) +
+    (low.length?`<div class="v-fold" id="vFold">${vShowLow?'－':'＋'} 표본 부족 ${low.length}종목 (${lowCalls}콜)</div>
+      ${vShowLow?vRankRows(low,key):''}`:'');
+  const f=$('#vFold'); if(f)f.addEventListener('click',()=>{vShowLow=!vShowLow;drawVerifyRank();});
+  $('#vRank').addEventListener('click',e=>{
+    const h=e.target.closest('.v-row-head'); if(!h)return;
+    const box=h.parentNode.querySelector('.v-row-detail');
+    if(!box.dataset.filled){ box.innerHTML=vCallRows(h.dataset.vstock); box.dataset.filled='1'; }
+    box.classList.toggle('open');
+  });
+}
+
+function vRankRows(rows,key){
+  return rows.map(st=>{const h=st[key]||{};
+    return `<div class="v-row${st.low_sample?' low':''}">
+      <div class="v-row-head" data-vstock="${esc(st.name)}">
+        <span class="v-name">${esc(st.name)}</span>
+        <span class="pill">${esc(st.market)}</span>
+        ${st.low_sample?'<span class="v-badge low">표본 부족</span>':''}
+        <span class="v-mini">${st.calls}콜</span>
+        <span class="v-mini">${h.judged?`${h.hit}/${h.judged}`:'판정 전'}</span>
+        <span class="v-hr">${h.hit_rate==null?'—':h.hit_rate.toFixed(0)+'%'}</span>
+        <span class="v-ex">${vPct(h.avg_excess)}</span>
+      </div><div class="v-row-detail"></div></div>`;}).join('');
+}
+
+function vCallRows(name){
+  const key='h'+vHorizon;
+  const cs=(D.verify.calls||[]).filter(c=>c.stock===name)
+    .sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+  return cs.map(c=>{
+    const r=c[key];
+    const badge = c.conflict ? '<span class="v-badge conf">의견 갈림</span>'
+      : c.error==='no_price'||c.error==='bad_entry' ? '<span class="v-badge pend">가격 없음</span>'
+      : !r ? '<span class="v-badge pend">판정 대기</span>'
+      : `<span class="v-badge ${r.hit?'hit':'miss'}">${vPct(r.excess!=null?r.excess:r.ret)}</span>`;
+    const who=(c.sources||[]).map(x=>esc(x.sharer)).filter(Boolean).join(', ');
+    const snip=esc(((c.sources||[])[0]||{}).snippet||'');
+    return `<div class="mention"><span class="md">${esc(fmtDate(c.date))}</span>
+      <span class="v-dir ${esc(c.stance)}">${c.stance==='bullish'?'강세':'약세'}</span>
+      ${badge} <span style="color:var(--text-3)">${who}</span> ${snip}</div>`;
+  }).join('') || '<div class="v-mini">표시할 콜이 없다.</div>';
+}
+
+const VMAP=(()=>{const m={};((D.verify&&D.verify.stocks)||[]).forEach(s=>m[s.name]=s);return m;})();
+function verifyChip(name){
+  const st=VMAP[name]; if(!st) return '';
+  // 표본 부족 종목은 적중률을 아예 노출하지 않는다 — 2콜짜리 100%가 신뢰 근거로 읽히면 안 된다
+  if(st.low_sample) return `<span class="pill" style="background:var(--surface-2,#f3f0ea);color:var(--text-3)">✅ ${st.calls}콜</span>`;
+  const h=st['h'+PRIMARY_H]||{};
+  if(!h.judged) return '';
+  return `<span class="pill" style="background:#e8f6ec;color:#16a34a" title="${h.hit}/${h.judged} 적중 · 평균 초과 ${vPct(h.avg_excess)}">✅ ${h.hit}/${h.judged} · ${vPct(h.avg_excess)}</span>`;
 }
 
 /* ───────── STRATEGY ───────── */
@@ -2010,7 +2144,7 @@ function drawSentiment(){
 }
 
 /* ───────── INIT ───────── */
-renderHome();renderSectors();renderStocks();renderAnalytics();renderStrategy();renderGlossary();renderGraph();renderChatView();
+renderHome();renderSectors();renderStocks();renderAnalytics();renderStrategy();renderGlossary();renderGraph();renderChatView();renderVerify();
 /* 빌드 시각·데이터 신선도 배지 (조용한 폴백 가시화) */
 (function(){
   const el = document.getElementById('fu-status'); if(!el) return;
