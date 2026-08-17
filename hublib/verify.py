@@ -249,3 +249,100 @@ class PriceCache:
         os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
         with open(self.path, "w", encoding="utf-8") as f:
             json.dump({"v": CACHE_VERSION, "series": self.data}, f, ensure_ascii=False)
+
+
+COLD_START_PAD_DAYS = 14       # 첫 콜 이전 여유 — 연휴가 껴도 진입일을 찾는다
+BENCH_TICKERS = {"KOSPI": ("KR", "KS11"), "KOSDAQ": ("KR", "KQ11"),
+                 "US": ("US", "^IXIC")}
+
+
+def _load_kr(ticker, start):
+    """FinanceDataReader — KR 종목·지수. momentum.py 의 준비 함수를 재사용한다."""
+    from hublib.momentum import _ensure_finance_datareader
+    fdr = _ensure_finance_datareader()
+    df = fdr.DataReader(ticker, start)
+    if df is None or "Close" not in df:
+        return []
+    return [(i.date().isoformat(), float(v))
+            for i, v in df["Close"].dropna().items() if float(v) > 0]
+
+
+def _load_us(ticker, start):
+    """yfinance — US 종목·나스닥 지수."""
+    import yfinance as yf
+    h = yf.Ticker(ticker).history(start=start, interval="1d")
+    if h is None or "Close" not in h:
+        return []
+    return [(i.date().isoformat(), float(v))
+            for i, v in h["Close"].dropna().items() if float(v) > 0]
+
+
+DEFAULT_LOADERS = {"KR": _load_kr, "US": _load_us}
+
+
+def _start_for(cache_last, first_call_date):
+    if cache_last:
+        return cache_last                      # 마지막 저장일부터 이어받는다
+    d = datetime.date.fromisoformat(first_call_date) - datetime.timedelta(days=COLD_START_PAD_DAYS)
+    return d.isoformat()
+
+
+def fetch_prices(calls, cache, loaders=None):
+    """콜 목록 → {'<market>:<ticker>': [(date, close)]}.
+
+    종목당 1회만 요청하고, 캐시가 있으면 마지막 날부터 증분만 받는다.
+    한 종목이 실패해도 빈 시계열로 격리하고 나머지는 계속한다.
+    """
+    loaders = loaders or DEFAULT_LOADERS
+    wanted = {}
+    for c in calls:
+        key = f"{c['market']}:{c['ticker']}"
+        prev = wanted.get(key)
+        if prev is None or c["date"] < prev["first"]:
+            wanted[key] = {"market": c["market"], "ticker": c["ticker"], "first": c["date"]}
+
+    out = {}
+    for key in sorted(wanted):
+        w = wanted[key]
+        loader = loaders.get(w["market"])
+        old = cache.get(key)
+        if loader is None:
+            out[key] = old
+            continue
+        start = _start_for(cache.last(key), w["first"])
+        try:
+            fresh = loader(w["ticker"], start)
+        except Exception as e:
+            print(f"  ✗ 검증 가격 {key} 실패: {repr(e)[:100]}")
+            out[key] = old
+            continue
+        points = merge_points(old, fresh)
+        if points:
+            cache.put(key, points)
+        out[key] = points
+    return out
+
+
+def fetch_benchmarks(labels, first_date, cache, loaders=None):
+    """{'KOSPI'|'KOSDAQ'|'US': [(date, close)]}. 종목과 같은 소스·같은 달력을 쓴다."""
+    loaders = loaders or DEFAULT_LOADERS
+    out = {}
+    for label in sorted(set(labels)):
+        market, ticker = BENCH_TICKERS[label]
+        key = f"BENCH:{label}"
+        old = cache.get(key)
+        loader = loaders.get(market)
+        if loader is None:
+            out[label] = old
+            continue
+        try:
+            fresh = loader(ticker, _start_for(cache.last(key), first_date))
+        except Exception as e:
+            print(f"  ✗ 검증 벤치마크 {label} 실패: {repr(e)[:100]}")
+            out[label] = old
+            continue
+        points = merge_points(old, fresh)
+        if points:
+            cache.put(key, points)
+        out[label] = points
+    return out

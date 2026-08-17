@@ -259,3 +259,63 @@ def test_price_cache_save_is_noop_when_clean(tmp_path):
     p = tmp_path / "price_cache.json"
     PriceCache(str(p)).save()
     assert not p.exists()
+
+
+# ── 수집 ─────────────────────────────────────────────────────────
+def test_fetch_prices_uses_cache_and_only_requests_the_gap(tmp_path):
+    from hublib.verify import PriceCache, fetch_prices
+    cache = PriceCache(str(tmp_path / "c.json"))
+    cache.put("KR:000660", [("2026-05-04", 100.0), ("2026-05-05", 101.0)])
+    seen = {}
+
+    def loader(ticker, start):
+        seen[ticker] = start
+        return [("2026-05-06", 102.0)]
+
+    calls = [{"stock": "S", "market": "KR", "ticker": "000660", "date": "2026-05-04"}]
+    out = fetch_prices(calls, cache, loaders={"KR": loader})
+    assert seen["000660"] == "2026-05-05", "캐시 마지막 날부터만 요청해야 함"
+    assert out["KR:000660"][-1] == ("2026-05-06", 102.0)
+    assert len(out["KR:000660"]) == 3
+
+
+def test_fetch_prices_cold_start_reaches_back_before_first_call(tmp_path):
+    from hublib.verify import PriceCache, fetch_prices
+    seen = {}
+
+    def loader(ticker, start):
+        seen[ticker] = start
+        return [("2026-03-01", 100.0)]
+
+    calls = [{"stock": "S", "market": "US", "ticker": "NVDA", "date": "2026-03-05"}]
+    fetch_prices(calls, PriceCache(str(tmp_path / "c.json")), loaders={"US": loader})
+    assert seen["NVDA"] < "2026-03-05", "첫 콜 이전부터 받아야 진입일을 찾는다"
+
+
+def test_fetch_prices_isolates_a_failing_ticker(tmp_path):
+    from hublib.verify import PriceCache, fetch_prices
+
+    def loader(ticker, start):
+        if ticker == "BAD":
+            raise RuntimeError("boom")
+        return [("2026-05-04", 100.0)]
+
+    calls = [{"stock": "A", "market": "KR", "ticker": "BAD", "date": "2026-05-04"},
+             {"stock": "B", "market": "KR", "ticker": "OK", "date": "2026-05-04"}]
+    out = fetch_prices(calls, PriceCache(str(tmp_path / "c.json")), loaders={"KR": loader})
+    assert out["KR:BAD"] == [], "실패한 종목은 빈 시계열 — 나머지는 살아야 함"
+    assert out["KR:OK"] == [("2026-05-04", 100.0)]
+
+
+def test_fetch_prices_requests_each_ticker_once(tmp_path):
+    from hublib.verify import PriceCache, fetch_prices
+    hits = []
+
+    def loader(ticker, start):
+        hits.append(ticker)
+        return [("2026-05-04", 100.0)]
+
+    calls = [{"stock": "S", "market": "KR", "ticker": "000660", "date": d}
+             for d in ("2026-05-04", "2026-05-11", "2026-06-01")]
+    fetch_prices(calls, PriceCache(str(tmp_path / "c.json")), loaders={"KR": loader})
+    assert hits == ["000660"], "같은 종목을 콜 수만큼 반복 요청하면 안 됨"
