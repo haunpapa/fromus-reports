@@ -259,7 +259,7 @@ def parse_report(path):
                    "why": txt(sr.select_one(".strat-why"))}
             (nexts if kind == "next" else strategy).append(row)
         if kind == "next":
-            for kr in sec.select(".key-message-box .key-row"):
+            for kr in sec.select(".key-message-box .key-row, .watch-card .key-row"):
                 nexts.append({"title": txt(kr.select_one(".key-title")),
                               "desc": txt(kr.select_one(".key-desc")), "why": ""})
     rec["readings"], rec["glossary"] = readings, glossary
