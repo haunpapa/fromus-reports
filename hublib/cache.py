@@ -3,7 +3,7 @@
 
 리포트 HTML 은 한번 커밋되면 내용이 바뀌지 않으므로, 파일 내용 해시가 같으면
 직전 파싱 결과를 재사용한다. 파서(hublib.parse.parse_report) 로직이 바뀌면
-CI 캐시 키(hublib/parse.py 해시)가 달라져 자동 무효화된다.
+파서 해시 스탬프(__parser__)로 캐시 자체가 무효화된다 (CI restore-keys 폴백에도 안전).
 """
 import copy
 import hashlib
@@ -19,7 +19,7 @@ class ParseCache:
                 self.data = json.load(f)
         except Exception:
             self.data = {}
-        self.dirty = False
+        self.dirty = False; _ps = hashlib.sha1(open(os.path.join(os.path.dirname(__file__), "parse.py"), "rb").read()).hexdigest(); (None if self.data.get("__parser__") == _ps else self.data.clear()); self.data["__parser__"] = _ps  # 파서 로직 변경 시 캐시 전체 무효화 — CI restore-keys가 구캐시를 복원해도 안전
 
     def get_or_parse(self, filepath, parser):
         """filepath 내용 해시가 캐시와 같으면 저장된 파싱 결과(사본)를 반환,
