@@ -4,7 +4,9 @@
 const CACHE = 'fu-hub-v3';
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./hub.html'])).then(() => self.skipWaiting()));
+  // cache:'reload' — HTTP 캐시를 우회해 항상 네트워크의 최신 셸을 프리캐시
+  // (기본 addAll 은 브라우저 HTTP 캐시의 구 셸을 그대로 담아 v2→v3 전환 때 stale 고착 관찰됨)
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll([new Request('./hub.html', {cache: 'reload'})])).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
