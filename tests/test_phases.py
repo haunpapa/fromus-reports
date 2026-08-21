@@ -61,3 +61,10 @@ def test_render_reuses_existing_kb_without_recollect(tmp_path):
                   "--template", "hub_template.html"], cwd=str(src))
         assert r.returncode == 0, r.stderr
     assert len(list(src.glob("kb.*.json"))) == 1
+
+
+def test_hub_template_has_kb_retry_fallback():
+    """배포 직후 구 셸이 사라진 kb.<구해시> 404 를 만나면 1회 캐시버스터 재로드해야 한다."""
+    import pathlib
+    tpl = (pathlib.Path(__file__).resolve().parents[1] / "hub_template.html").read_text(encoding="utf-8")
+    assert "kbRetried" in tpl and "kbfix=" in tpl

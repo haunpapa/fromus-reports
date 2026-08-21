@@ -2176,10 +2176,19 @@ tabFromHash();
     window.DATA = await r.json();
   }catch(e){
     console.error('KB 로딩 실패:', e);
+    // 배포 직후엔 캐시된 구 셸이 사라진 kb.<구해시>를 가리켜 404 — 캐시버스터로 1회 자동 재로드
+    try{
+      if(!sessionStorage.getItem('kbRetried')){
+        sessionStorage.setItem('kbRetried','1');
+        location.replace(location.pathname + '?kbfix=' + Date.now() + location.hash);
+        return;
+      }
+    }catch(_e){}
     if(boot) boot.innerHTML = '데이터를 불러오지 못했습니다.<br>' +
       '<a href="javascript:location.reload()" style="color:#b8860b">새로고침</a>';
     return;
   }
+  try{ sessionStorage.removeItem('kbRetried'); }catch(_e){}
   document.querySelectorAll('script[type="fu-app"]').forEach(function(s){
     const n = document.createElement('script');
     n.textContent = s.textContent;
