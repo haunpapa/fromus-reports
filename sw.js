@@ -1,7 +1,7 @@
-/* From Us Knowledge Hub — Service Worker v2
+/* From Us Knowledge Hub — Service Worker v3
    셸(html): stale-while-revalidate — 캐시 즉시 표시 + 백그라운드 갱신
    kb.<hash>.json: cache-first — 해시가 바뀌면 URL이 바뀌므로 영구 캐시 안전 (구 해시는 제거) */
-const CACHE = 'fu-hub-v2';
+const CACHE = 'fu-hub-v3';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./hub.html'])).then(() => self.skipWaiting()));
@@ -16,7 +16,12 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
-  const path = new URL(e.request.url).pathname;
+  const url = new URL(e.request.url);
+  const path = url.pathname;
+
+  // 탈출구: ?nosw= 가 붙은 요청은 가로채지 않고 네트워크로 직행
+  // (배포 직후 구 셸이 사라진 kb.<구해시>를 가리킬 때 부트 코드가 신선한 셸을 받아오는 경로)
+  if (url.searchParams.has('nosw')) return;
 
   // 불변 데이터 (해시 파일명) — cache-first + 구버전 해시 파일 정리
   if (/\/kb\.[0-9a-f]{6,}\.json$/.test(path)) {

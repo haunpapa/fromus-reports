@@ -2180,7 +2180,10 @@ tabFromHash();
     try{
       if(!sessionStorage.getItem('kbRetried')){
         sessionStorage.setItem('kbRetried','1');
-        location.replace(location.pathname + '?kbfix=' + Date.now() + location.hash);
+        // ?nosw= 는 서비스워커(v3+)가 가로채지 않는 탈출구 — 신선한 셸을 강제 로드
+        if('serviceWorker' in navigator) navigator.serviceWorker.getRegistration()
+          .then(function(r){ if(r) r.update(); }).catch(function(){});
+        location.replace(location.pathname + '?nosw=' + Date.now() + location.hash);
         return;
       }
     }catch(_e){}
