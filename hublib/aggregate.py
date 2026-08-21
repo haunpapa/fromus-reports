@@ -5,6 +5,14 @@ from hublib.config import PRINCIPLE_BUCKETS, STOCK_STOPWORDS, THEME_KEYS, is_sup
 from hublib.parse import expand_stock_names, normalize_stock, parse_num, parse_target_prices, sector_theme, split_stock_token
 
 
+def _kw_in(kw, text):
+    """키워드 매칭 — 영문/숫자 키워드는 단어 경계 필수('business'의 ess 오탐 방지), 한글은 부분일치."""
+    import re as _re
+    if _re.fullmatch(r"[a-z0-9]+", kw):
+        return bool(_re.search(r"(?<![a-z0-9])" + _re.escape(kw) + r"(?![a-z0-9])", text))
+    return kw in text
+
+
 def aggregate(reports, window_days=31):
     reports = sorted(reports, key=lambda r: r["sort_date"])
     # 섹터·테마·종목·수급 = '최근 1개월' 윈도우만 집계. 전략·용어·시계열 = 전체.
@@ -34,20 +42,39 @@ def aggregate(reports, window_days=31):
         for sec in r["sectors"]:
             supply = is_supply_card(sec["name"])
             theme = sector_theme(sec["name"])
-            market = (theme is None) and not supply   # 시황 코너: 랭킹 제외, 종목 출처만 '시황'
+            market = (theme is None) and not supply   # 시황 코너: 종목 출처만 '시황'
+            card_kind = "수급" if supply else ("시황" if market else "코너")
+
+            def _S(th):
+                return sectors.setdefault(th, {"theme": th, "names": set(), "mentions": [],
+                                               "stocks": set(), "count": 0, "rep": 0,
+                                               "direct": 0, "indirect": 0})
+
             if not supply and not market:
-                S = sectors.setdefault(theme, {"theme": theme, "names": set(), "mentions": [],
-                                               "stocks": set(), "count": 0, "rep": 0})
-                S["names"].add(sec["name"]); S["count"] += 1
+                S = _S(theme)
+                S["names"].add(sec["name"]); S["count"] += 1; S["direct"] += 1
                 S["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
-                                      "name": sec["name"], "sub": sec["sub"],
+                                      "name": sec["name"], "sub": sec["sub"], "kind": "코너",
                                       "stocks": sec["stocks"], "note": sec["note"]})
                 # 대표님 직접 언급 가중: 섹터 노트에 대표님/이혜나 또는 대표님 발언에 테마 키워드
                 note_l = sec["note"] or ""
                 kws = THEME_KEYS.get(theme, (theme,))
                 if ("대표님" in note_l) or ("이혜나" in note_l) or any(kw and kw.lower() in rep_text for kw in kws):
                     S["rep"] += 1
-            else:
+
+            # ── 간접 언급: 모든 카드의 제목+부제+노트에서 테마 키워드 스캔 (카드당 테마별 1회) ──
+            card_text = " ".join(filter(None, (sec["name"], sec.get("sub"), sec.get("note")))).lower()
+            for th, kws in THEME_KEYS.items():
+                if th == theme:
+                    continue   # 직접 카드는 자기 테마에 이미 집계됨
+                if any(kw and _kw_in(kw.lower(), card_text) for kw in kws):
+                    S2 = _S(th)
+                    S2["count"] += 1; S2["indirect"] += 1
+                    S2["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
+                                           "name": sec["name"], "sub": sec["sub"], "kind": card_kind,
+                                           "stocks": sec["stocks"], "note": sec["note"]})
+
+            if supply:
                 supply_days.append({"date": label, "rtype": r["type"], "id": r["id"],
                                     "label": sec["name"], "who": supply_tag(sec["name"]),
                                     "stocks": sec["stocks"], "note": sec["note"]})

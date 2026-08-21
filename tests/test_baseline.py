@@ -52,9 +52,10 @@ def test_aggregate_extracts_expected_counts():
     agg = _aggregate([r])
     assert isinstance(agg.get("stocks"), list)
     assert isinstance(agg.get("sectors"), list)
-    # 2026-05-04 단일 리포트 집계 결과 — 종목 27, 섹터테마 8
+    # 2026-05-04 단일 리포트 집계 결과 — 종목 27, 섹터테마 9
+    # (2026-08-21 언급총량 개편: 간접 키워드 언급으로 테마 1개 추가 발견돼 8→9)
     assert len(agg["stocks"]) == 27, f"종목 수 변동: {len(agg['stocks'])}"
-    assert len(agg["sectors"]) == 8, f"섹터 수 변동: {len(agg['sectors'])}"
+    assert len(agg["sectors"]) == 9, f"섹터 수 변동: {len(agg['sectors'])}"
     # 각 종목은 최소 name·count 를 가진다
     for s in agg["stocks"]:
         assert s.get("name") and isinstance(s.get("count"), int)

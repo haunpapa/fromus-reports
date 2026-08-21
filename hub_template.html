@@ -911,13 +911,13 @@ function renderSectors(){
   const secs=D.sectors||[];
   $('#view-sectors').innerHTML=`
     <div class="sec-title">🧩 섹터·테마 클러스터 <span class="count-badge">${secs.length}</span></div>
-    <div class="sec-sub">${RECENT_LABEL} · 카드를 누르면 시점별 전개</div>
+    <div class="sec-sub">${RECENT_LABEL} · 코너 편성+수급·시황 간접 언급 합산 · 카드를 누르면 시점별 전개</div>
     <div class="cluster">${secs.map((s,i)=>sectorCard(s,i)).join('')}</div>`;
 }
 function sectorCard(s,i){
   const stocks=(s.stocks||[]).slice(0,12);
   const tl=(s.mentions||[]).slice().reverse().map(m=>`
-    <div class="row"><span class="d">${esc(fmtDate(m.date))}</span> · <b>${esc(m.name)}</b>${m.sub?` <span style="color:var(--text-3)">(${esc(m.sub)})</span>`:''} ${srcLink(m.id)}
+    <div class="row"><span class="d">${esc(fmtDate(m.date))}</span> · ${m.kind&&m.kind!=='코너'?`<span class="tag" style="font-size:10px">${esc(m.kind)}</span> `:''}<b>${esc(m.name)}</b>${m.sub?` <span style="color:var(--text-3)">(${esc(m.sub)})</span>`:''} ${srcLink(m.id)}
       ${m.note?`<div style="color:var(--text-3);margin-top:3px">${esc(m.note.slice(0,180))}</div>`:''}</div>`).join('');
   // ── 채팅 테마 결합 (D.chat.themes 가 dict 일 때만; 기존 빌드는 이름 리스트) ──
   const tmap = (D.chat && !Array.isArray(D.chat.themes)) ? (D.chat.themes||{}) : {};
@@ -933,6 +933,7 @@ function sectorCard(s,i){
       <span class="count-badge">${s.count}회</span>
     </div>
     <div class="intensity"><i style="width:${Math.round((s.count||0)/SECMAX*100)}%"></i></div>
+    <div style="margin:2px 0 2px;font-size:11px;color:var(--text-3)">코너 ${s.direct??s.count}회 · 간접 언급 ${s.indirect??0}회${s.rep?` · 대표님 연관 ${s.rep}회`:''}</div>
     <div style="margin:2px 0 8px">${momentumChip(s)}</div>
     <div class="scard-stocks">${stocks.map(n=>`<span class="tag" data-stock="${esc(n)}">${esc(n)}</span>`).join('')||'<span style="font-size:12px;color:var(--text-4)">개별 종목 태그 없음</span>'}</div>
     ${chatHead}
