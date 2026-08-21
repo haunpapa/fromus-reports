@@ -38,7 +38,8 @@ def aggregate(reports, window_days=31):
                 rep_text += " " + (_i.get("quote") or "")
                 rep_text += " " + " ".join((k.get("title","")+" "+k.get("desc","")) for k in _i.get("key_messages", []))
                 rep_text += " " + " ".join((b.get("text") or "") for b in _i.get("bullets", []))
-        rep_text = rep_text.lower()
+        rep_raw = " ".join(rep_text.split())
+        rep_text = rep_raw.lower()
         for sec in r["sectors"]:
             supply = is_supply_card(sec["name"])
             theme = sector_theme(sec["name"])
@@ -56,10 +57,10 @@ def aggregate(reports, window_days=31):
                 S["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
                                       "name": sec["name"], "sub": sec["sub"], "kind": "코너",
                                       "stocks": sec["stocks"], "note": sec["note"]})
-                # 대표님 직접 언급 가중: 섹터 노트에 대표님/이혜나 또는 대표님 발언에 테마 키워드
+                # 대표님 직접 언급 가중: 섹터 노트에 대표님/이혜나가 명시된 경우
+                # (대표님 발언 속 테마 키워드는 아래 리포트 단위 '대표님 발언 언급'에서 집계)
                 note_l = sec["note"] or ""
-                kws = THEME_KEYS.get(theme, (theme,))
-                if ("대표님" in note_l) or ("이혜나" in note_l) or any(kw and kw.lower() in rep_text for kw in kws):
+                if ("대표님" in note_l) or ("이혜나" in note_l):
                     S["rep"] += 1
 
             # ── 간접 언급: 모든 카드의 제목+부제+노트에서 테마 키워드 스캔 (카드당 테마별 1회) ──
@@ -109,6 +110,22 @@ def aggregate(reports, window_days=31):
                         T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
                                               "source": "테마", "label": sec["name"], "theme": theme,
                                               "annotation": ann, "note": sec["note"][:200]})
+
+        # ── 대표님 발언 언급: 발언 텍스트에 테마 키워드가 있으면 테마당 리포트당 1회 집계 ──
+        if rep_text.strip():
+            for th, kws in THEME_KEYS.items():
+                kw_hit = next((kw for kw in kws if kw and _kw_in(kw.lower(), rep_text)), None)
+                if not kw_hit:
+                    continue
+                S3 = sectors.setdefault(th, {"theme": th, "names": set(), "mentions": [],
+                                             "stocks": set(), "count": 0, "rep": 0,
+                                             "direct": 0, "indirect": 0})
+                S3["count"] += 1; S3["indirect"] += 1; S3["rep"] += 1
+                pos = rep_text.find(kw_hit.lower())
+                snippet = rep_raw[max(0, pos - 40):pos + 80].strip()
+                S3["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
+                                       "name": "이혜나 대표님 발언", "sub": "", "kind": "대표님",
+                                       "stocks": [], "note": f"대표님 발언: “…{snippet}…”"})
     # set → list
     for S in sectors.values():
         S["names"] = sorted(S["names"]); S["stocks"] = sorted(S["stocks"])

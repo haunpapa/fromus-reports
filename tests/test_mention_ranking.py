@@ -102,3 +102,50 @@ def test_fallback_raw_theme_still_direct_only():
     agg = aggregate([_report([("엔터·미디어", "", "", ["하이브"])])])
     S = _sector(agg, "엔터·미디어")
     assert S and S["direct"] == 1 and S["count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# 대표님 발언 언급 (2026-08-22): 코너가 없어도 대표님 발언 속 테마는 rep·count 에 잡혀야 한다
+# ---------------------------------------------------------------------------
+def _report_with_rep(cards, rep_quote):
+    r = _report(cards)
+    r["insights"] = [{"name": "이혜나 대표님", "quote": rep_quote, "key_messages": [], "bullets": []}]
+    return r
+
+
+def test_rep_speech_counts_theme_without_any_card():
+    """카드가 하나도 없어도 대표님 발언의 테마 키워드는 언급 1회 + 대표님 연관 1회."""
+    from hublib.aggregate import aggregate
+    agg = aggregate([_report_with_rep([], "금리 인하 사이클에서 은행주를 주목해야")])
+    S = _sector(agg, "금융·금리수혜")
+    assert S is not None
+    assert S["count"] == 1 and S["rep"] == 1 and S["direct"] == 0
+    m = S["mentions"][0]
+    assert m["kind"] == "대표님" and "대표님" in (m["note"] or "")
+
+
+def test_rep_speech_counts_once_per_report_per_theme():
+    """한 리포트에서 같은 테마를 여러 번 말해도 리포트당 1회."""
+    from hublib.aggregate import aggregate
+    agg = aggregate([_report_with_rep([], "반도체가 답이다. HBM도 반도체다. 메모리 슈퍼사이클.")])
+    S = _sector(agg, "반도체·메모리")
+    assert S["count"] == 1 and S["rep"] == 1
+
+
+def test_rep_speech_adds_on_top_of_direct_card():
+    """반도체 코너 + 대표님 발언 반도체 → count 2 (코너 1 + 대표님 1), rep 1."""
+    from hublib.aggregate import aggregate
+    agg = aggregate([_report_with_rep(
+        [("반도체 코너", "", "", ["삼성전자"])], "반도체 비중을 유지합니다")])
+    S = _sector(agg, "반도체·메모리")
+    assert S["direct"] == 1 and S["count"] == 2 and S["rep"] == 1
+
+
+def test_direct_card_rep_only_when_note_names_rep():
+    """코너 카드의 rep 은 노트에 대표님/이혜나가 직접 등장할 때만 (발언 매칭은 리포트 단위로 이관)."""
+    from hublib.aggregate import aggregate
+    agg = aggregate([_report([("반도체 코너", "", "대표님이 강조한 HBM 라인", ["삼성전자"])])])
+    S = _sector(agg, "반도체·메모리")
+    assert S["rep"] == 1
+    agg2 = aggregate([_report([("반도체 코너", "", "평범한 노트", ["삼성전자"])])])
+    assert _sector(agg2, "반도체·메모리")["rep"] == 0
