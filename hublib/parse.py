@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """프롬어스 허브 빌더 — 리포트 HTML 파싱·정규화."""
 import datetime, os, re, sys
-from hublib.config import ETF_BRANDS, SECTOR_THEME, STOCK_ALIASES, WEEKDAY_KR, _today_kst
+from hublib.config import ETF_BRANDS, SECTOR_THEME, STOCK_ALIASES, WEEKDAY_KR, _today_kst, is_market_label
 
 
 try:
@@ -64,10 +64,13 @@ def expand_stock_names(nm):
     return [nm]
 
 def sector_theme(name):
+    """섹션 이름 → 테마. 키워드 매핑 우선, 시황 코너 제목이면 None(테마 아님), 그 외 원문 유지."""
     low = name.lower()
     for keys, theme in SECTOR_THEME:
         if any(k in low for k in keys):
             return theme
+    if is_market_label(name):
+        return None
     return name.strip()
 
 def detect_report(path, soup):

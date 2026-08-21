@@ -57,7 +57,7 @@ ETF_BRANDS = ("KODEX", "TIGER", "KBSTAR", "ARIRANG", "PLUS", "SOL", "ACE",
               "RISE", "KOSEF", "TIMEFOLIO", "HANARO", "KIWOOM", "WON")
 
 SECTOR_THEME = [
-    (("반도체", "hbm", "메모리", "dram", "nand", "d램", "파운드리"), "반도체·메모리"),
+    (("반도체", "hbm", "메모리", "dram", "nand", "d램", "파운드리", "소부장"), "반도체·메모리"),
     (("로봇", "로보", "피지컬", "휴머노이드"), "로봇·피지컬AI"),
     (("소프트웨어", "sw", "소프트"), "소프트웨어·AI"),
     (("바이오", "제약", "헬스", "인슐린"), "바이오·제약"),
@@ -78,6 +78,20 @@ THEME_KEYS = {}
 
 for _keys, _theme in SECTOR_THEME:
     THEME_KEYS.setdefault(_theme, _keys)
+
+# 시황 코너 제목 판별 — 섹터·테마가 아닌 장세 요약 라벨(테마 랭킹에서 제외, 종목 출처는 '시황')
+# 주의: SECTOR_THEME 키워드 매칭이 항상 우선이므로 "로봇 — 오늘의 주도 섹터" 같은 이름은 영향 없음
+_MARKET_LABEL_WORDS = (
+    "시총", "특징주", "오늘의", "급등", "급락", "강세", "약세",
+    "순매수", "순매도", "수급", "주도주", "인버스", "레버리지",
+    "방어주", "그림자", "빨간불",
+    "외국인", "외인", "기관", "코스피", "코스닥", "장에서", "자금",
+)
+
+def is_market_label(name):
+    n = (name or "")
+    return any(w in n for w in _MARKET_LABEL_WORDS)
+
 
 def is_supply_card(name):
     n = name or ""

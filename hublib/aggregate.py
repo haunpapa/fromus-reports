@@ -34,7 +34,8 @@ def aggregate(reports, window_days=31):
         for sec in r["sectors"]:
             supply = is_supply_card(sec["name"])
             theme = sector_theme(sec["name"])
-            if not supply:
+            market = (theme is None) and not supply   # 시황 코너: 랭킹 제외, 종목 출처만 '시황'
+            if not supply and not market:
                 S = sectors.setdefault(theme, {"theme": theme, "names": set(), "mentions": [],
                                                "stocks": set(), "count": 0, "rep": 0})
                 S["names"].add(sec["name"]); S["count"] += 1
@@ -70,6 +71,10 @@ def aggregate(reports, window_days=31):
                         T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
                                               "source": "수급", "label": supply_tag(sec["name"]),
                                               "annotation": ann, "note": sec["note"][:160]})
+                    elif market:
+                        T["mentions"].append({"date": label, "rtype": r["type"], "id": r["id"],
+                                              "source": "시황", "label": sec["name"],
+                                              "annotation": ann, "note": sec["note"][:200]})
                     else:
                         T["theme_count"] += 1
                         T["sectors"].add(sec["name"]); T["themes"].add(theme)
