@@ -285,6 +285,11 @@ def split_stock_token(span):
     s = (span or "").strip()
     s = re.sub(r"^\s*(?:[①-⑩]|\d{1,2}[\.\)])\s*", "", s)   # 선두 순위번호(①/1./1)) 제거
     ann = ""
+    # 선두 [태그] (예: '[기관] 피에스케이') — 태그는 주석으로, 종목명이 유실되지 않게
+    mtag = re.match(r"^\s*(\[[^\]]+\])\s*", s)
+    if mtag:
+        ann = mtag.group(1)
+        s = s[mtag.end():].strip()
     mp = re.search(r"\(([^)]*)\)", s)
     if mp:
         ann = mp.group(0)

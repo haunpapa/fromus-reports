@@ -73,3 +73,19 @@ def test_aggregate_keeps_stock_mentions_from_market_sections():
     assert stock["theme_count"] == 0 and stock["themes"] == []
     assert stock["mentions"][0]["source"] == "시황"
     assert stock["mentions"][0]["label"] == "오늘의 특징주"
+
+
+# ---------------------------------------------------------------------------
+# 선두 [태그] 토큰 (2026-08-21): '[기관] 피에스케이 363억' → 종목은 피에스케이, 태그는 주석으로
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize("token,name,ann_has", [
+    ("[기관] 피에스케이 363억", "피에스케이", "[기관]"),
+    ("[코스피·기관] S-Oil +5.60%", "S-Oil", "[코스피·기관]"),
+    ("[외국인] 한화에어로스페이스", "한화에어로스페이스", "[외국인]"),
+    ("SK하이닉스 (KB TP 380만)", "SK하이닉스", "(KB TP 380만)"),  # 기존 동작 유지
+])
+def test_leading_bracket_tag_moves_to_annotation(token, name, ann_has):
+    from hublib.parse import split_stock_token
+    nm, ann = split_stock_token(token)
+    assert nm == name
+    assert ann_has in ann
