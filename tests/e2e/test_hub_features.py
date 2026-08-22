@@ -135,3 +135,22 @@ def test_ai_daily_lines_when_present(page, site_url):
     _boot(page, site_url)
     has = page.evaluate("!!(window.DATA.ai_digest && window.DATA.ai_digest.daily && (window.DATA.ai_digest.daily.lines||[]).length)")
     assert page.locator(".brf-ai").count() == (1 if has else 0)
+
+
+# ───────────────────── Task 6: 검증 탭 코호트·테마·분포 ─────────────────────
+
+def test_verify_cohort_toggle_and_histogram(page, site_url):
+    _boot(page, site_url)
+    if not page.evaluate("!!(window.DATA.verify && window.DATA.verify.enabled)"):
+        pytest.skip("verify 비활성")
+    page.goto(site_url + "hub.html#verify")
+    page.wait_for_selector("#view-verify .v-score", timeout=15000)
+    assert page.locator("#vHist").count() == 1
+    has_rep = page.evaluate("!!(window.DATA.verify.report && window.DATA.verify.report.enabled)")
+    assert page.locator("#vCohort").count() == (1 if has_rep else 0)
+    if has_rep:
+        page.click('#vCohort button[data-cohort="report"]')
+        page.wait_for_selector("#vThemes", timeout=5000)
+        if page.evaluate("(window.DATA.verify.themes||[]).length"):
+            assert page.locator("#vThemes .v-row").count() >= 1
+        assert "리포트" in page.inner_text("#view-verify .sec-sub")
