@@ -65,28 +65,29 @@ function chatMentionRow(s, kind, m, idx){
 function chatNewsRow(n){
   return `<div class="mention"><span class="md">${esc(fmtDate(n.date))}</span>
     <span class="src-pill 테마">뉴스</span>
-    <span>${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></span></div>`;
+    <span>${esc(n.title)} <a class="src" href="${esc(safeHref(n.url))}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></span></div>`;
 }
 function renderChat(s){
   const c=s.chat; if(!c) return '';
   const st=c.stance||{};
   const badge=`<span style="color:#7c3aed">강세 ${st.bullish||0} · 약세 ${st.bearish||0} · 관망 ${st.watch||0}</span>`;
   const ops=c.opinions||[], mkt=c.market_news||[], nws=c.news||[];
+  const opsN=c.opinions_n??ops.length, mktN=c.market_news_n??mkt.length, nwsN=c.news_n??nws.length;   // 코어는 앞부분만 싣고 개수를 따로 준다 (스펙 C2)
   const opHtml = ops.slice(0,CHAT_INIT_OP).map((m,i)=>chatMentionRow(s,'opinion',m,i)).join('')
     || '<div style="font-size:11.5px;color:var(--text-4)">개별 의견 없음</div>';
-  const opMore = ops.length>CHAT_INIT_OP
-    ? `<div class="chat-more" data-chat-stock="${esc(s.name)}" data-chat-kind="opinion" data-chat-shown="${CHAT_INIT_OP}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 의견 ${ops.length-CHAT_INIT_OP}건 더보기</div>` : '';
-  const mktBlock = mkt.length
-    ? `<details class="chat-mkt" style="margin-top:6px"><summary style="cursor:pointer;color:#16a34a;font-size:11.5px">📰 관련 시황 ${mkt.length}건</summary>
+  const opMore = opsN>CHAT_INIT_OP
+    ? `<div class="chat-more" data-chat-stock="${esc(s.name)}" data-chat-kind="opinion" data-chat-shown="${Math.min(CHAT_INIT_OP,ops.length)}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 의견 ${opsN-CHAT_INIT_OP}건 더보기</div>` : '';
+  const mktBlock = mktN
+    ? `<details class="chat-mkt" style="margin-top:6px"><summary style="cursor:pointer;color:#16a34a;font-size:11.5px">📰 관련 시황 ${mktN}건</summary>
         <div class="chat-mkt-body" data-chat-stock="${esc(s.name)}" data-chat-shown="0"></div></details>` : '';
   const nwHtml = nws.slice(0,CHAT_INIT_NEWS).map(chatNewsRow).join('');
-  const nwMore = nws.length>CHAT_INIT_NEWS
-    ? `<div class="chat-more-news" data-chat-stock="${esc(s.name)}" data-chat-shown="${CHAT_INIT_NEWS}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 뉴스 ${nws.length-CHAT_INIT_NEWS}건 더보기</div>` : '';
+  const nwMore = nwsN>CHAT_INIT_NEWS
+    ? `<div class="chat-more-news" data-chat-stock="${esc(s.name)}" data-chat-shown="${Math.min(CHAT_INIT_NEWS,nws.length)}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 뉴스 ${nwsN-CHAT_INIT_NEWS}건 더보기</div>` : '';
   return `<div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">
     <div style="font-size:11.5px;font-weight:700;color:#7c3aed;margin-bottom:4px">💬 채팅 근거 · ${c.count}회 · ${badge}</div>
     <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">💡 의견</div>${opHtml}${opMore}
     ${mktBlock}
-    ${nws.length?`<div style="font-size:11px;color:var(--text-3);margin:5px 0 3px">📰 뉴스(최신순)</div>${nwHtml}${nwMore}`:''}
+    ${nwsN?`<div style="font-size:11px;color:var(--text-3);margin:5px 0 3px">📰 뉴스(최신순)</div>${nwHtml}${nwMore}`:''}
   </div>`;
 }
 function stMentionHtml(m){

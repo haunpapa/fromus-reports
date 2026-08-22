@@ -9,8 +9,8 @@ const VIEW_RENDERERS = {
   strategy:  ()=>renderStrategy(),
   verify:    ()=>renderVerify(),
   graph:     ()=>renderGraph(),
-  glossary:  ()=>renderGlossary(),
-  chat:      ()=>renderChatView(),
+  glossary:  ()=>loadChunk('glossary').then(()=>renderGlossary()),
+  chat:      ()=>loadChunk('chat').then(()=>renderChatView()),
 };
 const RENDERED = new Set();
 function ensureView(name){
@@ -22,10 +22,16 @@ function ensureView(name){
     RENDERED.delete(name);                         // 실패는 기억하지 않는다 — 다시 시도 가능
     console.error('탭 렌더 실패:', name, e);
     const host=document.getElementById('view-'+name);
-    if(host) host.innerHTML=`<div class="empty">데이터를 불러오지 못했습니다. <button type="button" class="cmp-add" data-view-retry="${esc(name)}">다시 시도</button></div>`;
+    if(host) host.innerHTML=chunkFailHtml(name);
   });
 }
-document.addEventListener('click',e=>{ const b=e.target.closest('[data-view-retry]'); if(b) ensureView(b.dataset.viewRetry); });
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-chunk-retry]'); if(!b) return;
+  const name=b.dataset.chunkRetry;
+  if(name==='search'){ scheduleSearch(); return; }
+  if(name==='stockchat'){ const body=b.closest('.chat-mkt-body'); if(body){ body.dataset.chatShown='0'; loadChunk('stockchat').then(()=>fillMarketBody(body)).catch(()=>{}); } return; }
+  ensureView(name);
+});
 function showTab(name,fromHash){
   if(!TABS.includes(name))name='home';
   if(name==='verify' && !verifyOn()) name='home';

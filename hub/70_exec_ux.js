@@ -93,7 +93,10 @@ function buildCommandItems(){
   (D.reports||[]).slice().reverse().slice(0,40).forEach(r=>items.push({kind:r.type==='weekly'?'주간':'데일리',title:r.headline||r.file,sub:`${fmtDate(r.date)} · ${r.subhead||''}`,go:()=>openReport(r.id,r.headline||'')}));
   return items;
 }
-function openCommand(){const m=$('#cmdk');m.classList.add('open');$('#cmdInput').value='';cmdIndex=0;drawCommandList();setTimeout(()=>$('#cmdInput').focus(),20);}
+function openCommand(){
+  const m=$('#cmdk');m.classList.add('open');$('#cmdInput').value='';cmdIndex=0;drawCommandList();setTimeout(()=>$('#cmdInput').focus(),20);
+  if(!(D.glossary||[]).length) loadChunk('glossary').then(()=>{ CMD_ITEMS=buildCommandItems(); drawCommandList(); }).catch(()=>{});
+}
 function closeCommand(){$('#cmdk').classList.remove('open');}
 function drawCommandList(){
   const q=($('#cmdInput')?.value||'').toLowerCase().trim();

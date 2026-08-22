@@ -80,5 +80,5 @@ def test_hub_template_has_kb_retry_fallback():
     sw = (root / "sw.js").read_text(encoding="utf-8")
     assert "kbRetried" in tpl and "?nosw=" in tpl, "부트 재시도는 SW 탈출구(?nosw=)를 써야 함"
     assert "searchParams.has('nosw')" in sw, "sw.js 에 ?nosw= 패스스루 없음"
-    assert "fu-hub-v3" in sw, "SW 캐시 버전 v3 아님"
+    assert "fu-hub-v4" in sw, "SW 캐시 버전 v4 아님"
     assert "cache: 'reload'" in sw, "install 프리캐시가 HTTP 캐시를 우회해야 함(stale 셸 고착 방지)"

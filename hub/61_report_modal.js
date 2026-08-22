@@ -91,6 +91,10 @@ $$('[data-rclose]').forEach(el=>el.addEventListener('click',closeReport));
 // ── 채팅 모달 (별도 컨테이너; RM/openReport/closeReport 재사용 금지) ──
 let cmBodyOverflow='';
 function openChatModal(stockName, kind, idx){
+  loadChunk('stockchat').then(()=>_openChatModal(stockName, kind, idx))
+    .catch(()=>_openChatModal(stockName, kind, idx));   // 실패해도 코어에 실린 앞부분(idx<3)은 열린다
+}
+function _openChatModal(stockName, kind, idx){
   const arr = chatArr(stockName, kind);
   const m = arr[idx]; if(!m) return;
   $('#cmTitle').innerHTML = `${esc(stockName)} <span class="rm-date">${esc(fmtDate(m.date))} · ${esc(m.sharer||'')} · ${esc(m.stance||'')}</span>`;
@@ -99,7 +103,7 @@ function openChatModal(stockName, kind, idx){
   const tl = ((s.chat&&s.chat.opinions)||[]).filter(o=>o.sharer===m.sharer)
     .map(o=>`<div style="font-size:11.5px;color:var(--text-3)">· ${esc(fmtDate(o.date))} ${esc(o.stance||'')} — ${esc((o.snippet||'').slice(0,60))}</div>`).join('');
   const news = ((s.chat&&s.chat.news)||[]).slice(0,4)
-    .map(n=>`<div style="font-size:11.5px"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title)} <a class="src" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`).join('');
+    .map(n=>`<div style="font-size:11.5px"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title)} <a class="src" href="${esc(safeHref(n.url))}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`).join('');
   $('#cmBody').innerHTML = `
     <div style="background:var(--surface-2);border-radius:8px;padding:12px;line-height:1.6;font-size:13px;white-space:pre-wrap">${esc(m.full||m.snippet||'')}</div>
     ${co?`<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-top:12px">함께 언급 종목</div><div>${co}</div>`:''}

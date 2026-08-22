@@ -25,7 +25,7 @@ function renderHome(){
       <button class="stat" data-go="strategy"><div class="v">${b.weekly||0}</div><div class="l">위클리</div></button>
       <button class="stat" data-go="stocks"><div class="v">${(D.stocks||[]).length}</div><div class="l">종목 <span class="go">→</span></div></button>
       <button class="stat" data-go="sectors"><div class="v">${(D.sectors||[]).length}</div><div class="l">섹터 <span class="go">→</span></div></button>
-      <button class="stat" data-go="glossary"><div class="v">${(D.glossary||[]).length}</div><div class="l">용어 <span class="go">→</span></div></button>
+      <button class="stat" data-go="glossary"><div class="v">${(((D.build&&D.build.counts)||{}).glossary) ?? (D.glossary||[]).length}</div><div class="l">용어 <span class="go">→</span></div></button>
       <button class="stat" data-go="analytics"><div class="v">📊</div><div class="l">분석 <span class="go">→</span></div></button>
     </div>
     <div id="watchHome"></div>

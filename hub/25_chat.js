@@ -31,7 +31,7 @@ function cgActionRow(a){
 }
 function cgNewsRow(n){
   return `<div class="cg-row"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title||'')}
-    <a class="src" href="${esc(n.url||'#')}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`;
+    <a class="src" href="${esc(safeHref(n.url))}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`;
 }
 function cgReadingRow(r){
   const body = esc(r.body||''); const long = body.length>140;

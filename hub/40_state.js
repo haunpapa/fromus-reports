@@ -103,31 +103,29 @@ function chatArr(stockName, kind){
   const s=STOCK_BY_NAME[stockName]; if(!s||!s.chat) return [];
   return kind==='opinion' ? (s.chat.opinions||[]) : (kind==='market' ? (s.chat.market_news||[]) : (s.chat.news||[]));
 }
+function expandChatMore(el){
+  const name=el.dataset.chatStock, kind=el.dataset.chatKind||'opinion', shown=+el.dataset.chatShown;
+  const arr=chatArr(name,kind); const next=Math.min(arr.length, shown+CHAT_MORE);
+  el.insertAdjacentHTML('beforebegin', arr.slice(shown,next).map((m,i)=>chatMentionRow(STOCK_BY_NAME[name],kind,m,shown+i)).join(''));
+  el.dataset.chatShown=next;
+  const label=kind==='market'?'시황':'의견';
+  if(next>=arr.length) el.remove(); else el.textContent=`＋ ${label} ${arr.length-next}건 더보기`;
+}
+function expandChatNews(el){
+  const name=el.dataset.chatStock, shown=+el.dataset.chatShown;
+  const s=STOCK_BY_NAME[name], arr=(s&&s.chat&&s.chat.news)||[];
+  const next=Math.min(arr.length, shown+CHAT_MORE);
+  el.insertAdjacentHTML('beforebegin', arr.slice(shown,next).map(chatNewsRow).join(''));
+  el.dataset.chatShown=next;
+  if(next>=arr.length) el.remove(); else el.textContent=`＋ 뉴스 ${arr.length-next}건 더보기`;
+}
+function withStockChat(el, fn){            // 전체 채팅 블록(stockchat 청크)이 필요한 동작 공통 래퍼
+  const prev=el.textContent; el.textContent='불러오는 중…';
+  loadChunk('stockchat').then(()=>fn(el)).catch(()=>{ el.textContent=prev+' (실패 · 다시 누르면 재시도)'; });
+}
 document.addEventListener('click', e=>{
-  // 1) 의견/시황 더보기 (kind 일반화)
-  const opMore=e.target.closest('.chat-more');
-  if(opMore){
-    const name=opMore.dataset.chatStock, kind=opMore.dataset.chatKind||'opinion';
-    const shown=+opMore.dataset.chatShown;
-    const arr=chatArr(name,kind); const next=Math.min(arr.length, shown+CHAT_MORE);
-    const frag=arr.slice(shown,next).map((m,i)=>chatMentionRow(STOCK_BY_NAME[name],kind,m,shown+i)).join('');
-    opMore.insertAdjacentHTML('beforebegin',frag);
-    opMore.dataset.chatShown=next;
-    const label=kind==='market'?'시황':'의견';
-    if(next>=arr.length) opMore.remove(); else opMore.textContent=`＋ ${label} ${arr.length-next}건 더보기`;
-    return;
-  }
-  // 2) 뉴스 더보기
-  const nwMore=e.target.closest('.chat-more-news');
-  if(nwMore){
-    const name=nwMore.dataset.chatStock, shown=+nwMore.dataset.chatShown;
-    const s=STOCK_BY_NAME[name], arr=(s&&s.chat&&s.chat.news)||[];
-    const next=Math.min(arr.length, shown+CHAT_MORE);
-    nwMore.insertAdjacentHTML('beforebegin', arr.slice(shown,next).map(chatNewsRow).join(''));
-    nwMore.dataset.chatShown=next;
-    if(next>=arr.length) nwMore.remove(); else nwMore.textContent=`＋ 뉴스 ${arr.length-next}건 더보기`;
-    return;
-  }
+  const opMore=e.target.closest('.chat-more');      if(opMore){ withStockChat(opMore, expandChatMore); return; }
+  const nwMore=e.target.closest('.chat-more-news'); if(nwMore){ withStockChat(nwMore, expandChatNews); return; }
 });
 // ── 채팅 전역 섹션: 더보기 + 인라인 펼침 (data-cg-* 만) ──
 document.addEventListener('click', e=>{
@@ -148,15 +146,18 @@ document.addEventListener('click', e=>{
   const exp = e.target.closest('[data-cg-expand]');
   if(exp){ exp.classList.toggle('cg-clip'); return; }
 });
-// 관련 시황 <details> 최초 펼침 시 채우기 + 더보기
-document.addEventListener('toggle', e=>{
-  const d=e.target.closest('details.chat-mkt'); if(!d||!d.open) return;
-  const body=d.querySelector('.chat-mkt-body'); if(!body || +body.dataset.chatShown>0) return;
+function fillMarketBody(body){
   const name=body.dataset.chatStock, arr=chatArr(name,'market');
   const n=Math.min(arr.length,5);
   body.innerHTML=arr.slice(0,n).map((m,i)=>chatMentionRow(STOCK_BY_NAME[name],'market',m,i)).join('')
     + (arr.length>n?`<div class="chat-more" data-chat-stock="${esc(name)}" data-chat-kind="market" data-chat-shown="${n}" style="cursor:pointer;color:#16a34a;font-size:11.5px;margin:3px 0">＋ 시황 ${arr.length-n}건 더보기</div>`:'');
   body.dataset.chatShown=n;
+}
+document.addEventListener('toggle', e=>{
+  const d=e.target.closest('details.chat-mkt'); if(!d||!d.open) return;
+  const body=d.querySelector('.chat-mkt-body'); if(!body || +body.dataset.chatShown>0) return;
+  body.innerHTML='<div class="v-mini">불러오는 중…</div>';
+  loadChunk('stockchat').then(()=>fillMarketBody(body)).catch(()=>{ body.innerHTML=chunkFailHtml('stockchat'); });
 }, true);
 /* ── 연관 종목(동시 언급) 맵 — Obsidian 백링크 벤치마크 ── */
 const CO_MAP=(()=>{

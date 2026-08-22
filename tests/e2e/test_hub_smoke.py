@@ -97,3 +97,19 @@ def test_boot_renders_only_home(page, site_url):
     page.click('#tabs .tab[data-tab="stocks"]')
     page.wait_for_selector("#stockList .strow", timeout=15000)
     assert page.evaluate("document.querySelector('#view-stocks').innerHTML.length") > 200
+
+
+def test_search_loads_search_chunk_lazily(page, site_url):
+    _boot(page, site_url)
+    loaded = page.evaluate("performance.getEntriesByType('resource').some(r=>/kb\\.search\\./.test(r.name))")
+    assert loaded is False, "부트에서 search 청크를 받으면 안 된다"
+    page.fill("#q", "반도체")
+    page.wait_for_selector("#searchPanel.open .sr", timeout=15000)
+    loaded = page.evaluate("performance.getEntriesByType('resource').some(r=>/kb\\.search\\./.test(r.name))")
+    assert loaded is True
+
+
+def test_core_is_small(page, site_url):
+    _boot(page, site_url)
+    size = page.evaluate("(performance.getEntriesByType('resource').find(r=>/kb\\.core\\./.test(r.name))||{}).decodedBodySize||0")
+    assert 0 < size < 3_000_000, f"core 가 너무 큼: {size}"
