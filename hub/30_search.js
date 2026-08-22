@@ -94,11 +94,13 @@ function hl(s,tokens){
 $('#q').addEventListener('input',scheduleSearch);
 $('#q').addEventListener('focus',()=>{ ensureSearch().catch(()=>{}); if($('#q').value.trim())scheduleSearch(); else drawRecent(); });
 $('#clr').addEventListener('click',()=>{$('#q').value='';searchFilter='all';runSearch();$('#searchHint').textContent='';$('#q').focus();});
+/* 칩을 누르면 패널을 다시 그린다 → e.target 이 DOM 에서 떨어져 나가므로 아래 document 핸들러의
+   e.target.closest('.searchwrap') 가 null 이 되어 패널이 닫혀 버린다. 버블링을 여기서 끊는다. */
 $('#searchPanel').addEventListener('click',e=>{
-  const f=e.target.closest('.sp-filter[data-f]'); if(f){searchFilter=f.dataset.f;runSearch();return;}
-  const s=e.target.closest('.sp-src'); if(s){searchSrc=s.dataset.src;runSearch();return;}
-  const p=e.target.closest('.sp-period'); if(p){searchPeriod=p.dataset.period;runSearch();return;}
-  const r=e.target.closest('[data-recent]'); if(r){$('#q').value=r.dataset.recent;scheduleSearch();return;}
+  const f=e.target.closest('.sp-filter[data-f]'); if(f){e.stopPropagation();searchFilter=f.dataset.f;runSearch();return;}
+  const s=e.target.closest('.sp-src'); if(s){e.stopPropagation();searchSrc=s.dataset.src;runSearch();return;}
+  const p=e.target.closest('.sp-period'); if(p){e.stopPropagation();searchPeriod=p.dataset.period;runSearch();return;}
+  const r=e.target.closest('[data-recent]'); if(r){e.stopPropagation();$('#q').value=r.dataset.recent;scheduleSearch();return;}
   if(e.target.closest('.sr,.sr-pin')){ const q=$('#q').value.trim(); if(q) pushRecent(q); }
 });
 document.addEventListener('click',e=>{ if(!e.target.closest('.searchwrap')) $('#searchPanel').classList.remove('open'); });

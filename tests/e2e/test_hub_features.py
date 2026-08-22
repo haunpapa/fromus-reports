@@ -68,6 +68,8 @@ def test_search_source_and_period_filters(page, site_url):
         page.wait_for_function(
             "[...document.querySelectorAll('#searchPanel .sr .sr-kind')].every(k=>/채팅|목표가/.test(k.textContent))",
             timeout=5000)
+        # 칩을 눌러 패널을 다시 그려도 열린 채로 남아야 한다 (document 의 '바깥 클릭' 핸들러가 닫아버리던 회귀)
+        assert page.locator("#searchPanel.open").is_visible()
     page.click('#searchPanel .sp-period[data-period="7"]')
     page.wait_for_timeout(300)
     assert page.locator("#searchPanel .sp-period.on").get_attribute("data-period") == "7"
