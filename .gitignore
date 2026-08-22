@@ -14,6 +14,9 @@ hub.html
 knowledge_base.json
 ai_digest.json
 kb.*.json
+version.json
+build/report.md
+build/e2e_timing.json
 
 # OMC 휘발성 런타임 상태 (세션마다 변경 → 추적 제외)
 .omc/state/

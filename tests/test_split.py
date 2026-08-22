@@ -71,3 +71,48 @@ def test_slim_reports_does_not_mutate_input():
     before = json.dumps(data, ensure_ascii=False, sort_keys=True)
     slim_reports(data["reports"])
     assert json.dumps(data, ensure_ascii=False, sort_keys=True) == before
+
+
+def test_split_payload_core_and_chunks():
+    from hublib.split import split_payload
+    data = _mini_data()
+    core, chunks = split_payload(data)
+
+    # 코어에서 빠지는 것
+    assert "search" not in core and "glossary" not in core
+    assert core["build"]["counts"] == {"glossary": 1, "search": 1}
+    assert core["reports"][0].keys() == {"type", "date", "id", "sort_date", "file", "headline", "subhead"}
+    # chat 은 관계망·섹터 카드가 쓰는 themes/co_edges 와 섹션 개수만 남는다
+    assert set(core["chat"].keys()) == {"build", "themes", "co_edges", "counts"}
+    assert core["chat"]["counts"]["news"] == 3 and core["chat"]["counts"]["actions"] == 2
+    # 종목 chat 은 초기 표시분만 + 전체 개수
+    sc = core["stocks"][0]["chat"]
+    assert len(sc["opinions"]) == 3 and sc["opinions_n"] == 7
+    assert len(sc["news"]) == 4 and sc["news_n"] == 7
+    assert sc["market_news"] == [] and sc["market_news_n"] == 2
+    assert sc["stance"] == {"bullish": 2, "bearish": 0, "watch": 1} and sc["targets"] == [{"value": "90000"}]
+    assert "chat" not in core["stocks"][1]
+
+    # 청크
+    assert chunks["search"] == data["search"]
+    assert chunks["glossary"] == data["glossary"]
+    assert chunks["chat"] == data["chat"]
+    assert list(chunks["stockchat"].keys()) == ["삼성전자"]
+    assert chunks["stockchat"]["삼성전자"] == data["stocks"][0]["chat"]
+
+
+def test_split_payload_without_chat():
+    from hublib.split import split_payload
+    data = _mini_data(); data.pop("chat")
+    for s in data["stocks"]: s.pop("chat", None)
+    core, chunks = split_payload(data)
+    assert "chat" not in core
+    assert chunks["chat"] is None and chunks["stockchat"] == {}
+
+
+def test_split_payload_does_not_mutate_input():
+    from hublib.split import split_payload
+    data = _mini_data()
+    before = json.dumps(data, ensure_ascii=False, sort_keys=True)
+    split_payload(data)
+    assert json.dumps(data, ensure_ascii=False, sort_keys=True) == before

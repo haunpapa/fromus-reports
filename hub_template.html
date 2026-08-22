@@ -704,7 +704,10 @@ window.KB_URL = /*KBURL*/"knowledge_base.json"/*ENDKBURL*/;
 (async function(){
   const boot = document.getElementById('fu-boot');
   try{
-    const r = await fetch(window.KB_URL);
+    // KB_URL 은 이제 매니페스트 객체({core, chat, …}) — 구 셸(문자열)도 그대로 동작
+    const coreUrl = (typeof window.KB_URL === 'string') ? window.KB_URL : (window.KB_URL && window.KB_URL.core);
+    if(!coreUrl) throw new Error('KB 매니페스트에 core 없음');
+    const r = await fetch(coreUrl);
     if(!r.ok) throw new Error('HTTP ' + r.status);
     window.DATA = await r.json();
   }catch(e){
