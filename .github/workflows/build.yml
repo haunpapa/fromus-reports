@@ -69,6 +69,14 @@ jobs:
           key: price-cache-v1-${{ github.run_id }}
           restore-keys: price-cache-v1-
 
+      # what's new 는 '전일 빌드의 요약'과 비교한다 — 가격 캐시와 같은 이유로 run_id 키 + 최근 복원.
+      - name: Restore kb summary (what's new 전일 기준)
+        uses: actions/cache@v4
+        with:
+          path: build/kb_summary.json
+          key: kb-summary-${{ github.run_id }}
+          restore-keys: kb-summary-
+
       - name: Build index
         run: python build_index.py
 
@@ -81,6 +89,8 @@ jobs:
         run: python ai_digest.py || echo "AI 다이제스트 생략(실패 무시)"
 
       - name: Render (hub.html + kb.<hash>.json)
+        env:
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}   # 리포 Variables 에 Pages URL — 없으면 feed.json 이 상대 URL
         run: python build_hub.py --phase render --json knowledge_base.json --out hub.html
 
       - name: Run tests
@@ -94,6 +104,7 @@ jobs:
           mkdir -p _site
           cp index.html hub.html knowledge_base.json trade.html manifest.webmanifest sw.js _site/
           cp ai_digest.json _site/ 2>/dev/null || true
+          cp feed.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
           cp version.json _site/
           cp -r reports icons _site/

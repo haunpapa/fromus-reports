@@ -120,6 +120,28 @@ def _build_verify_safe(data):
         return None
 
 
+def _build_whats_new_safe(data):
+    """전일 요약 대비 diff. 첫 빌드·실패는 None — 빌드는 계속된다."""
+    import sys
+    try:
+        from hublib.whatsnew import diff, load_summary, save_summary, summarize, SUMMARY_PATH
+        prev = load_summary(SUMMARY_PATH)
+        cur = summarize(data)
+        out = diff(prev, data)
+        if out is None and prev and prev.get("to") == cur["to"]:
+            out = prev.get("last_diff")            # 같은 날 재빌드(푸시 트리거) — 그날 아침의 diff 를 그대로 유지
+        if prev is None or prev.get("to") != cur["to"]:
+            save_summary(SUMMARY_PATH, {**cur, "last_diff": out})   # 기준일이 바뀔 때만 요약(+그날의 diff) 갱신
+        print("what's new --", "없음(첫 빌드/동일 기준일)" if out is None else
+              f"신규 {len(out['new_stocks'])} · 급증 {len(out['surging'])} · "
+              f"콜 {len(out['new_calls'])} · 목표가 {len(out['new_targets'])}")
+        return out
+    except Exception as e:
+        print(f"[WARN] what's new 생략 -- {e}", file=sys.stderr)
+        data.setdefault("build", {})["whats_new_error"] = str(e)
+        return None
+
+
 def _validate_schema_safe(data):
     """최소 스키마 검증. 검증기 자체가 터지면 빈 목록 — 검증 때문에 빌드가 멈춰선 안 된다."""
     import sys
@@ -182,6 +204,7 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     }
     data = _merge_chat_kb(data)
     data["verify"] = _build_verify_safe(data)
+    data["whats_new"] = _build_whats_new_safe(data)
 
     problems = _validate_schema_safe(data)
     if problems:
@@ -253,6 +276,10 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
     with open(os.path.join(out_dir, "version.json"), "w", encoding="utf-8") as f:
         json.dump({"core": manifest["core"], "generated": (data.get("build") or {}).get("generated", "")},
                   f, ensure_ascii=False)
+
+    from hublib.feed import build_feed
+    with open(os.path.join(out_dir, "feed.json"), "w", encoding="utf-8") as f:
+        json.dump(build_feed(data, os.environ.get("SITE_BASE_URL", "")), f, ensure_ascii=False, indent=1)
 
     _write_size_report(sizes)
     if os.path.exists(tpl):                                        # 템플릿이 없어도 kb.*·version.json 은 이미 만들어졌다
