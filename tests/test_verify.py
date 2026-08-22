@@ -369,3 +369,87 @@ def test_aggregate_counts_too_recent_calls_as_pending_not_failed():
     s = aggregate_calls(calls, horizons=(20,))["summary"]["h20"]
     assert s["failed"] == 1, "no_entry 를 실패로 세면 없는 장애를 보고하게 된다"
     assert s["pending"] == 1
+
+
+# ── 리포트 수급 코호트 ───────────────────────────────────────────
+def _report_stocks():
+    return [
+        {"name": "삼성전자", "count": 5, "themes": ["반도체·메모리"], "mentions": [
+            {"date": "2026-05-04", "id": "2026-05-04", "source": "수급", "label": "기관 순매수 · 코스피", "annotation": "1,000억"},
+            {"date": "2026-05-04", "id": "2026-05-04", "source": "테마", "label": "반도체"},
+            {"date": "2026-05-11", "id": "2026-05-11", "source": "수급", "label": "외국인 순매수 · 코스피", "annotation": ""}]},
+        {"name": "엔비디아", "count": 9, "themes": ["소프트웨어·AI"], "mentions": [
+            {"date": "2026-05-04", "id": "2026-05-04", "source": "수급", "label": "기관 순매수"}]},
+        {"name": "조용한주", "count": 1, "themes": [], "mentions": [{"date": "2026-05-04", "source": "테마"}]},
+    ]
+
+
+TICKER_MAP = {"삼성전자": {"code": "005930", "market": "KOSPI"}, "조용한주": {"code": "000001", "market": "KOSDAQ"}}
+
+
+def test_extract_report_calls_supply_only_with_ticker():
+    from hublib.verify import extract_report_calls
+    calls, stats = extract_report_calls(_report_stocks(), TICKER_MAP)
+    assert [c["date"] for c in calls] == ["2026-05-04", "2026-05-11"]
+    c = calls[0]
+    assert c["stock"] == "삼성전자" and c["ticker"] == "005930" and c["market"] == "KR"
+    assert c["stance"] == "bullish" and c["type"] == "supply" and c["bench_label"] == "KOSPI" and c["conflict"] is False
+    assert c["sources"] == [{"sharer": "리포트", "snippet": "기관 순매수 · 코스피 · 1,000억", "id": "2026-05-04"}]
+    assert stats == {"population": 3, "no_ticker": 1, "stocks": 1, "merged_from": 2, "duplicate": 0}
+
+
+def test_extract_report_calls_merges_same_day_and_caps_stocks():
+    from hublib.verify import extract_report_calls
+    stocks = _report_stocks()
+    stocks[0]["mentions"].append({"date": "2026-05-04", "source": "수급", "label": "투신 순매수", "id": "2026-05-04"})
+    calls, stats = extract_report_calls(stocks, TICKER_MAP)
+    assert len([c for c in calls if c["date"] == "2026-05-04" and c["stock"] == "삼성전자"]) == 1
+    assert stats["duplicate"] == 1
+    calls2, _ = extract_report_calls(stocks, TICKER_MAP, max_stocks=0)
+    assert calls2 == []
+
+
+def test_downsample_series_every_5th_plus_last():
+    from hublib.verify import downsample_series
+    pts = [(f"2026-05-{i:02d}", float(i)) for i in range(1, 24)]
+    out = downsample_series(pts, step=5, max_points=80)
+    assert out[0] == ["2026-05-01", 1.0] and out[-1] == ["2026-05-23", 23.0]
+    assert [d for d, _ in out] == ["2026-05-01", "2026-05-06", "2026-05-11", "2026-05-16", "2026-05-21", "2026-05-23"]
+    assert len(downsample_series(pts, step=1, max_points=4)) <= 4
+    assert downsample_series([], step=5) == []
+
+
+def test_aggregate_themes_rolls_calls_by_stock_theme():
+    from hublib.verify import aggregate_themes
+    judged = [
+        {"stock": "A", "conflict": False, "h20": {"hit": True, "excess": 4.0}},
+        {"stock": "A", "conflict": False, "h20": {"hit": False, "excess": -2.0}},
+        {"stock": "B", "conflict": False, "h20": {"hit": True, "excess": 1.0}},
+        {"stock": "C", "conflict": True,  "h20": {"hit": True, "excess": 9.0}},
+    ]
+    themes = {"A": ["반도체·메모리", "삼성그룹"], "B": ["반도체·메모리"], "C": ["반도체·메모리"]}
+    out = aggregate_themes(judged, themes, horizons=(20,))
+    semi = next(t for t in out if t["theme"] == "반도체·메모리")
+    assert semi["calls"] == 3 and semi["h20"]["judged"] == 3 and semi["h20"]["hit"] == 2
+    assert semi["h20"]["avg_excess"] == 1.0
+    assert next(t for t in out if t["theme"] == "삼성그룹")["calls"] == 2
+    assert out[0]["theme"] == "반도체·메모리", "콜 수 내림차순"
+
+
+def test_build_verify_report_cohort_with_fake_loaders(tmp_path):
+    from hublib.verify import build_verify
+    ser = _series(40)
+
+    def loader(ticker, start):
+        return ser
+    out = build_verify(chat_kb=_mini(), report_stocks=_report_stocks(), ticker_map=TICKER_MAP,
+                       cache_path=str(tmp_path / "c.json"), loaders={"KR": loader, "US": loader},
+                       market_of=lambda code: "KOSPI")
+    assert out["enabled"] and out["meta"]["cohort"] == "core"
+    rep = out["report"]
+    assert rep["enabled"] and rep["meta"]["cohort"] == "report" and rep["meta"]["calls"] == 2
+    assert rep["meta"]["excluded"]["no_ticker"] == 1
+    assert rep["stocks"][0]["name"] == "삼성전자" and rep["stocks"][0]["series"][0][0] <= "2026-05-04"
+    assert out["stocks"][0]["series"], "채팅 코호트 종목에도 시계열"
+    assert out["themes"] and out["themes"][0]["cohort"] == "report"
+    assert all(c["stock"] != "삼성전자" or c["type"] == "supply" for c in rep["calls"])

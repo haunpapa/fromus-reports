@@ -75,7 +75,10 @@ def _merge_chat_kb(data):
         with open(chat_path, encoding="utf-8") as cf:
             chat = json.load(cf)
         data, added = _merge_chat(data, chat)
-        print(f"chat_kb.json merged -- stocks +{added}")
+        from hublib.search import build_chat_search
+        chat_items = build_chat_search(chat)
+        data = {**data, "search": (data.get("search") or []) + chat_items}
+        print(f"chat_kb.json merged -- stocks +{added} · 검색항목 +{len(chat_items)}")
     except ImportError as e:
         print(f"[WARN] merge_hub.py 없음 -- 채팅 병합 생략: {e}", file=sys.stderr)
         data.setdefault("build", {})["chat_merge_error"] = f"import: {e}"
@@ -104,10 +107,14 @@ def _build_verify_safe(data):
         from hublib.verify import build_verify
         with open("chat_kb.json", encoding="utf-8") as f:
             chat = json.load(f)
-        out = build_verify(chat_kb=chat)
+        out = build_verify(chat_kb=chat, report_stocks=data.get("stocks"))
         if out and out.get("enabled"):
             m = out["meta"]
             print(f"검증 레이어 -- {m['calls']}콜 / {m['stocks']}종목")
+            rep = out.get("report") or {}
+            if rep.get("enabled"):
+                print(f"  리포트 코호트 -- {rep['meta']['calls']}콜 / {rep['meta']['stocks']}종목 · "
+                      f"테마 {len(out.get('themes') or [])}")
         elif out:
             print(f"ℹ️ 검증 레이어 비활성 -- {out.get('reason')}")
         return out
@@ -117,13 +124,48 @@ def _build_verify_safe(data):
         return None
 
 
+def _build_whats_new_safe(data):
+    """전일 요약 대비 diff. 첫 빌드·실패는 None — 빌드는 계속된다."""
+    import sys
+    try:
+        from hublib.whatsnew import diff, load_summary, save_summary, summarize, SUMMARY_PATH
+        prev = load_summary(SUMMARY_PATH)
+        cur = summarize(data)
+        out = diff(prev, data)
+        if out is None and prev and prev.get("to") == cur["to"]:
+            out = prev.get("last_diff")            # 같은 날 재빌드(푸시 트리거) — 그날 아침의 diff 를 그대로 유지
+        if prev is None or prev.get("to") != cur["to"]:
+            save_summary(SUMMARY_PATH, {**cur, "last_diff": out})   # 기준일이 바뀔 때만 요약(+그날의 diff) 갱신
+        print("what's new --", "없음(첫 빌드/동일 기준일)" if out is None else
+              f"신규 {len(out['new_stocks'])} · 급증 {len(out['surging'])} · "
+              f"콜 {len(out['new_calls'])} · 목표가 {len(out['new_targets'])}")
+        return out
+    except Exception as e:
+        print(f"[WARN] what's new 생략 -- {e}", file=sys.stderr)
+        data.setdefault("build", {})["whats_new_error"] = str(e)
+        return None
+
+
+def _validate_schema_safe(data):
+    """최소 스키마 검증. 검증기 자체가 터지면 빈 목록 — 검증 때문에 빌드가 멈춰선 안 된다."""
+    import sys
+    try:
+        from hublib.schema import validate
+        return validate(data)
+    except Exception as e:
+        print(f"[WARN] 스키마 검증 생략 -- {e}", file=sys.stderr)
+        data.setdefault("build", {})["schema_error"] = str(e)
+        return []
+
+
 def collect(src=".", files=None, json_out="knowledge_base.json"):
     """리포트 파싱→집계→시세→모멘텀→검색→chat 병합→knowledge_base.json 기록.
     무거운 단계 — parse/aggregate/momentum 를 지연 import 한다."""
     import json, sys
-    from hublib.config import _fmt_kst
+    from hublib.config import _fmt_kst, STOCK_ALIASES
     from hublib.parse import discover, parse_report
     from hublib.aggregate import aggregate, build_search
+    from hublib.search import with_hay
     from hublib.momentum import fetch_index_series, enrich_market_momentum
     from hublib.cache import ParseCache
 
@@ -148,7 +190,7 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     if idx_series:
         agg["series"].update(idx_series)
     market_momentum_meta = enrich_market_momentum(agg, agg.get("series", {}))
-    search = build_search(reports, agg)
+    search = with_hay(build_search(reports, agg))
 
     daily = [r for r in reports if r["type"] == "daily"]
     weekly = [r for r in reports if r["type"] == "weekly"]
@@ -159,12 +201,21 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
                   "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else ""),
                   "recent_from": agg.get("recent_from", ""), "recent_reports": agg.get("recent_reports", 0),
                   "index_source": "yfinance" if idx_series else "report",
-                  "market_momentum": market_momentum_meta},
+                  "market_momentum": market_momentum_meta,
+                  "aliases": {k.lower(): v for k, v in STOCK_ALIASES.items()}},
         # ai_digest 는 render 단계에서 주입 (ai_digest.py 가 knowledge_base.json 을 읽고 생성)
         "reports": reports, "search": search, "ai_digest": None, **agg,
     }
     data = _merge_chat_kb(data)
     data["verify"] = _build_verify_safe(data)
+    data["whats_new"] = _build_whats_new_safe(data)
+
+    problems = _validate_schema_safe(data)
+    if problems:
+        print(f"[WARN] 스키마 문제 {len(problems)}건: " + " | ".join(problems[:10]), file=sys.stderr)
+        data = {**data, "build": {**(data.get("build") or {}), "schema_warnings": problems[:50]}}
+        if any("누락" in p and "[" not in p for p in problems):     # 최상위 키 누락만 빌드 실패
+            sys.exit("knowledge_base 최상위 키 누락 — 빌드 중단")
     with open(json_out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
     print(f"\n→ {json_out} 작성 ({os.path.getsize(json_out)//1024} KB)")
@@ -172,6 +223,20 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
           f"섹터테마 {len(agg['sectors'])} · 스탠스 {len(agg['stance'])} · 원칙 {len(agg['principles'])} · "
           f"용어 {len(agg['glossary'])} · 검색항목 {len(search)} · 최근기준 {agg.get('recent_from','?')}~")
     return data
+
+
+def _apply_news_flags(data, flags):
+    """neutral 로 분류된 채팅 뉴스에 neutral:true 를 붙인 새 data (C6)."""
+    def mark(items):
+        return [({**n, "neutral": True} if flags.get(n.get("url")) == "neutral" else n) for n in (items or [])]
+
+    chat = data.get("chat")
+    stocks = [({**s, "chat": {**s["chat"], "news": mark(s["chat"].get("news"))}} if s.get("chat") else s)
+              for s in (data.get("stocks") or [])]
+    out = {**data, "stocks": stocks}
+    if chat:
+        out["chat"] = {**chat, "news": mark(chat.get("news"))}
+    return out
 
 
 def _emit_json(out_dir, name, obj):
@@ -210,6 +275,9 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
             print("ℹ️ ai_digest.json 반영")
             with open(json_in, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=1)
+            flags = (data["ai_digest"] or {}).get("news_flags") or {}
+            if flags:
+                data = _apply_news_flags(data, flags)
     except Exception as e:
         print(f"ℹ️ ai_digest.json 읽기 실패 — 무시 ({e})")
 
@@ -229,6 +297,10 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
     with open(os.path.join(out_dir, "version.json"), "w", encoding="utf-8") as f:
         json.dump({"core": manifest["core"], "generated": (data.get("build") or {}).get("generated", "")},
                   f, ensure_ascii=False)
+
+    from hublib.feed import build_feed
+    with open(os.path.join(out_dir, "feed.json"), "w", encoding="utf-8") as f:
+        json.dump(build_feed(data, os.environ.get("SITE_BASE_URL", "")), f, ensure_ascii=False, indent=1)
 
     _write_size_report(sizes)
     if os.path.exists(tpl):                                        # 템플릿이 없어도 kb.*·version.json 은 이미 만들어졌다

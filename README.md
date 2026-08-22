@@ -66,9 +66,9 @@ E2E_SITE_DIR=. python -m pytest tests/e2e -q
 
 | 키 | 설명 |
 |---|---|
-| `build` | 빌드 메타: `schema`, `generated`(KST), `reports/daily/weekly` 수, `from/to`, `index_source`("yfinance"\|"report"), `market_momentum`, (병합 실패 시)`chat_merge_error` |
+| `build` | 빌드 메타: `schema`, `generated`(KST), `reports/daily/weekly` 수, `from/to`, `index_source`("yfinance"\|"report"), `market_momentum`, `aliases`(소문자 별칭→정규 종목명, C3), (실패 시)`chat_merge_error`·`verify_error`·`whats_new_error`·`schema_warnings` |
 | `reports` | 파싱된 리포트 레코드 배열 (type/date/id/sections·insights 등) |
-| `search` | 검색 인덱스 항목 배열 (kind/title/snippet/date/tags) |
+| `search` | 검색 인덱스 항목 배열 (kind/title/snippet/date/tags/extra) + `source`("report"\|"chat")·`hay`(소문자 사전 토큰화). 채팅 kind: `채팅뉴스`·`채팅의견`·`목표가` (C3) |
 | `stocks` | 종목별 집계 (name/count/mentions/sectors/themes/targets/market_momentum) |
 | `sectors` | 섹터테마별 집계 (theme/names/stocks/mentions/market_momentum) |
 | `supply_days` | 날짜별 스마트머니(수급) TOP |
@@ -79,13 +79,27 @@ E2E_SITE_DIR=. python -m pytest tests/e2e -q
 | `sentiment` | 일자별 센티멘트 점수 |
 | `series` | 지수 시계열(코스피/코스닥/나스닥) |
 | `chat` | 카카오톡 온톨로지 병합분(종목·뉴스·목표가·관계망 등, `merge_hub.py`) |
-| `ai_digest` | AI 위클리 다이제스트 (`ai_digest.py` 산출물, 없으면 null) |
+| `ai_digest` | AI 요약 (`ai_digest.py` 산출물, 없으면 null) — `digest`(위클리) + `daily:{date,lines[3]}` + `stock_reasons:{종목:{text,as_of}}` + `news_flags:{url:"neutral"\|"relevant"}` (C6). render 가 `news_flags` 를 `chat.news[]`·`stocks[].chat.news[]` 에 `neutral:true` 로 병합한다 |
 | `verify` | 채팅 방향성 발화의 사후 성과 검증 (`hublib/verify.py`) — `meta`/`summary`/`stocks`/`calls`. 봇·무벤치마크 종목 제외, 발화 **다음 거래일 종가** 진입, 거래일 기준 h5/h20/h60, **지수 대비 초과수익**이 1차 지표. 수집 실패 시 `{"enabled": false}` |
+| `verify.report` | 리포트 **수급 포착 언급**(`stocks[].mentions[].source=="수급"`)을 강세 콜로 본 별도 코호트 (C4). `meta.cohort=="report"`, `excluded.no_ticker`(US·비상장 제외). 채팅 코호트와 **절대 합산하지 않는다** |
+| `verify.themes` | 리포트 코호트의 테마별 집계 `[{theme, cohort:"report", calls, h5/h20/h60}]` (C4) |
+| `verify.stocks[].series` | 종목 주가 시계열 `[[date, close]]` — 거래일 5일 간격 다운샘플 + 마지막 점(≤80점). 두 코호트 모두 (C4) |
+| `whats_new` | 전일 빌드 대비 변화 (`hublib/whatsnew.py`, C5) — `since`/`new_stocks`/`surging`/`new_calls`/`new_targets`/`new_reports`. 첫 빌드·같은 기준일이면 `null` |
 | `recent_from`·`recent_reports`·`window_days` | 최근 집계 윈도우 메타 |
+
+### 그 밖의 산출물·캐시
+
+| 파일 | 설명 |
+|---|---|
+| `feed.json` | JSON Feed 1.1 (`hublib/feed.py`) — 최근 리포트 30건 + 오늘 달라진 것. 절대 URL 은 CI Variable `SITE_BASE_URL` 이 있을 때만 |
+| `build/parse_cache.json` | 리포트 파싱 캐시 (CI 키 `parse-cache-`) |
+| `build/price_cache.json` | 검증 레이어 일봉 캐시 (CI 키 `price-cache-v1-`) |
+| `build/kb_summary.json` | what's new 의 전일 요약 (CI 키 `kb-summary-`) |
+| `build/ai_cache.json` | AI 증분 요약 캐시 (CI 키 `ai-cache-v1-`) |
 
 ## 주의
 
-- `index.html`/`hub.html`/`knowledge_base.json`/`ai_digest.json`/`kb.*.json` 은 CI 산출물이며 커밋하지 않는다(`.gitignore`). 소스는 `reports/`·`chat_kb.json` 과 빌더 코드다.
+- `index.html`/`hub.html`/`knowledge_base.json`/`ai_digest.json`/`kb.*.json`/`feed.json` 은 CI 산출물이며 커밋하지 않는다(`.gitignore`). 소스는 `reports/`·`chat_kb.json` 과 빌더 코드다.
 - `trade.html` 은 별도 레포(korea-trade-dashboard)에서 CI가 동기화하며, 실패 시 리포 내 스냅샷을 유지한다.
 - 카카오톡 원문은 실명 포함(`public=False`) — 공개 익명화는 후속 과제.
 - `verify` 는 **종목 단위만** 집계한다. 발화자별 적중률·랭킹은 의도적으로 만들지 않는다

@@ -69,11 +69,27 @@ jobs:
           key: price-cache-v1-${{ github.run_id }}
           restore-keys: price-cache-v1-
 
+      # what's new 는 '전일 빌드의 요약'과 비교한다 — 가격 캐시와 같은 이유로 run_id 키 + 최근 복원.
+      - name: Restore kb summary (what's new 전일 기준)
+        uses: actions/cache@v4
+        with:
+          path: build/kb_summary.json
+          key: kb-summary-${{ github.run_id }}
+          restore-keys: kb-summary-
+
       - name: Build index
         run: python build_index.py
 
       - name: Collect (파싱·집계·시세 — 1회만)
         run: python build_hub.py --phase collect --src . --json knowledge_base.json
+
+      # 같은 입력은 다시 묻지 않는다 — 캐시가 없으면 그날 전량 재요약(비용만 늘고 결과는 같다).
+      - name: Restore AI cache (증분 요약)
+        uses: actions/cache@v4
+        with:
+          path: build/ai_cache.json
+          key: ai-cache-v1-${{ github.run_id }}
+          restore-keys: ai-cache-v1-
 
       - name: AI weekly digest (시크릿 없으면 자동 생략)
         env:
@@ -81,16 +97,22 @@ jobs:
         run: python ai_digest.py || echo "AI 다이제스트 생략(실패 무시)"
 
       - name: Render (hub.html + kb.<hash>.json)
+        env:
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}   # 리포 Variables 에 Pages URL — 없으면 feed.json 이 상대 URL
         run: python build_hub.py --phase render --json knowledge_base.json --out hub.html
 
       - name: Run tests
         run: pip install pytest && python -m pytest tests/ generator/test_parse.py -q
+
+      - name: kb 크기 예산 (경고만, 코어 2배 초과 시 실패)
+        run: KB_BUDGET_CHECK=1 python -m pytest tests/test_budget.py -q
 
       - name: Assemble site
         run: |
           mkdir -p _site
           cp index.html hub.html knowledge_base.json trade.html manifest.webmanifest sw.js _site/
           cp ai_digest.json _site/ 2>/dev/null || true
+          cp feed.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
           cp version.json _site/
           cp -r reports icons _site/
@@ -99,6 +121,12 @@ jobs:
         run: |
           pip install pytest-playwright && python -m playwright install --with-deps chromium
           E2E_SITE_DIR=_site python -m pytest tests/e2e -q
+
+      - name: Job Summary (kb 크기·예산·E2E 타이밍)
+        if: always()
+        run: |
+          cat build/report.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          [ -f build/e2e_timing.json ] && { echo; echo '### E2E 타이밍'; echo '```'; cat build/e2e_timing.json; echo; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
