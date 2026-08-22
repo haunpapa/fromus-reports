@@ -55,6 +55,12 @@ pip install pytest-playwright && python -m playwright install chromium
 E2E_SITE_DIR=. python -m pytest tests/e2e -q
 ```
 
+- `tests/e2e/test_hub_smoke.py` — 부트·탭·검색·딥링크·SW·성능 회귀 기본 스모크.
+- `tests/e2e/test_hub_features.py` — 모바일 하단 탭·검색 시트, 검색 2.0(출처·기간·별칭·최근 검색어),
+  종목 상세 뷰, 홈 "오늘 달라진 것"·AI 데일리, 검증 코호트 토글·테마·분포.
+  아직 데이터에 없는 필드(`whats_new`·`build.aliases`·`verify.report`·`ai_digest.daily` 등)에 기대는
+  단언은 **자동으로 skip 하거나 "없으면 없어야 한다"로 대칭 검증**한다 — 필드가 생기면 그대로 켜진다.
+
 ## knowledge_base.json 스키마 (v2)
 
 `build.schema` 필드로 버전을 표기한다. **키 추가는 하위호환(마이너)**,
@@ -94,3 +100,11 @@ E2E_SITE_DIR=. python -m pytest tests/e2e -q
   **강세 의견의 초과수익 검증**이며 허브 화면에도 그렇게 명시한다.
 - 로컬에서 verify 를 건너뛰려면 `VERIFY_SKIP=1` — `tests/test_phases.py` 가 이 값으로
   네트워크를 격리한다.
+- `vendor/chart.umd.min.js` 는 Chart.js 4.4.1 UMD 빌드를 **직접 커밋한 유일한 서드파티 자산**이다.
+  cdnjs 를 셸에서 걷어내 렌더 블로킹 외부 스크립트를 0으로 만들고 SW 프리캐시(오프라인)까지 덮기 위함이다.
+  갱신할 때는 파일을 통째로 교체하고 `tests/e2e` 를 다시 돌린다. CI 는 `cp -r vendor _site/` 로 배포한다.
+- 딥링크는 두 가지다. `#stocks/<이름>` 은 **종목 목록**을 그 이름으로 걸러 첫 행을 펼치고,
+  `#stock/<이름>`(단수)은 **공유용 종목 상세 뷰**를 연다 — 주가·언급 오버레이, 두 코호트의 콜 검증,
+  채팅 근거, 관계 이웃이 한 화면에 있다. 칩·태그·검색 결과의 `data-stock` 클릭은 모두 상세 뷰로 간다.
+- 모바일(≤940px) 하단 탭은 5개(개요·종목·섹터·전략·더보기)이고 나머지는 **더보기 시트**에 있다.
+  검색창을 누르면 `body.search-open` 전체화면 시트가 열리며, 뒤로가기로 닫힌다.
