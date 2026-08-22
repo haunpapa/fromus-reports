@@ -120,6 +120,18 @@ def _build_verify_safe(data):
         return None
 
 
+def _validate_schema_safe(data):
+    """최소 스키마 검증. 검증기 자체가 터지면 빈 목록 — 검증 때문에 빌드가 멈춰선 안 된다."""
+    import sys
+    try:
+        from hublib.schema import validate
+        return validate(data)
+    except Exception as e:
+        print(f"[WARN] 스키마 검증 생략 -- {e}", file=sys.stderr)
+        data.setdefault("build", {})["schema_error"] = str(e)
+        return []
+
+
 def collect(src=".", files=None, json_out="knowledge_base.json"):
     """리포트 파싱→집계→시세→모멘텀→검색→chat 병합→knowledge_base.json 기록.
     무거운 단계 — parse/aggregate/momentum 를 지연 import 한다."""
@@ -170,6 +182,13 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     }
     data = _merge_chat_kb(data)
     data["verify"] = _build_verify_safe(data)
+
+    problems = _validate_schema_safe(data)
+    if problems:
+        print(f"[WARN] 스키마 문제 {len(problems)}건: " + " | ".join(problems[:10]), file=sys.stderr)
+        data = {**data, "build": {**(data.get("build") or {}), "schema_warnings": problems[:50]}}
+        if any("누락" in p and "[" not in p for p in problems):     # 최상위 키 누락만 빌드 실패
+            sys.exit("knowledge_base 최상위 키 누락 — 빌드 중단")
     with open(json_out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
     print(f"\n→ {json_out} 작성 ({os.path.getsize(json_out)//1024} KB)")

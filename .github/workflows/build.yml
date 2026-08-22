@@ -86,6 +86,9 @@ jobs:
       - name: Run tests
         run: pip install pytest && python -m pytest tests/ generator/test_parse.py -q
 
+      - name: kb 크기 예산 (경고만, 코어 2배 초과 시 실패)
+        run: KB_BUDGET_CHECK=1 python -m pytest tests/test_budget.py -q
+
       - name: Assemble site
         run: |
           mkdir -p _site
@@ -99,6 +102,12 @@ jobs:
         run: |
           pip install pytest-playwright && python -m playwright install --with-deps chromium
           E2E_SITE_DIR=_site python -m pytest tests/e2e -q
+
+      - name: Job Summary (kb 크기·예산·E2E 타이밍)
+        if: always()
+        run: |
+          cat build/report.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          [ -f build/e2e_timing.json ] && { echo; echo '### E2E 타이밍'; echo '```'; cat build/e2e_timing.json; echo; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
