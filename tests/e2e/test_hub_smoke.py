@@ -87,3 +87,13 @@ def test_boot_timing_recorded(page, site_url):
     with open("build/e2e_timing.json", "w", encoding="utf-8") as f:
         json.dump({"dcl_ms": nav, "dom_nodes": dom, "canvases": canvases}, f)
     assert nav < 15000
+
+
+def test_boot_renders_only_home(page, site_url):
+    """부트 직후에는 홈만 그려져 있어야 한다(P3). 다른 탭은 첫 진입 시 렌더."""
+    _boot(page, site_url)
+    assert page.evaluate("document.querySelector('#view-stocks').innerHTML.length") == 0
+    assert page.evaluate("document.querySelectorAll('canvas').length") < 15
+    page.click('#tabs .tab[data-tab="stocks"]')
+    page.wait_for_selector("#stockList .strow", timeout=15000)
+    assert page.evaluate("document.querySelector('#view-stocks').innerHTML.length") > 200

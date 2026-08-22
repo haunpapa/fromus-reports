@@ -1,5 +1,5 @@
 /* ───────── INIT ───────── */
-renderHome();renderSectors();renderStocks();renderAnalytics();renderStrategy();renderGlossary();renderGraph();renderChatView();renderVerify();
+RENDERED.add('home'); renderHome(); syncVerifyTab();
 /* 빌드 시각·데이터 신선도 배지 (조용한 폴백 가시화) */
 (function(){
   const el = document.getElementById('fu-status'); if(!el) return;
@@ -17,3 +17,4 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
 }
 bootV4Enhancements();
 tabFromHash();
+try{ performance.mark('fu:app-ready'); }catch(e){}

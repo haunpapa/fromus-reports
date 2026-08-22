@@ -5,10 +5,11 @@ const PRIMARY_H = ((D.verify&&D.verify.meta&&D.verify.meta.primary)||20);
 const vPct = x => x==null ? '—' : (x>0?'+':'')+x.toFixed(1)+'%p';
 
 function verifyOn(){ return !!(D.verify && D.verify.enabled); }
+function syncVerifyTab(){ $$('.tab[data-tab="verify"]').forEach(b=>{ b.style.display = verifyOn()?'':'none'; }); }
 
 function renderVerify(){
   const host=$('#view-verify'); if(!host) return;
-  $$('.tab[data-tab="verify"]').forEach(b=>{ b.style.display = verifyOn()?'':'none'; });
+  syncVerifyTab();
   if(!verifyOn()){ host.innerHTML=''; return; }
   const V=D.verify, m=V.meta||{}, key='h'+vHorizon, s=(V.summary||{})[key]||{};
   const toggle=(m.horizons||[5,20,60]).map(h=>

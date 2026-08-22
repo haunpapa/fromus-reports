@@ -175,7 +175,20 @@ function relatedChips(name){
   return `<div style="margin:10px 0 4px;font-size:11.5px;color:var(--text-3)">🔗 함께 언급된 종목</div>
     <div>${rel.map(([n,c])=>`<span class="tag" data-stock="${esc(n)}">${esc(n)} <span style="color:var(--text-4)">${c}</span></span>`).join('')}</div>`;
 }
-function drawStockSparks(){$$('.strow-spark').forEach(cv=>{const s=STOCK_BY_NAME[cv.dataset.sparkName]; if(s)drawSpark(cv,weeklyCounts(s.mentions));});}
+/* 스파크라인 — 뷰포트에 들어온 행만 그린다 (208개 canvas 즉시 렌더 방지) */
+const SPARK_IO = ('IntersectionObserver' in window) ? new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(!en.isIntersecting) return;
+    const cv=en.target; SPARK_IO.unobserve(cv);
+    const s=STOCK_BY_NAME[cv.dataset.sparkName]; if(s) drawSpark(cv, weeklyCounts(s.mentions));
+  });
+},{rootMargin:'240px'}) : null;
+function drawStockSparks(){
+  $$('.strow-spark').forEach(cv=>{
+    if(SPARK_IO){ SPARK_IO.observe(cv); return; }
+    const s=STOCK_BY_NAME[cv.dataset.sparkName]; if(s) drawSpark(cv, weeklyCounts(s.mentions));
+  });
+}
 
 /* ── 이벤트 카드 ── */
 function eventCards(){
