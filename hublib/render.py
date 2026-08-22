@@ -198,7 +198,9 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
         with open(tpl, encoding="utf-8") as f:
             shell = f.read()
         shell = inject_app_js(shell, concat_app_js())
-        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+        from hublib.split import slim_reports
+        out_data = {**data, "reports": slim_reports(data.get("reports"))}
+        payload = json.dumps(out_data, ensure_ascii=False, separators=(",", ":"))
         kb_hash = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:10]
         kb_name = f"kb.{kb_hash}.json"
         out_dir = os.path.dirname(os.path.abspath(out)) or "."
