@@ -41,3 +41,45 @@ def test_mobile_search_sheet_opens_and_closes(page, site_url):
     assert page.evaluate("getComputedStyle(document.querySelector('#bnav')).display") == "none"
     page.click("#qClose")
     page.wait_for_function("!document.body.classList.contains('search-open')", timeout=5000)
+
+
+# ───────────────────────── Task 3: 검색 2.0 ─────────────────────────
+
+def test_search_alias_pins_stock_card(page, site_url):
+    _boot(page, site_url)
+    has_alias = page.evaluate(
+        "!!(window.DATA.build && window.DATA.build.aliases && window.DATA.build.aliases['하닉']"
+        " && (window.DATA.stocks||[]).some(s=>s.name==='SK하이닉스'))")
+    if not has_alias:
+        pytest.skip("aliases 없는 빌드이거나 SK하이닉스 미수록")
+    page.fill("#q", "하닉")
+    page.wait_for_selector("#searchPanel.open .sr-pin", timeout=15000)
+    assert "SK하이닉스" in page.inner_text("#searchPanel .sr-pin")
+
+
+def test_search_source_and_period_filters(page, site_url):
+    _boot(page, site_url)
+    page.fill("#q", "반도체")
+    page.wait_for_selector("#searchPanel.open .sr", timeout=15000)
+    has_chat = page.evaluate("(window.DATA.search||[]).some(i=>i.source==='chat')")
+    if has_chat:
+        page.click('#searchPanel .sp-src[data-src="chat"]')
+        # 핀 카드(.sr-pin)의 '종목' 은 제외 — .sr 안의 종류 배지만 본다
+        page.wait_for_function(
+            "[...document.querySelectorAll('#searchPanel .sr .sr-kind')].every(k=>/채팅|목표가/.test(k.textContent))",
+            timeout=5000)
+    page.click('#searchPanel .sp-period[data-period="7"]')
+    page.wait_for_timeout(300)
+    assert page.locator("#searchPanel .sp-period.on").get_attribute("data-period") == "7"
+
+
+def test_recent_queries_shown_on_empty_focus(page, site_url):
+    _boot(page, site_url)
+    page.fill("#q", "반도체")
+    page.wait_for_selector("#searchPanel.open .sr", timeout=15000)
+    page.click("#searchPanel button.sr >> nth=0")     # a.sr(채팅뉴스)은 새 탭을 열므로 button 만
+    page.keyboard.press("Escape")
+    page.fill("#q", "")
+    page.click("#q")
+    page.wait_for_selector("#searchPanel .sp-recent", timeout=5000)
+    assert "반도체" in page.inner_text("#searchPanel .sp-recent")

@@ -608,6 +608,15 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   body.search-open .bnav{display:none;}
   .strow-head{min-height:48px;}                 /* 터치 타깃 */
 }
+/* ── 검색 2.0: 출처·기간 필터 · 종목 핀 · 최근 검색어 ── */
+.sp-head2{margin-top:-4px;}
+.sp-src,.sp-period{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--text-3);cursor:pointer;margin-right:4px;}
+.sp-src.on,.sp-period.on{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
+.sr-pin{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:10px;cursor:pointer;font-size:13px;}
+.sr-pin .sr-go{margin-left:auto;color:var(--gold);font-weight:700;}
+.sp-recent{padding:8px 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.sp-recent-l{font-size:11px;color:var(--text-4);margin-right:4px;}
+a.sr{text-decoration:none;color:inherit;display:block;}
 </style>
 </head>
 <body>
