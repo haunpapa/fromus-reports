@@ -75,7 +75,10 @@ def _merge_chat_kb(data):
         with open(chat_path, encoding="utf-8") as cf:
             chat = json.load(cf)
         data, added = _merge_chat(data, chat)
-        print(f"chat_kb.json merged -- stocks +{added}")
+        from hublib.search import build_chat_search
+        chat_items = build_chat_search(chat)
+        data = {**data, "search": (data.get("search") or []) + chat_items}
+        print(f"chat_kb.json merged -- stocks +{added} · 검색항목 +{len(chat_items)}")
     except ImportError as e:
         print(f"[WARN] merge_hub.py 없음 -- 채팅 병합 생략: {e}", file=sys.stderr)
         data.setdefault("build", {})["chat_merge_error"] = f"import: {e}"
@@ -121,9 +124,10 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     """리포트 파싱→집계→시세→모멘텀→검색→chat 병합→knowledge_base.json 기록.
     무거운 단계 — parse/aggregate/momentum 를 지연 import 한다."""
     import json, sys
-    from hublib.config import _fmt_kst
+    from hublib.config import _fmt_kst, STOCK_ALIASES
     from hublib.parse import discover, parse_report
     from hublib.aggregate import aggregate, build_search
+    from hublib.search import with_hay
     from hublib.momentum import fetch_index_series, enrich_market_momentum
     from hublib.cache import ParseCache
 
@@ -148,7 +152,7 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     if idx_series:
         agg["series"].update(idx_series)
     market_momentum_meta = enrich_market_momentum(agg, agg.get("series", {}))
-    search = build_search(reports, agg)
+    search = with_hay(build_search(reports, agg))
 
     daily = [r for r in reports if r["type"] == "daily"]
     weekly = [r for r in reports if r["type"] == "weekly"]
@@ -159,7 +163,8 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
                   "to": daily[-1]["date"] if daily else (reports[-1]["id"] if reports else ""),
                   "recent_from": agg.get("recent_from", ""), "recent_reports": agg.get("recent_reports", 0),
                   "index_source": "yfinance" if idx_series else "report",
-                  "market_momentum": market_momentum_meta},
+                  "market_momentum": market_momentum_meta,
+                  "aliases": {k.lower(): v for k, v in STOCK_ALIASES.items()}},
         # ai_digest 는 render 단계에서 주입 (ai_digest.py 가 knowledge_base.json 을 읽고 생성)
         "reports": reports, "search": search, "ai_digest": None, **agg,
     }
