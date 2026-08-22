@@ -573,6 +573,12 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 .cg-card .md,.cg-row .md{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-4);margin-right:7px}
 #view-chat .sec-title{scroll-margin-top:112px}  /* topbar ~64 + 점프칩 ~48 */
 @media(max-width:940px){ .cg-jump{top:60px} #view-chat .sec-title{scroll-margin-top:108px} }
+/* ── 새 버전 토스트 ── */
+.fu-toast{position:fixed;left:50%;bottom:calc(74px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:200;
+  background:var(--side-bg);color:var(--side-text);border:1px solid var(--side-line);border-radius:12px;padding:10px 14px;
+  font-size:13px;box-shadow:0 8px 24px var(--shadow);white-space:nowrap;}
+.fu-toast button{margin-left:10px;background:var(--side-gold);color:#181410;border:0;border-radius:8px;padding:5px 10px;font-weight:700;cursor:pointer;font-family:inherit;}
+@media(min-width:941px){.fu-toast{bottom:24px;}}
 </style>
 </head>
 <body>
@@ -701,6 +707,13 @@ window.KB_URL = /*KBURL*/"knowledge_base.json"/*ENDKBURL*/;
 <script>
 /* 데이터 부트스트랩 — 유일하게 즉시 실행되는 스크립트.
    KB(kb.<hash>.json)를 fetch 한 뒤 fu-app 블록들을 순서대로 실행한다. */
+function showUpdateToast(gen){
+  if(document.getElementById('fu-toast')) return;
+  var t = document.createElement('div'); t.id = 'fu-toast'; t.className = 'fu-toast'; t.setAttribute('role', 'status');
+  t.innerHTML = '새 데이터가 준비됐습니다' + (gen ? ' · ' + gen : '') + ' <button type="button">새로고침</button>';
+  t.querySelector('button').onclick = function(){ location.replace(location.pathname + '?nosw=' + Date.now() + location.hash); };
+  document.body.appendChild(t);
+}
 (async function(){
   const boot = document.getElementById('fu-boot');
   try{
@@ -734,6 +747,15 @@ window.KB_URL = /*KBURL*/"knowledge_base.json"/*ENDKBURL*/;
     document.body.appendChild(n);   // 동기 실행 — 원래 순서 보장
   });
   if(boot){ boot.style.opacity = '0'; setTimeout(function(){ boot.remove(); }, 200); }
+  // 새 빌드 감지 (P6) — 셸은 SWR 이라 재방문 첫 화면이 구 셸일 수 있다. version.json 은 ?nosw= 로 SW 를 우회한다.
+  setTimeout(function(){
+    fetch('./version.json?nosw=' + Date.now(), {cache: 'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(v){
+        var cur = (typeof window.KB_URL === 'string') ? window.KB_URL : (window.KB_URL && window.KB_URL.core);
+        if(v && v.core && cur && v.core !== cur) showUpdateToast(v.generated || '');
+      }).catch(function(){});
+  }, 4000);
 })();
 </script>
 </body>

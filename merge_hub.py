@@ -52,6 +52,16 @@ def _co_edges(chat):
             keep.add(pk)
     return [{"a": a, "b": b, "w": strong[(a, b)]} for (a, b) in sorted(keep)]
 
+def _safe_url(u):
+    """허브에 싣는 링크는 http/https 만 — 카톡에서 온 문자열을 그대로 href 에 넣지 않는다."""
+    u = (u or "").strip()
+    return u if u.lower().startswith(("http://", "https://")) else ""
+
+
+def _safe_news(items):
+    return [{**n, "url": _safe_url(n.get("url"))} for n in (items or [])]
+
+
 def _name_in(m, nm, ticker):
     sn = m.get("snippet", "") or ""
     return (nm in sn) or (bool(ticker) and ticker in sn)
@@ -119,7 +129,7 @@ def _chat_block(cs, nm, comap, with_targets=True):
     market = [_augment(m, nm, comap)
               for m in _sort_desc([m for m in ments
                                    if (not _is_opinion(m)) and _name_in(m, nm, ticker)])][:MARKET_KEEP]
-    news = _sort_desc(cs.get("news", []))[:NEWS_KEEP]
+    news = _safe_news(_sort_desc(cs.get("news", []))[:NEWS_KEEP])
     blk = {"count": cs.get("count", 0), "signals": len(ments),
            "stance": stance_summary(ments),
            "opinions": opinions, "market_news": market, "news": news}
@@ -174,7 +184,7 @@ def merge(kb, chat):
     kb["chat"]={"build":chat.get("build",{}),
         "actions":chat.get("actions",[]),"strategy":chat.get("strategy",[]),
         "targets":chat.get("targets",[]),"qna":chat.get("qna",[]),
-        "news":chat.get("news",[]),"readings":chat.get("readings",[]),
+        "news":_safe_news(chat.get("news",[])),"readings":chat.get("readings",[]),
         "glossary":chat.get("glossary",[]),
         "stocks_added":added,"themes":_theme_blocks(kb, chat.get("themes", {})),
         "co_edges": _co_edges(chat)}
