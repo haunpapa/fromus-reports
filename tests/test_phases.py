@@ -39,12 +39,21 @@ def test_collect_then_render(tmp_path):
     assert r2.returncode == 0, r2.stderr
     assert (src / "hub.html").exists()
 
-    kb_files = list(src.glob("kb.*.json"))
-    assert len(kb_files) == 1, f"해시 KB 파일이 정확히 1개여야 함: {kb_files}"
-    data = json.loads(kb_files[0].read_text(encoding="utf-8"))
-    assert data["ai_digest"]["digest"]["title"] == "테스트다이제스트"
-    # 셸에 해시 URL 이 박혔는지
-    assert kb_files[0].name in (src / "hub.html").read_text(encoding="utf-8")
+    core_files = list(src.glob("kb.core.*.json"))
+    assert len(core_files) == 1, f"코어 파일이 정확히 1개여야 함: {core_files}"
+    core = json.loads(core_files[0].read_text(encoding="utf-8"))
+    assert core["ai_digest"]["digest"]["title"] == "테스트다이제스트"
+    assert "search" not in core and "glossary" not in core, "검색·용어는 청크로 빠져야 함"
+    shell = (src / "hub.html").read_text(encoding="utf-8")
+    import re as _re
+    man = json.loads(_re.search(r"/\*KBURL\*/(.*?)/\*ENDKBURL\*/", shell, _re.S).group(1))
+    assert man["core"] == core_files[0].name
+    assert "search" in man, "검색 청크는 리포트만 있어도 만들어져야 함"
+    for name in ("search", "glossary", "chat", "stockchat"):      # 픽스처엔 용어·채팅이 없을 수 있다 → 있는 것만 확인
+        if name in man:
+            assert (src / man[name]).exists(), f"{name} 청크 파일 없음"
+    assert (src / "version.json").exists()
+    assert json.loads((src / "version.json").read_text(encoding="utf-8"))["core"] == man["core"]
     # render 가 knowledge_base.json 에도 다이제스트를 반영했는지
     kb2 = json.loads((src / "kb_raw.json").read_text(encoding="utf-8"))
     assert kb2["ai_digest"]["digest"]["title"] == "테스트다이제스트"
@@ -60,7 +69,7 @@ def test_render_reuses_existing_kb_without_recollect(tmp_path):
         r = _run(["--phase", "render", "--json", "kb_raw.json", "--out", "hub.html",
                   "--template", "hub_template.html"], cwd=str(src))
         assert r.returncode == 0, r.stderr
-    assert len(list(src.glob("kb.*.json"))) == 1
+    assert len(list(src.glob("kb.core.*.json"))) == 1
 
 
 def test_hub_template_has_kb_retry_fallback():
@@ -71,5 +80,5 @@ def test_hub_template_has_kb_retry_fallback():
     sw = (root / "sw.js").read_text(encoding="utf-8")
     assert "kbRetried" in tpl and "?nosw=" in tpl, "부트 재시도는 SW 탈출구(?nosw=)를 써야 함"
     assert "searchParams.has('nosw')" in sw, "sw.js 에 ?nosw= 패스스루 없음"
-    assert "fu-hub-v3" in sw, "SW 캐시 버전 v3 아님"
+    assert "fu-hub-v4" in sw, "SW 캐시 버전 v4 아님"
     assert "cache: 'reload'" in sw, "install 프리캐시가 HTTP 캐시를 우회해야 함(stale 셸 고착 방지)"

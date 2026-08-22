@@ -13,7 +13,7 @@ reports/daily·weekly/*.html (수동 작성·커밋)
        ├─ build_index.py                → index.html (아카이브 목록)
        ├─ build_hub.py --phase collect  → knowledge_base.json (파싱·집계·시세·모멘텀·chat 병합·콜 검증)
        ├─ ai_digest.py                  → ai_digest.json (AI 위클리 요약, 시크릿 있을 때만)
-       └─ build_hub.py --phase render   → hub.html(셸) + kb.<hash>.json(데이터)
+       └─ build_hub.py --phase render   → hub.html(셸: hub/*.js concat) + kb.core.<hash>.json + kb.{chat,search,glossary,stockchat}.<hash>.json + version.json
   └─ GitHub Pages (Actions artifact 배포 — 산출물은 커밋하지 않음)
 ```
 
@@ -28,6 +28,8 @@ reports/daily·weekly/*.html (수동 작성·커밋)
 | `hublib/render.py` | `collect`/`render` 2단계 빌드 + index 허브 버튼 주입 |
 | `hublib/cache.py` | 리포트 파싱 증분 캐시 (파일 sha1 기준) |
 | `hublib/verify.py` | 채팅 콜 추출·판정·집계 + 가격 수집/증분 캐시 |
+| `hublib/split.py` | render 출력 분할·슬림화 (코어/청크, 순수 함수) |
+| `hub/*.js` | 허브 셸 앱 코드 — 파일명 숫자 순서로 concat 되어 `hub_template.html` 의 `/*APPJS*/` 마커에 주입된다 |
 
 ## 로컬 빌드
 
@@ -47,11 +49,18 @@ pip install pytest
 python -m pytest tests/ generator/test_parse.py -q
 ```
 
+```bash
+# 셸 JS 스모크 (렌더 후)
+pip install pytest-playwright && python -m playwright install chromium
+E2E_SITE_DIR=. python -m pytest tests/e2e -q
+```
+
 ## knowledge_base.json 스키마 (v2)
 
 `build.schema` 필드로 버전을 표기한다. **키 추가는 하위호환(마이너)**,
 **키 의미 변경·삭제는 `schema` 증가**로 관리한다. hub.html 은 이 데이터를
-`kb.<hash>.json` 으로 fetch 해 렌더한다.
+`kb.core.<hash>.json`(첫 화면) + 청크(`kb.chat/search/glossary/stockchat.<hash>.json`, 필요 시점 fetch) 로 받아
+렌더한다. 분할 규칙은 `docs/superpowers/specs/2026-08-23-hub-improvement-design.md` §3.3 C2.
 
 최상위 키:
 

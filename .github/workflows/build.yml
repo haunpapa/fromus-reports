@@ -18,6 +18,8 @@ on:
       - 'hub_template.html'
       - 'sw.js'
       - 'hublib/**'
+      - 'hub/**'
+      - 'tests/e2e/**'
   schedule:
     - cron: '30 22 * * *'   # 매일 07:30 KST — 시세·trade·다이제스트 자동 갱신
   workflow_dispatch:
@@ -90,7 +92,13 @@ jobs:
           cp index.html hub.html knowledge_base.json trade.html manifest.webmanifest sw.js _site/
           cp ai_digest.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
+          cp version.json _site/
           cp -r reports icons _site/
+
+      - name: E2E 스모크 (셸 JS — _site 기준)
+        run: |
+          pip install pytest-playwright && python -m playwright install --with-deps chromium
+          E2E_SITE_DIR=_site python -m pytest tests/e2e -q
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

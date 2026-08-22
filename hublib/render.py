@@ -18,6 +18,30 @@ HUB_BTN_CSS = ("\n.hub-btn{display:inline-block;margin-top:22px;padding:11px 24p
 
 HUB_BTN_HTML = '\n  <a href="hub.html" class="hub-btn">📊 지식 허브 — 검색·섹터·종목·전략 →</a>'
 
+APP_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "hub")
+
+
+def concat_app_js(app_dir=APP_DIR):
+    """hub/*.js 를 파일명 사전순으로 이어붙인다 — 파일명 숫자가 곧 실행 순서."""
+    import glob
+    files = sorted(glob.glob(os.path.join(app_dir, "*.js")))
+    if not files:
+        raise FileNotFoundError(f"앱 모듈 없음: {app_dir}/*.js")
+    parts = []
+    for p in files:
+        with open(p, encoding="utf-8") as f:
+            parts.append(f"/* ==== {os.path.basename(p)} ==== */\n" + f.read())
+    return "\n".join(parts)
+
+
+def inject_app_js(shell, app_js):
+    """/*APPJS*/ … /*ENDAPPJS*/ 사이에 앱 코드를 넣는다. 치환 함수를 써서 JS 의 백슬래시·$1 이 re 에 해석되지 않게 한다."""
+    if "/*APPJS*/" not in shell or "/*ENDAPPJS*/" not in shell:
+        raise ValueError("템플릿에 /*APPJS*/ … /*ENDAPPJS*/ 마커가 없습니다.")
+    return re.sub(r"/\*APPJS\*/.*?/\*ENDAPPJS\*/",
+                  lambda _m: "/*APPJS*/\n" + app_js + "\n/*ENDAPPJS*/", shell, count=1, flags=re.S)
+
+
 def inject_hub_button(index_path):
     if not os.path.exists(index_path):
         print(f"ℹ️ index.html 없음({index_path}) — 허브 버튼 주입 생략")
@@ -150,10 +174,31 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     return data
 
 
+def _emit_json(out_dir, name, obj):
+    """kb.<name>.<hash>.json 기록 → (파일명, 바이트 수). 해시는 청크 자신의 내용 — 안 바뀐 청크는 파일명이 유지된다."""
+    import hashlib, json
+    payload = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+    h = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:10]
+    fname = f"kb.{name}.{h}.json"
+    with open(os.path.join(out_dir, fname), "w", encoding="utf-8") as f:
+        f.write(payload)
+    return fname, len(payload.encode("utf-8"))
+
+
+def _write_size_report(sizes, path="build/report.md"):
+    """섹션별 바이트를 Markdown 표로 — CI Job Summary 에 붙인다 (Q1)."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    rows = "\n".join(f"| {k} | {v/1e6:.2f} MB |" for k, v in sizes.items())
+    total = sum(sizes.values())
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(f"### kb 출력 크기\n\n| 파일 | raw |\n|---|---|\n{rows}\n| **합계** | **{total/1e6:.2f} MB** |\n")
+
+
 def render(json_in="knowledge_base.json", out="hub.html", template=None, index_path=None):
-    """knowledge_base.json(+ai_digest.json) → kb.<hash>.json + hub 셸.
+    """knowledge_base.json(+ai_digest.json) → kb.core.<h>.json + 청크 + hub 셸 + version.json.
     파싱·네트워크 없음 — render 단계만 실행 시 bs4/yfinance 없이 동작한다."""
-    import glob, hashlib, json, sys
+    import glob, json, sys
+    from hublib.split import split_payload
     with open(json_in, encoding="utf-8") as f:
         data = json.load(f)
 
@@ -170,31 +215,37 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
 
     here = os.path.dirname(os.path.abspath(__file__))
     tpl = template or os.path.join(os.path.dirname(here), "hub_template.html")
-    if os.path.exists(tpl):
+    out_dir = os.path.dirname(os.path.abspath(out)) or "."
+    for old in glob.glob(os.path.join(out_dir, "kb.*.json")):   # 구 해시(구 형식 kb.<h>.json 포함) 정리
+        os.remove(old)
+
+    core, chunks = split_payload(data)
+    manifest, sizes = {}, {}
+    manifest["core"], sizes["core"] = _emit_json(out_dir, "core", core)
+    for name, obj in chunks.items():
+        if obj:                                                   # 빈 청크(chat 없음 등)는 파일·매니페스트에서 생략
+            manifest[name], sizes[name] = _emit_json(out_dir, name, obj)
+
+    with open(os.path.join(out_dir, "version.json"), "w", encoding="utf-8") as f:
+        json.dump({"core": manifest["core"], "generated": (data.get("build") or {}).get("generated", "")},
+                  f, ensure_ascii=False)
+
+    _write_size_report(sizes)
+    if os.path.exists(tpl):                                        # 템플릿이 없어도 kb.*·version.json 은 이미 만들어졌다
         with open(tpl, encoding="utf-8") as f:
             shell = f.read()
-        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-        kb_hash = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:10]
-        kb_name = f"kb.{kb_hash}.json"
-        out_dir = os.path.dirname(os.path.abspath(out)) or "."
-        # 이전 해시 파일 정리 후 새 파일 기록 (셸 캐시 무효화를 위해 파일명에 해시)
-        for old in glob.glob(os.path.join(out_dir, "kb.*.json")):
-            os.remove(old)
-        with open(os.path.join(out_dir, kb_name), "w", encoding="utf-8") as f:
-            f.write(payload)
-        # /*KBURL*/ ... /*ENDKBURL*/ 사이를 새 해시 파일명으로 치환
-        if "/*KBURL*/" in shell and "/*ENDKBURL*/" in shell:
-            shell = re.sub(r"/\*KBURL\*/.*?/\*ENDKBURL\*/",
-                           f'/*KBURL*/"{kb_name}"/*ENDKBURL*/', shell, count=1, flags=re.S)
-        else:
+        shell = inject_app_js(shell, concat_app_js())
+        if "/*KBURL*/" not in shell or "/*ENDKBURL*/" not in shell:
             sys.exit("템플릿에 /*KBURL*/ … /*ENDKBURL*/ 마커가 없습니다.")
+        shell = re.sub(r"/\*KBURL\*/.*?/\*ENDKBURL\*/",
+                       lambda _m: "/*KBURL*/" + json.dumps(manifest, ensure_ascii=False) + "/*ENDKBURL*/",
+                       shell, count=1, flags=re.S)
         with open(out, "w", encoding="utf-8") as f:
             f.write(shell)
-        print(f"→ {out} 셸 빌드 완료 ({os.path.getsize(out)//1024} KB) "
-              f"+ {kb_name} ({len(payload)//1024//1024}MB)")
+        print(f"→ {out} 셸 빌드 완료 ({os.path.getsize(out)//1024} KB) + " +
+              " · ".join(f"{n} {b/1e6:.2f}MB" for n, b in sizes.items()))
     else:
-        print(f"⚠ 템플릿 없음({tpl}) — JSON만 생성했습니다.")
+        print(f"⚠ 템플릿 없음({tpl}) — kb.*.json 만 생성했습니다.")
 
-    # 아카이브 index.html 에 허브 버튼 주입
     idx = index_path or os.path.join(os.path.dirname(out) or ".", "index.html")
     inject_hub_button(idx)
