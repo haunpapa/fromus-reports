@@ -18,6 +18,30 @@ HUB_BTN_CSS = ("\n.hub-btn{display:inline-block;margin-top:22px;padding:11px 24p
 
 HUB_BTN_HTML = '\n  <a href="hub.html" class="hub-btn">📊 지식 허브 — 검색·섹터·종목·전략 →</a>'
 
+APP_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "hub")
+
+
+def concat_app_js(app_dir=APP_DIR):
+    """hub/*.js 를 파일명 사전순으로 이어붙인다 — 파일명 숫자가 곧 실행 순서."""
+    import glob
+    files = sorted(glob.glob(os.path.join(app_dir, "*.js")))
+    if not files:
+        raise FileNotFoundError(f"앱 모듈 없음: {app_dir}/*.js")
+    parts = []
+    for p in files:
+        with open(p, encoding="utf-8") as f:
+            parts.append(f"/* ==== {os.path.basename(p)} ==== */\n" + f.read())
+    return "\n".join(parts)
+
+
+def inject_app_js(shell, app_js):
+    """/*APPJS*/ … /*ENDAPPJS*/ 사이에 앱 코드를 넣는다. 치환 함수를 써서 JS 의 백슬래시·$1 이 re 에 해석되지 않게 한다."""
+    if "/*APPJS*/" not in shell or "/*ENDAPPJS*/" not in shell:
+        raise ValueError("템플릿에 /*APPJS*/ … /*ENDAPPJS*/ 마커가 없습니다.")
+    return re.sub(r"/\*APPJS\*/.*?/\*ENDAPPJS\*/",
+                  lambda _m: "/*APPJS*/\n" + app_js + "\n/*ENDAPPJS*/", shell, count=1, flags=re.S)
+
+
 def inject_hub_button(index_path):
     if not os.path.exists(index_path):
         print(f"ℹ️ index.html 없음({index_path}) — 허브 버튼 주입 생략")
@@ -173,6 +197,7 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
     if os.path.exists(tpl):
         with open(tpl, encoding="utf-8") as f:
             shell = f.read()
+        shell = inject_app_js(shell, concat_app_js())
         payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
         kb_hash = hashlib.sha1(payload.encode("utf-8")).hexdigest()[:10]
         kb_name = f"kb.{kb_hash}.json"
@@ -185,7 +210,7 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
         # /*KBURL*/ ... /*ENDKBURL*/ 사이를 새 해시 파일명으로 치환
         if "/*KBURL*/" in shell and "/*ENDKBURL*/" in shell:
             shell = re.sub(r"/\*KBURL\*/.*?/\*ENDKBURL\*/",
-                           f'/*KBURL*/"{kb_name}"/*ENDKBURL*/', shell, count=1, flags=re.S)
+                           lambda _m: f'/*KBURL*/"{kb_name}"/*ENDKBURL*/', shell, count=1, flags=re.S)
         else:
             sys.exit("템플릿에 /*KBURL*/ … /*ENDKBURL*/ 마커가 없습니다.")
         with open(out, "w", encoding="utf-8") as f:
