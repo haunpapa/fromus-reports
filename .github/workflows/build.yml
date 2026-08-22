@@ -83,6 +83,14 @@ jobs:
       - name: Collect (파싱·집계·시세 — 1회만)
         run: python build_hub.py --phase collect --src . --json knowledge_base.json
 
+      # 같은 입력은 다시 묻지 않는다 — 캐시가 없으면 그날 전량 재요약(비용만 늘고 결과는 같다).
+      - name: Restore AI cache (증분 요약)
+        uses: actions/cache@v4
+        with:
+          path: build/ai_cache.json
+          key: ai-cache-v1-${{ github.run_id }}
+          restore-keys: ai-cache-v1-
+
       - name: AI weekly digest (시크릿 없으면 자동 생략)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

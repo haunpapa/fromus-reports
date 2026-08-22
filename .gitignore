@@ -7,6 +7,7 @@ build/_probe_*
 build/parse_cache.json
 build/price_cache.json
 build/kb_summary.json
+build/ai_cache.json
 hub_preview.html
 
 # CI 생성물 (Actions artifact로 배포 — 커밋 금지). trade.html 은 폴백 스냅샷이라 추적 유지.

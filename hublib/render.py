@@ -225,6 +225,20 @@ def collect(src=".", files=None, json_out="knowledge_base.json"):
     return data
 
 
+def _apply_news_flags(data, flags):
+    """neutral 로 분류된 채팅 뉴스에 neutral:true 를 붙인 새 data (C6)."""
+    def mark(items):
+        return [({**n, "neutral": True} if flags.get(n.get("url")) == "neutral" else n) for n in (items or [])]
+
+    chat = data.get("chat")
+    stocks = [({**s, "chat": {**s["chat"], "news": mark(s["chat"].get("news"))}} if s.get("chat") else s)
+              for s in (data.get("stocks") or [])]
+    out = {**data, "stocks": stocks}
+    if chat:
+        out["chat"] = {**chat, "news": mark(chat.get("news"))}
+    return out
+
+
 def _emit_json(out_dir, name, obj):
     """kb.<name>.<hash>.json 기록 → (파일명, 바이트 수). 해시는 청크 자신의 내용 — 안 바뀐 청크는 파일명이 유지된다."""
     import hashlib, json
@@ -261,6 +275,9 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
             print("ℹ️ ai_digest.json 반영")
             with open(json_in, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=1)
+            flags = (data["ai_digest"] or {}).get("news_flags") or {}
+            if flags:
+                data = _apply_news_flags(data, flags)
     except Exception as e:
         print(f"ℹ️ ai_digest.json 읽기 실패 — 무시 ({e})")
 
