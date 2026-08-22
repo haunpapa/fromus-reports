@@ -1,0 +1,89 @@
+# -*- coding: utf-8 -*-
+"""허브 셸 스모크 — 부트·탭·검색·딥링크·SW. 실행: E2E_SITE_DIR=. python -m pytest tests/e2e -q"""
+import json
+import os
+
+import pytest
+
+pytest.importorskip("playwright")   # 플러그인 없으면 모듈 전체 skip
+
+IGNORED_CONSOLE = ("fonts.googleapis", "fonts.gstatic", "cdnjs.cloudflare")   # 외부 리소스 차단 환경 허용
+
+
+def _boot(page, site_url, frag=""):
+    """hub.html 을 열고 부트 오버레이가 사라질 때까지 기다린다. 콘솔 에러 목록을 돌려준다."""
+    errors = []
+    page.on("console", lambda m: errors.append(m.text) if m.type == "error"
+            and not any(k in m.text for k in IGNORED_CONSOLE) else None)
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(site_url + "hub.html" + frag)
+    page.wait_for_selector("#fu-boot", state="detached", timeout=30000)
+    return errors
+
+
+def test_boot_renders_home_without_errors(page, site_url):
+    errors = _boot(page, site_url)
+    assert page.locator("#view-home.active").count() == 1
+    assert page.locator("#view-home .briefing").count() == 1
+    assert errors == [], errors
+
+
+@pytest.mark.parametrize("tab", ["analytics", "sectors", "stocks", "strategy", "glossary", "graph", "chat"])
+def test_tab_renders_via_hash(page, site_url, tab):
+    errors = _boot(page, site_url, "#" + tab)
+    view = page.locator(f"#view-{tab}")
+    page.wait_for_function(
+        f"document.querySelector('#view-{tab}') && document.querySelector('#view-{tab}').innerHTML.length > 200",
+        timeout=15000)
+    assert "active" in (view.get_attribute("class") or "")
+    assert errors == [], errors
+
+
+def test_verify_tab_when_enabled(page, site_url):
+    _boot(page, site_url)
+    enabled = page.evaluate("!!(window.DATA && window.DATA.verify && window.DATA.verify.enabled)")
+    if not enabled:
+        pytest.skip("verify 비활성 빌드")
+    page.goto(site_url + "hub.html#verify")
+    page.wait_for_selector("#view-verify .v-score", timeout=15000)
+
+
+def test_global_search_returns_results(page, site_url):
+    errors = _boot(page, site_url)
+    page.fill("#q", "반도체")
+    page.wait_for_selector("#searchPanel.open .sr", timeout=15000)
+    assert page.locator("#searchPanel .sr").count() > 0
+    assert errors == [], errors
+
+
+def test_stock_deep_link_opens_detail(page, site_url):
+    _boot(page, site_url)
+    first = page.evaluate("(window.DATA.stocks||[])[0] && window.DATA.stocks[0].name")
+    assert first, "종목 데이터 없음"
+    page.goto(site_url + "hub.html#stocks/" + first)
+    page.wait_for_selector("#stockList .strow-detail.open", timeout=15000)
+
+
+def test_no_javascript_hrefs(page, site_url):
+    _boot(page, site_url, "#chat")
+    page.wait_for_timeout(500)
+    bad = page.evaluate("[...document.querySelectorAll('a[href]')].filter(a=>/^javascript:/i.test(a.getAttribute('href'))).length")
+    assert bad == 0
+
+
+def test_service_worker_registers(page, site_url):
+    _boot(page, site_url)
+    ok = page.evaluate("navigator.serviceWorker.ready.then(r=>!!r.active)")
+    assert ok
+
+
+def test_boot_timing_recorded(page, site_url):
+    """성능 회귀 관찰용 — 부트 완료까지 시간을 build/e2e_timing.json 에 남긴다. 단언은 느슨하게."""
+    _boot(page, site_url)
+    nav = page.evaluate("performance.getEntriesByType('navigation')[0].domContentLoadedEventEnd")
+    dom = page.evaluate("document.getElementsByTagName('*').length")
+    canvases = page.evaluate("document.querySelectorAll('canvas').length")
+    os.makedirs("build", exist_ok=True)
+    with open("build/e2e_timing.json", "w", encoding="utf-8") as f:
+        json.dump({"dcl_ms": nav, "dom_nodes": dom, "canvases": canvases}, f)
+    assert nav < 15000

@@ -92,6 +92,11 @@ jobs:
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
           cp -r reports icons _site/
 
+      - name: E2E 스모크 (셸 JS — _site 기준)
+        run: |
+          pip install pytest-playwright && python -m playwright install --with-deps chromium
+          E2E_SITE_DIR=_site python -m pytest tests/e2e -q
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
