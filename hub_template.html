@@ -18,8 +18,11 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#181410">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Noto+Serif+KR:wght@600;700;900&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 실제로 쓰이는 웨이트만 요청한다 — Sans 300 · Serif 900 은 어디에도 없어 제거 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=Noto+Serif+KR:wght@600;700&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script defer src="./vendor/chart.umd.min.js" id="chartjs"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    From Us Knowledge Hub — 'Ink & Gold' Design System v5
@@ -723,6 +726,11 @@ function showUpdateToast(gen){
     const r = await fetch(coreUrl);
     if(!r.ok) throw new Error('HTTP ' + r.status);
     window.DATA = await r.json();
+    await new Promise(function(res){           // defer 스크립트가 아직이면 load/error 까지(최대 3초) 대기
+      if(window.Chart) return res();
+      var s=document.getElementById('chartjs'); if(!s) return res();
+      s.addEventListener('load',res); s.addEventListener('error',res); setTimeout(res,3000);
+    });
   }catch(e){
     console.error('KB 로딩 실패:', e);
     // 배포 직후엔 캐시된 구 셸이 사라진 kb.<구해시>를 가리켜 404 — 캐시버스터로 1회 자동 재로드

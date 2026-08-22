@@ -26,6 +26,11 @@ def test_boot_renders_home_without_errors(page, site_url):
     assert page.locator("#view-home.active").count() == 1
     assert page.locator("#view-home .briefing").count() == 1
     assert errors == [], errors
+    # s.src 는 해석된 절대 URL 이라 자기 호스트도 https? 로 시작한다 → origin 으로 판별한다
+    ext = page.evaluate(
+        "[...document.scripts].filter(s=>s.src && new URL(s.src, location.href).origin !== location.origin).length")
+    assert ext == 0, "외부 호스트 스크립트가 남아 있음"
+    assert page.evaluate("typeof window.Chart") == "function"
 
 
 @pytest.mark.parametrize("tab", ["analytics", "sectors", "stocks", "strategy", "glossary", "graph", "chat"])
