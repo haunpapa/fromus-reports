@@ -107,10 +107,14 @@ def _build_verify_safe(data):
         from hublib.verify import build_verify
         with open("chat_kb.json", encoding="utf-8") as f:
             chat = json.load(f)
-        out = build_verify(chat_kb=chat)
+        out = build_verify(chat_kb=chat, report_stocks=data.get("stocks"))
         if out and out.get("enabled"):
             m = out["meta"]
             print(f"검증 레이어 -- {m['calls']}콜 / {m['stocks']}종목")
+            rep = out.get("report") or {}
+            if rep.get("enabled"):
+                print(f"  리포트 코호트 -- {rep['meta']['calls']}콜 / {rep['meta']['stocks']}종목 · "
+                      f"테마 {len(out.get('themes') or [])}")
         elif out:
             print(f"ℹ️ 검증 레이어 비활성 -- {out.get('reason')}")
         return out

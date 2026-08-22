@@ -78,6 +78,60 @@ def extract_calls(chat_kb):
 HORIZONS = (5, 20, 60)
 PRIMARY_HORIZON = 20
 
+# ── 리포트 수급 코호트 ───────────────────────────────────────────
+REPORT_COHORT_MAX_STOCKS = 120      # 언급 많은 순으로 가격 수집 상한 — CI 시간 보호
+
+
+def _bench_for_market(market):
+    return "KOSDAQ" if "KOSDAQ" in str(market or "").upper() else "KOSPI"
+
+
+def extract_report_calls(stocks, ticker_map, max_stocks=REPORT_COHORT_MAX_STOCKS):
+    """리포트 종목 집계(knowledge_base.stocks) → 수급 포착 언급을 강세 콜로. 네트워크 없음.
+
+    티커는 ticker_map[name] = {"code","market"} (momentum._build_ticker_map). 없으면 no_ticker 로 제외.
+    """
+    ranked = sorted((s for s in (stocks or []) if any(m.get("source") == "수급" for m in s.get("mentions") or [])),
+                    key=lambda s: (-(s.get("count") or 0), s.get("name") or ""))[:max_stocks]
+    raw, no_ticker = [], 0
+    for s in ranked:
+        meta = (ticker_map or {}).get(s.get("name"))
+        sup = [m for m in s.get("mentions") or [] if m.get("source") == "수급"]
+        if not meta or not meta.get("code"):
+            no_ticker += len(sup)
+            continue
+        for m in sup:
+            raw.append({"stock": s["name"], "market": "KR", "ticker": meta["code"], "date": m.get("date") or "",
+                        "stance": "bullish", "type": "supply", "bench_label": _bench_for_market(meta.get("market")),
+                        "source": {"sharer": "리포트",
+                                   "snippet": " · ".join(filter(None, [m.get("label"), m.get("annotation")]))[:SNIPPET_MAX],
+                                   "id": m.get("id") or ""}})
+    merged = {}
+    for c in sorted(raw, key=lambda x: (x["date"], x["stock"])):
+        key = (c["stock"], c["date"])
+        if key in merged:
+            merged[key]["sources"].append(c["source"])
+            continue
+        merged[key] = {**{k: v for k, v in c.items() if k != "source"},
+                       "conflict": False, "sources": [c["source"]]}
+    calls = sorted(merged.values(), key=lambda c: (c["date"], c["stock"]))
+    stats = {"population": len(raw) + no_ticker, "no_ticker": no_ticker,
+             "stocks": len({c["stock"] for c in calls}), "merged_from": len(raw),
+             "duplicate": len(raw) - len(calls)}
+    return calls, stats
+
+
+def downsample_series(points, step=5, max_points=80):
+    """[(date, close)] → [[date, close]] 거래일 step 간격 + 마지막 점. 종목 상세 주가 오버레이용(코어 크기 보호)."""
+    if not points:
+        return []
+    picked = list(points[::max(1, step)])
+    if picked[-1] != points[-1]:
+        picked.append(points[-1])
+    while len(picked) > max_points:
+        picked = picked[::2] if picked[-1] == points[-1] else picked[::2] + [points[-1]]
+    return [[d, v] for d, v in picked]
+
 
 def _entry_index(series, mention_date):
     """발화일보다 뒤인 첫 거래일 인덱스. 장 마감 후 발화의 look-ahead 를 막는다."""
@@ -207,6 +261,24 @@ def aggregate_calls(judged_calls, horizons=HORIZONS):
     stocks.sort(key=lambda s: (s["low_sample"], -s["calls"], s["name"]))
 
     return {"summary": summary, "stocks": stocks}
+
+
+def aggregate_themes(judged_calls, stock_themes, horizons=HORIZONS):
+    """콜 → 테마별 통계. stock_themes: {종목명: [테마,...]}. 충돌 콜 제외. 콜 수 내림차순."""
+    by_theme = {}
+    for c in judged_calls:
+        if c.get("conflict"):
+            continue
+        for th in stock_themes.get(c["stock"]) or []:
+            by_theme.setdefault(th, []).append(c)
+    out = []
+    for th, cs in by_theme.items():
+        row = {"theme": th, "cohort": "report", "calls": len(cs)}
+        for h in horizons:
+            key = f"h{h}"
+            row[key] = _roll([c[key] for c in cs if isinstance(c.get(key), dict)])
+        out.append(row)
+    return sorted(out, key=lambda r: (-r["calls"], r["theme"]))
 
 
 CACHE_VERSION = 1          # 수집·저장 형식이 바뀌면 올린다 (전량 무효화)
@@ -371,12 +443,46 @@ def _bench_label(call, market_of):
     return "US" if call["market"] == "US" else market_of(call["ticker"])
 
 
-def build_verify(chat_kb=None, cache_path="build/price_cache.json",
-                 loaders=None, market_of=None, horizons=HORIZONS):
+def _judge_all(calls, prices, benches, horizons):
+    out = []
+    for c in calls:
+        series = prices.get(f"{c['market']}:{c['ticker']}") or []
+        bench = benches.get(c["bench_label"]) or []
+        out.append({**c, **judge_call(c, series, bench, horizons=horizons)})
+    return out
+
+
+def _with_series(stock_rows, prices):
+    return [{**row, "series": downsample_series(prices.get(f"{row['market']}:{row['ticker']}") or [])}
+            for row in stock_rows]
+
+
+def _report_cohort(rep_calls, rep_stats, report_stocks, prices, benches, horizons, generated):
+    """리포트 수급 코호트 블록(verify.report) + 테마 집계(verify.themes)."""
+    rj = _judge_all(rep_calls, prices, benches, horizons)
+    ragg = aggregate_calls(rj, horizons=horizons)
+    themes = {s["name"]: list(s.get("themes") or []) for s in report_stocks}
+    block = {
+        "enabled": True,
+        "meta": {"cohort": "report", "calls": len(rj), "stocks": len(ragg["stocks"]),
+                 "population": rep_stats["population"], "horizons": list(horizons),
+                 "primary": PRIMARY_HORIZON, "entry": "next_trading_close", "unit": "trading_days",
+                 "excluded": {"no_ticker": rep_stats["no_ticker"], "duplicate": rep_stats["duplicate"]},
+                 "generated": generated},
+        "summary": ragg["summary"],
+        "stocks": _with_series(ragg["stocks"], prices),
+        "calls": rj,
+    }
+    return block, aggregate_themes(rj, themes, horizons=horizons)
+
+
+def build_verify(chat_kb=None, cache_path="build/price_cache.json", loaders=None, market_of=None,
+                 horizons=HORIZONS, report_stocks=None, ticker_map=None):
     """검증 레이어 전체를 조립한다. chat 데이터가 없으면 None.
 
-    예상 못 한 예외는 {'enabled': False, 'reason': ...} 로 바꿔 반환한다 —
-    검증 레이어 때문에 허브 빌드가 실패해선 안 된다.
+    report_stocks 가 주어지면 리포트 수급 코호트(verify.report)·테마 집계(verify.themes)도 만든다.
+    두 코호트는 가격 캐시·벤치마크만 공유하고 통계는 합치지 않는다.
+    예상 못 한 예외는 {'enabled': False, 'reason': ...} — 검증 때문에 허브 빌드가 실패해선 안 된다.
     """
     if not chat_kb:
         return None
@@ -390,22 +496,25 @@ def build_verify(chat_kb=None, cache_path="build/price_cache.json",
         for c in calls:
             c["bench_label"] = _bench_label(c, market_of)
 
+        rep_calls, rep_stats = [], {}
+        if report_stocks:
+            if ticker_map is None:
+                from hublib.momentum import _build_ticker_map
+                ticker_map = _build_ticker_map()
+            rep_calls, rep_stats = extract_report_calls(report_stocks, ticker_map)
+
         cache = PriceCache(cache_path)
-        first = min(c["date"] for c in calls)
-        prices = fetch_prices(calls, cache, loaders=loaders)
-        benches = fetch_benchmarks([c["bench_label"] for c in calls], first, cache,
-                                   loaders=loaders)
+        all_calls = calls + rep_calls
+        first = min(c["date"] for c in all_calls)
+        prices = fetch_prices(all_calls, cache, loaders=loaders)
+        benches = fetch_benchmarks([c["bench_label"] for c in all_calls], first, cache, loaders=loaders)
         cache.save()
 
-        judged = []
-        for c in calls:
-            series = prices.get(f"{c['market']}:{c['ticker']}") or []
-            bench = benches.get(c["bench_label"]) or []
-            judged.append({**c, **judge_call(c, series, bench, horizons=horizons)})
-
+        judged = _judge_all(calls, prices, benches, horizons)
         agg = aggregate_calls(judged, horizons=horizons)
         scored = [c for c in judged if not c["conflict"]]
-        return {
+        generated = _fmt_kst()
+        out = {
             "enabled": True,
             "meta": {
                 "cohort": "core", "calls": len(scored), "merged_from": stats["core"],
@@ -414,12 +523,19 @@ def build_verify(chat_kb=None, cache_path="build/price_cache.json",
                 "entry": "next_trading_close", "unit": "trading_days",
                 "excluded": {k: stats[k] for k in
                              ("bot", "asset", "bot_and_asset", "duplicate", "conflict")},
-                "generated": _fmt_kst(),
+                "generated": generated,
             },
             "summary": agg["summary"],
-            "stocks": agg["stocks"],
+            "stocks": _with_series(agg["stocks"], prices),
             "calls": judged,
         }
+        if rep_calls:
+            out["report"], out["themes"] = _report_cohort(
+                rep_calls, rep_stats, report_stocks, prices, benches, horizons, generated)
+        elif report_stocks:
+            out["report"] = {"enabled": False, "reason": "no supply mentions with ticker",
+                             "meta": {"cohort": "report", "excluded": rep_stats}}
+        return out
     except Exception as e:
         import traceback
         traceback.print_exc()

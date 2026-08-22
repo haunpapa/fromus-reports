@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """프롬어스 허브 빌더 — 지수 시계열·시장 모멘텀(yfinance/KRX)."""
-import datetime, os, signal, subprocess, sys
+import datetime, functools, os, signal, subprocess, sys
 from hublib.config import _fmt_kst, _today_kst
 
 
@@ -118,6 +118,7 @@ def _load_krx_listing():
         print(f"ℹ️ KRX 종목 목록 조회 실패 — 시장 모멘텀 생략 ({repr(e)[:120]})")
         return []
 
+@functools.lru_cache(maxsize=1)      # 한 빌드에서 KRX 목록은 한 번만 — momentum 과 verify 가 공유한다
 def _build_ticker_map():
     rows = _load_krx_listing()
     name_map = {}
