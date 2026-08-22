@@ -50,3 +50,23 @@ $('#clr').addEventListener('click',()=>{$('#q').value='';searchFilter='all';runS
 $('#searchPanel').addEventListener('click',e=>{const f=e.target.closest('.sp-filter');if(f){searchFilter=f.dataset.f;runSearch();}});
 document.addEventListener('click',e=>{ if(!e.target.closest('.searchwrap')) $('#searchPanel').classList.remove('open'); });
 
+
+/* ───────── 모바일 검색 시트 ─────────
+   포커스 시 전체화면(body.search-open). 닫힘 경로는 셋을 구분한다:
+   'back'  = 닫기 버튼/Escape → pushState 한 항목을 history.back() 으로 되돌린다
+   'pop'   = 뒤로가기 → 이미 되돌아온 상태라 아무 이동도 하지 않는다
+   'select'= 결과 선택 → 마커만 지운다(replaceState). 여기서 back() 을 쓰면 직후 openStock 이
+             replaceState 한 항목을 떠나 hashchange 가 이전 탭을 다시 열어 상세 뷰가 사라진다. */
+const isNarrow=()=>matchMedia('(max-width:940px)').matches;
+function openSearchSheet(){ if(!isNarrow()||document.body.classList.contains('search-open')) return;
+  document.body.classList.add('search-open'); document.body.style.overflow='hidden'; try{history.pushState({fuSearch:1},'');}catch(e){} }
+function closeSearchSheet(mode){ if(!document.body.classList.contains('search-open')) return;
+  document.body.classList.remove('search-open'); document.body.style.overflow=''; $('#searchPanel').classList.remove('open'); $('#q').blur();
+  const marked = history.state && history.state.fuSearch;
+  try{ if(mode==='back' && marked) history.back(); else if(mode==='select' && marked) history.replaceState(null,'',location.href); }catch(e){} }
+$('#q').addEventListener('focus',openSearchSheet);
+$('#qClose').addEventListener('click',()=>closeSearchSheet('back'));
+window.addEventListener('popstate',()=>closeSearchSheet('pop'));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSearchSheet('back'); });
+/* 결과를 고르면 시트(모바일)와 드롭다운(데스크톱)이 남지 않게 닫는다 */
+$('#searchPanel').addEventListener('click',e=>{ if(e.target.closest('.sr,.sr-pin')){ closeSearchSheet('select'); $('#searchPanel').classList.remove('open'); } });

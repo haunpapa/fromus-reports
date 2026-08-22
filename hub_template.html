@@ -582,6 +582,32 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   font-size:13px;box-shadow:0 8px 24px var(--shadow);white-space:nowrap;}
 .fu-toast button{margin-left:10px;background:var(--side-gold);color:#181410;border:0;border-radius:8px;padding:5px 10px;font-weight:700;cursor:pointer;font-family:inherit;}
 @media(min-width:941px){.fu-toast{bottom:24px;}}
+/* ── 모바일 더보기 시트 ── */
+.bsheet{display:none;position:fixed;inset:0;z-index:90;}
+.bsheet.open{display:block;}
+.bsheet-bd{position:absolute;inset:0;background:rgba(0,0,0,.35);}
+.bsheet-box{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:18px 18px 0 0;
+  padding:14px 12px calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  box-shadow:0 -8px 30px var(--shadow);}
+.bsheet-box .tab{flex-direction:column;align-items:center;gap:4px;padding:12px 6px;color:var(--text-2);background:var(--surface-2);min-height:64px;font-size:12px;}
+.bsheet-box .tab:hover{color:var(--text);background:var(--surface-3);}   /* 사이드바용 .tab:hover{color:#fff} 덮어쓰기 */
+.bsheet-box .tab.active{color:var(--gold);background:var(--gold-bg);}
+.bsheet-box .tab.active::before{display:none;}
+/* ── 모바일 검색 시트 ──
+   .searchwrap 은 .topbar(backdrop-filter + z-index:60) 의 자손이라 거기에 position:fixed 를 줘도
+   topbar 가 containing block 이 되어 55px 띠 안에 갇힌다. 그래서 body 에 클래스를 걸고 .topbar 자체를 전체화면 층으로 만든다. */
+.qclose{display:none;}
+@media(max-width:940px){
+  body.search-open .topbar{position:fixed;inset:0;z-index:100;backdrop-filter:none;background:var(--bg);overflow:auto;border-bottom:0;}
+  body.search-open .topbar-inner{flex-direction:column;align-items:stretch;padding:10px 12px;}
+  body.search-open .m-logo{display:none;}
+  body.search-open .searchbox{display:flex;align-items:center;}
+  body.search-open .qclose{display:inline-block;margin-left:8px;background:transparent;border:0;color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;}
+  body.search-open .search-panel{position:static;margin-top:8px;max-height:none;box-shadow:none;}
+  body.search-open .search-panel.open{display:block;}
+  body.search-open .bnav{display:none;}
+  .strow-head{min-height:48px;}                 /* 터치 타깃 */
+}
 </style>
 </head>
 <body>
@@ -600,7 +626,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
         <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
         <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
         <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
-        <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
+        <button class="tab" data-tab="chat"><span class="t-ico">💬</span>채팅</button>
         <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
         <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
         <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입동향</button>
@@ -621,6 +647,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
             <span class="ico">🔎</span>
             <input id="q" type="text" placeholder="종목·섹터·전략·용어·뉴스 무엇이든 검색…" autocomplete="off">
             <button class="clr" id="clr">✕</button>
+            <button class="qclose" id="qClose" type="button" aria-label="검색 닫기">닫기</button>
           </div>
           <div class="search-hint" id="searchHint"></div>
           <div class="search-panel" id="searchPanel"></div>
@@ -652,16 +679,22 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 
 <nav class="bnav" id="bnav" aria-label="하단 탭">
   <button class="tab active" data-tab="home"><span class="t-ico">⌂</span>개요</button>
-  <button class="tab" data-tab="analytics"><span class="t-ico">📊</span>분석</button>
-  <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터</button>
   <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
+  <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터</button>
   <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
-  <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
-        <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
-  <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
-  <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
-  <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입</button>
+  <button class="tab" id="bnavMore" type="button" aria-haspopup="true" aria-expanded="false"><span class="t-ico">☰</span>더보기</button>
 </nav>
+<div class="bsheet" id="bsheet" role="dialog" aria-label="더보기">
+  <div class="bsheet-bd" data-bsheet-close></div>
+  <div class="bsheet-box">
+    <button class="tab" data-tab="analytics"><span class="t-ico">📊</span>분석</button>
+    <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
+    <button class="tab" data-tab="chat"><span class="t-ico">💬</span>채팅</button>
+    <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
+    <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
+    <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입동향</button>
+  </div>
+</div>
 
 <div id="popover"></div>
 <div class="graph-tip" id="graphTip"></div>

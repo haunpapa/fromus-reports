@@ -1,5 +1,5 @@
 /* ───────── INIT ───────── */
-RENDERED.add('home'); renderHome(); syncVerifyTab();
+RENDERED.add('home'); renderHome(); syncVerifyTab(); syncChatTab();
 /* 빌드 시각·데이터 신선도 배지 (조용한 폴백 가시화) */
 (function(){
   const el = document.getElementById('fu-status'); if(!el) return;
