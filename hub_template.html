@@ -18,8 +18,11 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#181410">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Noto+Serif+KR:wght@600;700;900&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 실제로 쓰이는 웨이트만 요청한다 — Sans 300 · Serif 900 은 어디에도 없어 제거 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=Noto+Serif+KR:wght@600;700&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script defer src="./vendor/chart.umd.min.js" id="chartjs"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    From Us Knowledge Hub — 'Ink & Gold' Design System v5
@@ -579,6 +582,61 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
   font-size:13px;box-shadow:0 8px 24px var(--shadow);white-space:nowrap;}
 .fu-toast button{margin-left:10px;background:var(--side-gold);color:#181410;border:0;border-radius:8px;padding:5px 10px;font-weight:700;cursor:pointer;font-family:inherit;}
 @media(min-width:941px){.fu-toast{bottom:24px;}}
+/* ── 모바일 더보기 시트 ── */
+.bsheet{display:none;position:fixed;inset:0;z-index:90;}
+.bsheet.open{display:block;}
+.bsheet-bd{position:absolute;inset:0;background:rgba(0,0,0,.35);}
+.bsheet-box{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:18px 18px 0 0;
+  padding:14px 12px calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  box-shadow:0 -8px 30px var(--shadow);}
+.bsheet-box .tab{flex-direction:column;align-items:center;gap:4px;padding:12px 6px;color:var(--text-2);background:var(--surface-2);min-height:64px;font-size:12px;}
+.bsheet-box .tab:hover{color:var(--text);background:var(--surface-3);}   /* 사이드바용 .tab:hover{color:#fff} 덮어쓰기 */
+.bsheet-box .tab.active{color:var(--gold);background:var(--gold-bg);}
+.bsheet-box .tab.active::before{display:none;}
+/* ── 모바일 검색 시트 ──
+   .searchwrap 은 .topbar(backdrop-filter + z-index:60) 의 자손이라 거기에 position:fixed 를 줘도
+   topbar 가 containing block 이 되어 55px 띠 안에 갇힌다. 그래서 body 에 클래스를 걸고 .topbar 자체를 전체화면 층으로 만든다. */
+.qclose{display:none;}
+@media(max-width:940px){
+  body.search-open .topbar{position:fixed;inset:0;z-index:100;backdrop-filter:none;background:var(--bg);overflow:auto;border-bottom:0;}
+  body.search-open .topbar-inner{flex-direction:column;align-items:stretch;padding:10px 12px;}
+  body.search-open .m-logo{display:none;}
+  body.search-open .searchbox{display:flex;align-items:center;}
+  body.search-open .qclose{display:inline-block;margin-left:8px;background:transparent;border:0;color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;}
+  body.search-open .search-panel{position:static;margin-top:8px;max-height:none;box-shadow:none;}
+  body.search-open .search-panel.open{display:block;}
+  body.search-open .bnav{display:none;}
+  .strow-head{min-height:48px;}                 /* 터치 타깃 */
+}
+/* ── 검색 2.0: 출처·기간 필터 · 종목 핀 · 최근 검색어 ── */
+.sp-head2{margin-top:-4px;}
+.sp-src,.sp-period{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--text-3);cursor:pointer;margin-right:4px;}
+.sp-src.on,.sp-period.on{border-color:var(--gold);color:var(--gold);background:var(--gold-bg);}
+.sr-pin{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:10px;cursor:pointer;font-size:13px;}
+.sr-pin .sr-go{margin-left:auto;color:var(--gold);font-weight:700;}
+.sp-recent{padding:8px 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.sp-recent-l{font-size:11px;color:var(--text-4);margin-right:4px;}
+a.sr{text-decoration:none;color:inherit;display:block;}
+/* ── 종목 상세 ── */
+.sd-back{display:inline-block;margin-bottom:10px;font-size:12.5px;color:var(--text-3);cursor:pointer;}
+.sd-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.sd-name{font-family:'Playfair Display','Noto Serif KR',serif;font-size:28px;font-weight:700;}
+.sd-reason{font-size:13px;color:var(--text-2);margin:4px 0 12px;padding:8px 12px;border-left:3px solid var(--gold);background:var(--gold-bg);border-radius:0 8px 8px 0;}
+.sd-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;}
+@media(max-width:880px){.sd-grid{grid-template-columns:1fr;}}
+.sd-chart{width:100%;height:180px;display:block;}
+.sd-legend{font-size:11px;color:var(--text-4);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap;}
+.sd-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px;}
+.sd-act{margin-left:auto;display:flex;gap:6px;}
+.sd-act button{font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;}
+/* ── 오늘 달라진 것 · AI 데일리 · neutral 뉴스 ── */
+.wn-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.wn-k{font-size:11px;color:var(--text-3);min-width:64px;font-weight:600;}
+.brf-ai{margin-top:12px;font-size:13px;color:var(--text-2);border-top:1px dashed var(--border);padding-top:10px;}
+.brf-ai-k{font-size:11px;color:var(--gold);font-weight:700;display:block;margin-bottom:4px;}
+.strow-sub{font-size:11px;color:var(--text-3);flex-basis:100%;order:9;}
+.news-neutral{opacity:.5;}
+.v-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 12px;}
 </style>
 </head>
 <body>
@@ -597,7 +655,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
         <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
         <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
         <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
-        <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
+        <button class="tab" data-tab="chat"><span class="t-ico">💬</span>채팅</button>
         <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
         <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
         <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입동향</button>
@@ -618,6 +676,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
             <span class="ico">🔎</span>
             <input id="q" type="text" placeholder="종목·섹터·전략·용어·뉴스 무엇이든 검색…" autocomplete="off">
             <button class="clr" id="clr">✕</button>
+            <button class="qclose" id="qClose" type="button" aria-label="검색 닫기">닫기</button>
           </div>
           <div class="search-hint" id="searchHint"></div>
           <div class="search-panel" id="searchPanel"></div>
@@ -636,6 +695,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
       <div class="view" id="view-glossary"></div>
       <div class="view" id="view-graph"></div>
       <div class="view" id="view-chat"></div>
+      <div class="view" id="view-stock"></div>
     </div>
 
     <div class="foot">
@@ -649,16 +709,22 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 
 <nav class="bnav" id="bnav" aria-label="하단 탭">
   <button class="tab active" data-tab="home"><span class="t-ico">⌂</span>개요</button>
-  <button class="tab" data-tab="analytics"><span class="t-ico">📊</span>분석</button>
-  <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터</button>
   <button class="tab" data-tab="stocks"><span class="t-ico">📈</span>종목</button>
+  <button class="tab" data-tab="sectors"><span class="t-ico">🧩</span>섹터</button>
   <button class="tab" data-tab="strategy"><span class="t-ico">🧭</span>전략</button>
-  <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
-        <button class="tab" data-tab="chat" style="display:none"><span class="t-ico">💬</span>채팅</button>
-  <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
-  <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
-  <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입</button>
+  <button class="tab" id="bnavMore" type="button" aria-haspopup="true" aria-expanded="false"><span class="t-ico">☰</span>더보기</button>
 </nav>
+<div class="bsheet" id="bsheet" role="dialog" aria-label="더보기">
+  <div class="bsheet-bd" data-bsheet-close></div>
+  <div class="bsheet-box">
+    <button class="tab" data-tab="analytics"><span class="t-ico">📊</span>분석</button>
+    <button class="tab" data-tab="verify" style="display:none"><span class="t-ico">✅</span>검증</button>
+    <button class="tab" data-tab="chat"><span class="t-ico">💬</span>채팅</button>
+    <button class="tab" data-tab="glossary"><span class="t-ico">📚</span>용어</button>
+    <button class="tab" data-tab="graph"><span class="t-ico">🕸</span>관계망</button>
+    <button class="tab" data-tab="trade"><span class="t-ico">🚢</span>수출입동향</button>
+  </div>
+</div>
 
 <div id="popover"></div>
 <div class="graph-tip" id="graphTip"></div>
@@ -723,6 +789,11 @@ function showUpdateToast(gen){
     const r = await fetch(coreUrl);
     if(!r.ok) throw new Error('HTTP ' + r.status);
     window.DATA = await r.json();
+    await new Promise(function(res){           // defer 스크립트가 아직이면 load/error 까지(최대 3초) 대기
+      if(window.Chart) return res();
+      var s=document.getElementById('chartjs'); if(!s) return res();
+      s.addEventListener('load',res); s.addEventListener('error',res); setTimeout(res,3000);
+    });
   }catch(e){
     console.error('KB 로딩 실패:', e);
     // 배포 직후엔 캐시된 구 셸이 사라진 kb.<구해시>를 가리켜 404 — 캐시버스터로 1회 자동 재로드

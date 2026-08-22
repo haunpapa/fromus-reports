@@ -19,6 +19,7 @@ on:
       - 'sw.js'
       - 'hublib/**'
       - 'hub/**'
+      - 'vendor/**'
       - 'tests/e2e/**'
   schedule:
     - cron: '30 22 * * *'   # 매일 07:30 KST — 시세·trade·다이제스트 자동 갱신
@@ -115,7 +116,7 @@ jobs:
           cp feed.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
           cp version.json _site/
-          cp -r reports icons _site/
+          cp -r reports icons vendor _site/
 
       - name: E2E 스모크 (셸 JS — _site 기준)
         run: |

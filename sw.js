@@ -3,7 +3,7 @@
    kb.<chunk>.<hash>.json: cache-first — 해시가 바뀌면 URL이 바뀌므로 영구 캐시 안전.
    청크별로 구 해시만 정리한다 (chat 청크를 받으면서 core 캐시를 지우면 안 된다). */
 const CACHE = 'fu-hub-v4';
-const PRECACHE = ['./hub.html'];
+const PRECACHE = ['./hub.html', './vendor/chart.umd.min.js'];
 // kb.core.<h>.json · kb.chat.<h>.json … | 구 형식 kb.<h>.json 도 인식(청크명 'legacy')
 const KB_RE = /\/kb\.(?:([a-z]+)\.)?[0-9a-f]{6,}\.json$/;
 
