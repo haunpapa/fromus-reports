@@ -79,13 +79,18 @@ function renderHome(){
   const _cw=$('#calWrap'); if(_cw)_cw.addEventListener('click',e=>{const i=e.target.closest('.cal-on'); if(i)openReport(i.dataset.rid);});
 }
 /* ── 오늘 달라진 것 (C5) — 데이터 없으면 카드 자체가 없다 ── */
+/* 목표가 표시 — '800000원' 대신 '800,000원'. 값이 숫자가 아니면 그대로 둔다. */
+function wnTarget(value, unit){
+  const n = Number(String(value||'').replace(/,/g,''));
+  return (Number.isFinite(n) && String(value||'').trim() !== '' ? n.toLocaleString('ko-KR') : (value||'')) + (unit||'');
+}
 function whatsNewCard(){
   const w=D.whats_new; if(!w) return '';
   const rows=[];
   if((w.new_stocks||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">신규 등장</span>${w.new_stocks.slice(0,8).map(x=>`<span class="chip" data-stock="${esc(x.name)}">${esc(x.name)} <span class="n">${esc(x.count)}</span></span>`).join('')}</div>`);
   if((w.surging||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">언급 급증</span>${w.surging.slice(0,6).map(x=>`<span class="chip" data-stock="${esc(x.name)}">${esc(x.name)} <span class="n">${esc(x.prev)}→${esc(x.recent)}</span></span>`).join('')}</div>`);
-  if((w.new_calls||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 콜</span><span class="chip" data-go="verify">${w.new_calls.length}건 · 검증 탭 →</span>${w.new_calls.slice(0,4).map(c=>`<span class="chip" data-stock="${esc(c.stock)}">${esc(c.stock)} <span class="n">${c.stance==='bullish'?'강세':'약세'}</span></span>`).join('')}</div>`);
-  if((w.new_targets||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 목표가</span>${w.new_targets.slice(0,6).map(t=>`<span class="chip" data-stock="${esc(t.stock)}">${esc(t.stock)} <span class="n">${esc(t.value)}${esc(t.unit||'')}</span></span>`).join('')}</div>`);
+  if((w.new_calls||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 콜</span><span class="chip" data-go="verify">${w.new_calls.length}건 · 검증 탭 →</span>${w.new_calls.slice(0,4).map(c=>`<span class="chip" data-stock="${esc(c.stock)}">${esc(c.stock)} <span class="n">${c.stance==='bullish'?'강세':'약세'}${c.date?' · '+esc(fmtDate(c.date)):''}</span></span>`).join('')}</div>`);
+  if((w.new_targets||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 목표가</span>${w.new_targets.slice(0,6).map(t=>`<span class="chip" data-stock="${esc(t.stock)}">${esc(t.stock)} <span class="n">${esc(wnTarget(t.value,t.unit))}${t.date?' · '+esc(fmtDate(t.date)):''}</span></span>`).join('')}</div>`);
   if((w.new_reports||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 리포트</span>${w.new_reports.slice(0,4).map(id=>`<span class="chip" data-report="${esc(id)}">${esc(fmtDate(id))}</span>`).join('')}</div>`);
   if(!rows.length) return '';
   return `<div class="card" id="whatsNew" style="border-color:var(--gold-border)">

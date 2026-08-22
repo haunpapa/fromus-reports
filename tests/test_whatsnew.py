@@ -60,3 +60,38 @@ def test_load_save_roundtrip(tmp_path):
     s = summarize(_data()); save_summary(str(p), s)
     assert load_summary(str(p)) == s
     assert load_summary(str(tmp_path / "none.json")) is None
+
+
+def test_summarize_dedupes_identical_calls_and_targets():
+    """원본 chat.targets 에는 같은 사람이 같은 날 올린 완전 중복 레코드가 있다(실데이터 206건 중 69건).
+    그대로 두면 홈 '오늘 달라진 것' 카드가 같은 목표가를 3번 표시한다."""
+    from hublib.whatsnew import summarize
+    data = {
+        "build": {"to": "2026-08-21", "generated": "2026-08-21 07:30"},
+        "stocks": [], "reports": [],
+        "verify": {"enabled": True, "calls": [
+            {"stock": "효성중공업", "date": "2026-05-05", "stance": "bullish"},
+            {"stock": "효성중공업", "date": "2026-05-05", "stance": "bullish"},
+        ]},
+        "chat": {"targets": [
+            {"stock": "효성중공업", "value": "500", "unit": "만원", "date": "2026-08-03", "sharer": "A"},
+            {"stock": "효성중공업", "value": "500", "unit": "만원", "date": "2026-08-03", "sharer": "A"},
+            {"stock": "효성중공업", "value": "500", "unit": "만원", "date": "2026-08-03", "sharer": "A"},
+            {"stock": "한화오션", "value": "9", "unit": "만원", "date": "2026-08-03", "sharer": "B"},
+        ]},
+    }
+    cur = summarize(data)
+    assert cur["targets"] == ["한화오션|9|만원|2026-08-03", "효성중공업|500|만원|2026-08-03"]
+    assert cur["calls"] == ["효성중공업|2026-05-05|bullish"]
+
+
+def test_diff_emits_each_new_target_once():
+    from hublib.whatsnew import diff
+    prev = {"to": "2026-08-20", "stocks": {}, "calls": [], "targets": [], "reports": []}
+    data = {
+        "build": {"to": "2026-08-21", "generated": "2026-08-21 07:30"},
+        "stocks": [], "reports": [], "verify": {"enabled": False},
+        "chat": {"targets": [{"stock": "효성중공업", "value": "500", "unit": "만원", "date": "2026-08-03"}] * 3},
+    }
+    out = diff(prev, data)
+    assert out["new_targets"] == [{"stock": "효성중공업", "value": "500", "unit": "만원", "date": "2026-08-03"}]

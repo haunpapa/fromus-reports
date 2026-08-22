@@ -19,9 +19,11 @@ def summarize(data):
         stocks[s["name"]] = {"count": s.get("count") or 0,
                              "last": max((m.get("date") or "" for m in ms), default="")}
     v = data.get("verify") or {}
-    calls = sorted(f"{c['stock']}|{c['date']}|{c['stance']}" for c in (v.get("calls") or [])) if v.get("enabled") else []
-    targets = sorted(f"{t.get('stock','')}|{t.get('value','')}|{(t.get('unit') or '').strip()}|{t.get('date','')}"
-                     for t in ((data.get("chat") or {}).get("targets") or []))
+    # set() — 원본에 완전 중복 레코드가 있다(같은 사람이 같은 날 같은 목표가를 반복 게시).
+    # 그대로 두면 홈 '오늘 달라진 것' 카드가 같은 항목을 여러 번 보여 준다.
+    calls = sorted({f"{c['stock']}|{c['date']}|{c['stance']}" for c in (v.get("calls") or [])}) if v.get("enabled") else []
+    targets = sorted({f"{t.get('stock','')}|{t.get('value','')}|{(t.get('unit') or '').strip()}|{t.get('date','')}"
+                      for t in ((data.get("chat") or {}).get("targets") or [])})
     return {"to": b.get("to") or "", "generated": b.get("generated") or "", "stocks": stocks,
             "calls": calls, "targets": targets,
             "reports": sorted(r["id"] for r in (data.get("reports") or []) if r.get("id"))}

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1786925008187,
+  "lastScanned": 1787416960032,
   "projectRoot": "/Users/haunpapa/Documents/GitHub/fromus-reports",
   "techStack": {
     "languages": [],
@@ -39,7 +39,7 @@
       "path": "__pycache__",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1786925008179,
+      "lastAccessed": 1787416960016,
       "keyFiles": [
         "build_hub.cpython-311.pyc",
         "merge_hub.cpython-311.pyc"
@@ -48,12 +48,13 @@
     "build": {
       "path": "build",
       "purpose": "Build output",
-      "fileCount": 4,
-      "lastAccessed": 1786925008179,
+      "fileCount": 5,
+      "lastAccessed": 1787416960018,
       "keyFiles": [
         "_probe_dartlab.py",
         "_probe_schema.json",
         "parse_cache.json",
+        "price_cache.json",
         "test_merge_hub.py"
       ]
     },
@@ -61,14 +62,14 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1786925008179,
+      "lastAccessed": 1787416960018,
       "keyFiles": []
     },
     "generator": {
       "path": "generator",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1786925008179,
+      "lastAccessed": 1787416960018,
       "keyFiles": [
         "README.md",
         "chat_to_kb.py",
@@ -80,8 +81,8 @@
     "hublib": {
       "path": "hublib",
       "purpose": null,
-      "fileCount": 7,
-      "lastAccessed": 1786925008180,
+      "fileCount": 8,
+      "lastAccessed": 1787416960018,
       "keyFiles": [
         "__init__.py",
         "aggregate.py",
@@ -94,7 +95,7 @@
       "path": "icons",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1786925008180,
+      "lastAccessed": 1787416960018,
       "keyFiles": [
         "icon-192.png",
         "icon-512.png"
@@ -104,82 +105,55 @@
       "path": "reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1786925008180,
+      "lastAccessed": 1787416960019,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 4,
-      "lastAccessed": 1786925008180,
+      "fileCount": 7,
+      "lastAccessed": 1787416960019,
       "keyFiles": [
         "__init__.py",
         "test_baseline.py",
         "test_cache.py",
-        "test_phases.py"
+        "test_market_labels.py",
+        "test_mention_ranking.py"
       ]
     },
     "tests/fixtures": {
       "path": "tests/fixtures",
       "purpose": "Test fixtures",
-      "fileCount": 0,
-      "lastAccessed": 1786925008181,
-      "keyFiles": []
+      "fileCount": 1,
+      "lastAccessed": 1787416960021,
+      "keyFiles": [
+        "chat_kb_mini.json"
+      ]
     }
   },
   "hotPaths": [
     {
-      "path": "docs/superpowers/specs/2026-08-17-call-verification-design.md",
-      "accessCount": 18,
-      "lastAccessed": 1786927440468,
+      "path": "docs/superpowers/plans/2026-08-23-hub-improvement-00-foundation.md",
+      "accessCount": 34,
+      "lastAccessed": 1787421407466,
       "type": "file"
     },
     {
-      "path": "hublib/verify.py",
-      "accessCount": 5,
-      "lastAccessed": 1786928933949,
+      "path": "docs/superpowers/plans/2026-08-23-hub-improvement-B-ui.md",
+      "accessCount": 30,
+      "lastAccessed": 1787421740930,
       "type": "file"
     },
     {
-      "path": "docs/superpowers/plans/2026-08-17-call-verification.md",
-      "accessCount": 4,
-      "lastAccessed": 1786928348489,
+      "path": "docs/superpowers/plans/2026-08-23-hub-improvement-A-data.md",
+      "accessCount": 20,
+      "lastAccessed": 1787421736139,
       "type": "file"
     },
     {
-      "path": "hublib/render.py",
-      "accessCount": 2,
-      "lastAccessed": 1786928843718,
-      "type": "file"
-    },
-    {
-      "path": ".claude/settings.local.json",
-      "accessCount": 2,
-      "lastAccessed": 1786930090706,
-      "type": "file"
-    },
-    {
-      "path": "tests/fixtures/chat_kb_mini.json",
-      "accessCount": 1,
-      "lastAccessed": 1786928602802,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_verify.py",
-      "accessCount": 1,
-      "lastAccessed": 1786928614053,
-      "type": "file"
-    },
-    {
-      "path": "tests/test_phases.py",
-      "accessCount": 1,
-      "lastAccessed": 1786928848413,
-      "type": "file"
-    },
-    {
-      "path": "hub_template.html",
-      "accessCount": 1,
-      "lastAccessed": 1786929000358,
+      "path": "docs/superpowers/specs/2026-08-23-hub-improvement-design.md",
+      "accessCount": 10,
+      "lastAccessed": 1787420522318,
       "type": "file"
     }
   ],
