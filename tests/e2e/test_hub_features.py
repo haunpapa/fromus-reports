@@ -83,3 +83,36 @@ def test_recent_queries_shown_on_empty_focus(page, site_url):
     page.click("#q")
     page.wait_for_selector("#searchPanel .sp-recent", timeout=5000)
     assert "반도체" in page.inner_text("#searchPanel .sp-recent")
+
+
+# ───────────────────────── Task 4: 종목 상세 뷰 ─────────────────────────
+
+def test_stock_detail_route(page, site_url):
+    _boot(page, site_url)
+    first = page.evaluate("window.DATA.stocks[0].name")
+    page.goto(site_url + "hub.html#stock/" + first)
+    page.wait_for_selector("#view-stock.active .sd-head", timeout=15000)
+    assert first in page.inner_text("#view-stock .sd-head")
+    assert page.locator("#view-stock .sd-mentions .mention").count() >= 1
+
+
+def test_stock_chip_opens_detail(page, site_url):
+    _boot(page, site_url)
+    page.click("#view-home [data-stock] >> nth=0")
+    page.wait_for_selector("#view-stock.active .sd-head", timeout=15000)
+    assert page.evaluate("location.hash").startswith("#stock/")
+
+
+def test_mobile_search_select_keeps_stock_detail(page, site_url):
+    """모바일 검색 시트에서 종목 핀을 선택하면 history.back() 없이 상세 뷰가 유지돼야 한다."""
+    page.set_viewport_size({"width": 375, "height": 812})
+    _boot(page, site_url)
+    first = page.evaluate("window.DATA.stocks[0].name")
+    page.click("#q")
+    page.fill("#q", first)
+    page.wait_for_selector("#searchPanel.open .sr-pin", timeout=15000)
+    page.click("#searchPanel .sr-pin")
+    page.wait_for_timeout(400)
+    assert page.locator("#view-stock.active .sd-head").count() == 1
+    assert page.evaluate("location.hash").startswith("#stock/")
+    assert page.evaluate("document.body.classList.contains('search-open')") is False

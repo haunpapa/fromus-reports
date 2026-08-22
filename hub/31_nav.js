@@ -1,13 +1,7 @@
 /* ───────── chip / tag navigation ───────── */
 document.addEventListener('click',e=>{
   const stockTag=e.target.closest('[data-stock]');
-  if(stockTag){
-    showTab('stocks'); stockQuery=stockTag.dataset.stock; stockSort='count';
-    renderStocks();
-    try{history.replaceState(null,'','#stocks/'+encodeURIComponent(stockTag.dataset.stock));}catch(e){}
-    const first=$('#stockList .strow-detail'); if(first) first.classList.add('open');
-    return;
-  }
+  if(stockTag){ openStock(stockTag.dataset.stock); return; }
   const go=e.target.closest('[data-go]');
   if(go){
     const target=go.dataset.go, sector=go.dataset.sector;

@@ -140,9 +140,7 @@ function gPick(mx,my){const w=gScreenToWorld(mx,my); let best=null,bd=1e9;
   for(const p of G.nodes){const r=gRadius(p)+4/gView.k; const dx=p.x-w.x,dy=p.y-w.y,d=dx*dx+dy*dy;
     if(d<r*r && d<bd){bd=d;best=p;}} return best;}
 function gNavigate(p){
-  if(p.kind==='stock'){ showTab('stocks'); stockQuery=p.name; stockSort='count';
-    if($('#stockq'))$('#stockq').value=p.name; renderStocks();
-    const f=$('#stockList .strow-detail'); if(f)f.classList.add('open');
+  if(p.kind==='stock'){ openStock(p.name);
   } else { showTab('sectors');
     const card=$$('#view-sectors .scard').find(c=>c.querySelector('.scard-name')?.textContent===p.name);
     if(card){card.querySelector('.scard-detail').classList.add('open'); setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'center'}),60);} }

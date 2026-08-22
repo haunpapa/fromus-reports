@@ -617,6 +617,18 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 .sp-recent{padding:8px 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .sp-recent-l{font-size:11px;color:var(--text-4);margin-right:4px;}
 a.sr{text-decoration:none;color:inherit;display:block;}
+/* ── 종목 상세 ── */
+.sd-back{display:inline-block;margin-bottom:10px;font-size:12.5px;color:var(--text-3);cursor:pointer;}
+.sd-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.sd-name{font-family:'Playfair Display','Noto Serif KR',serif;font-size:28px;font-weight:700;}
+.sd-reason{font-size:13px;color:var(--text-2);margin:4px 0 12px;padding:8px 12px;border-left:3px solid var(--gold);background:var(--gold-bg);border-radius:0 8px 8px 0;}
+.sd-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;}
+@media(max-width:880px){.sd-grid{grid-template-columns:1fr;}}
+.sd-chart{width:100%;height:180px;display:block;}
+.sd-legend{font-size:11px;color:var(--text-4);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap;}
+.sd-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px;}
+.sd-act{margin-left:auto;display:flex;gap:6px;}
+.sd-act button{font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;}
 </style>
 </head>
 <body>
@@ -675,6 +687,7 @@ a.sr{text-decoration:none;color:inherit;display:block;}
       <div class="view" id="view-glossary"></div>
       <div class="view" id="view-graph"></div>
       <div class="view" id="view-chat"></div>
+      <div class="view" id="view-stock"></div>
     </div>
 
     <div class="foot">

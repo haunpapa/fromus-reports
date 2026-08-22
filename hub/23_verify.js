@@ -69,9 +69,9 @@ function vRankRows(rows,key){
       </div><div class="v-row-detail"></div></div>`;}).join('');
 }
 
-function vCallRows(name){
+function vCallRows(name, calls){
   const key='h'+vHorizon;
-  const cs=(D.verify.calls||[]).filter(c=>c.stock===name)
+  const cs=((calls||D.verify.calls)||[]).filter(c=>c.stock===name)
     .sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
   return cs.map(c=>{
     const r=c[key];

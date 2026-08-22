@@ -1,5 +1,5 @@
 /* ───────── TABS ───────── */
-const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph','chat','verify'];
+const TABS=['home','sectors','stocks','analytics','trade','strategy','glossary','graph','chat','verify','stock'];
 /* 탭별 렌더러 — 첫 진입 시 1회만 실행 (P3). Promise 를 돌려주는 렌더러는 청크 로딩 후 렌더한다 (P1). */
 const VIEW_RENDERERS = {
   home:      ()=>renderHome(),
@@ -58,6 +58,7 @@ function tabFromHash(){
   let h=''; try{h=decodeURIComponent((location.hash||'').replace('#',''));}catch(e){h=(location.hash||'').replace('#','');}
   const ix=h.indexOf('/'); const t=ix<0?h:h.slice(0,ix); const arg=ix<0?'':h.slice(ix+1);
   if(!TABS.includes(t))return;
+  if(t==='stock'){ if(arg) openStock(arg); else showTab('stocks',true); return; }   // 인자 없는 #stock 은 목록으로
   showTab(t,true);
   if(!arg)return;
   if(t==='stocks'){stockQuery=arg;stockSort='count';renderStocks();const first=$('#stockList .strow-detail');if(first)first.classList.add('open');}
