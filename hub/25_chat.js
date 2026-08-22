@@ -30,7 +30,7 @@ function cgActionRow(a){
     <span class="md">${esc(fmtDate(a.date))}</span> <span style="color:var(--text-3)">${esc(a.sharer||'')}</span></div>`;
 }
 function cgNewsRow(n){
-  return `<div class="cg-row"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title||'')}
+  return `<div class="cg-row${n.neutral?' news-neutral':''}"><span class="md">${esc(fmtDate(n.date))}</span> ${esc(n.title||'')}
     <a class="src" href="${esc(safeHref(n.url))}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></div>`;
 }
 function cgReadingRow(r){

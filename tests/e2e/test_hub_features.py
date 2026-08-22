@@ -116,3 +116,22 @@ def test_mobile_search_select_keeps_stock_detail(page, site_url):
     assert page.locator("#view-stock.active .sd-head").count() == 1
     assert page.evaluate("location.hash").startswith("#stock/")
     assert page.evaluate("document.body.classList.contains('search-open')") is False
+
+
+# ───────────────────── Task 5: 홈 What's new · AI 데일리 ─────────────────────
+
+def test_whats_new_card_matches_data(page, site_url):
+    _boot(page, site_url)
+    # diff 객체는 있어도 다섯 배열이 전부 빈 날이 있다 → '내용이 있을 때만' 카드
+    has = page.evaluate(
+        "(w=>!!w && ['new_stocks','surging','new_calls','new_targets','new_reports']"
+        ".some(k=>(w[k]||[]).length))(window.DATA.whats_new)")
+    assert page.locator("#whatsNew").count() == (1 if has else 0)
+    if has:
+        assert page.locator("#whatsNew [data-stock], #whatsNew [data-go], #whatsNew [data-report]").count() >= 1
+
+
+def test_ai_daily_lines_when_present(page, site_url):
+    _boot(page, site_url)
+    has = page.evaluate("!!(window.DATA.ai_digest && window.DATA.ai_digest.daily && (window.DATA.ai_digest.daily.lines||[]).length)")
+    assert page.locator(".brf-ai").count() == (1 if has else 0)

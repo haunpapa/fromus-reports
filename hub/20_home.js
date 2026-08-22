@@ -17,7 +17,9 @@ function renderHome(){
       ${latest.subhead?`<div class="brf-sub">${esc(latest.subhead)}</div>`:`<div class="brf-sub">데일리·위클리 리포트를 구조화해, 섹터·종목·전략·용어를 한곳에서 검색하고 점검합니다.</div>`}
       ${(latest.quote||latest.report_quote)?`<div class="brf-quote">${esc(latest.quote||latest.report_quote)}<cite>— ${esc(latest.name||'프벤져스')}, ${esc(fmtDate(latest.date))}</cite></div>`:''}
       ${(latest.points||[]).length?`<div class="brf-points">${(latest.points||[]).slice(0,4).map((p,i)=>`<div class="brf-pt"><span class="k">${i+1}</span><span>${esc(p)}</span></div>`).join('')}</div>`:''}
+      ${aiDailyLines()}
     </div></div>
+    ${whatsNewCard()}
     ${aiDigestCard()}
     <div class="statrow">
       <button class="stat" data-go="strategy"><div class="v">${b.reports||0}</div><div class="l">리포트 <span class="go">→</span></div></button>
@@ -75,6 +77,25 @@ function renderHome(){
     </div>`;
   drawTrend(); renderWatchHome(); renderDigest();
   const _cw=$('#calWrap'); if(_cw)_cw.addEventListener('click',e=>{const i=e.target.closest('.cal-on'); if(i)openReport(i.dataset.rid);});
+}
+/* ── 오늘 달라진 것 (C5) — 데이터 없으면 카드 자체가 없다 ── */
+function whatsNewCard(){
+  const w=D.whats_new; if(!w) return '';
+  const rows=[];
+  if((w.new_stocks||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">신규 등장</span>${w.new_stocks.slice(0,8).map(x=>`<span class="chip" data-stock="${esc(x.name)}">${esc(x.name)} <span class="n">${esc(x.count)}</span></span>`).join('')}</div>`);
+  if((w.surging||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">언급 급증</span>${w.surging.slice(0,6).map(x=>`<span class="chip" data-stock="${esc(x.name)}">${esc(x.name)} <span class="n">${esc(x.prev)}→${esc(x.recent)}</span></span>`).join('')}</div>`);
+  if((w.new_calls||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 콜</span><span class="chip" data-go="verify">${w.new_calls.length}건 · 검증 탭 →</span>${w.new_calls.slice(0,4).map(c=>`<span class="chip" data-stock="${esc(c.stock)}">${esc(c.stock)} <span class="n">${c.stance==='bullish'?'강세':'약세'}</span></span>`).join('')}</div>`);
+  if((w.new_targets||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 목표가</span>${w.new_targets.slice(0,6).map(t=>`<span class="chip" data-stock="${esc(t.stock)}">${esc(t.stock)} <span class="n">${esc(t.value)}${esc(t.unit||'')}</span></span>`).join('')}</div>`);
+  if((w.new_reports||[]).length) rows.push(`<div class="wn-row"><span class="wn-k">새 리포트</span>${w.new_reports.slice(0,4).map(id=>`<span class="chip" data-report="${esc(id)}">${esc(fmtDate(id))}</span>`).join('')}</div>`);
+  if(!rows.length) return '';
+  return `<div class="card" id="whatsNew" style="border-color:var(--gold-border)">
+    <div class="sec-title" style="margin:0 0 4px;font-size:17px">🆕 오늘 달라진 것</div>
+    <div class="sec-sub">${esc(fmtDate(w.since))} 빌드 이후 변화 · <a class="src" href="feed.json">feed.json↗</a></div>${rows.join('')}</div>`;
+}
+/* ── AI 데일리 3줄 (C6) ── */
+function aiDailyLines(){
+  const d=D.ai_digest&&D.ai_digest.daily; if(!d||!(d.lines||[]).length) return '';
+  return `<div class="brf-ai"><span class="brf-ai-k">🤖 AI 3줄</span>${d.lines.slice(0,3).map(l=>`<div>${esc(l)}</div>`).join('')}</div>`;
 }
 /* ── AI 위클리 다이제스트 (AlphaSense Smart Summaries 벤치마크) ── */
 function aiDigestCard(){

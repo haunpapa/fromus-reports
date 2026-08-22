@@ -63,7 +63,7 @@ function chatMentionRow(s, kind, m, idx){
     <span>${esc((m.snippet||'').slice(0,120))}${(m.co_stocks&&m.co_stocks.length)?` <span style="color:var(--text-4)">+${m.co_stocks.length}</span>`:''}</span></div>`;
 }
 function chatNewsRow(n){
-  return `<div class="mention"><span class="md">${esc(fmtDate(n.date))}</span>
+  return `<div class="mention${n.neutral?' news-neutral':''}"><span class="md">${esc(fmtDate(n.date))}</span>
     <span class="src-pill 테마">뉴스</span>
     <span>${esc(n.title)} <a class="src" href="${esc(safeHref(n.url))}" target="_blank" rel="noopener">${esc(n.outlet||'열기')}↗</a></span></div>`;
 }
@@ -108,6 +108,7 @@ function stockRow(s){
     <div class="strow-head" onclick="this.parentNode.querySelector('.strow-detail').classList.toggle('open')">
       <button class="star ${isWatched('stock',s.name)?'on':''}" data-watch="stock:${esc(s.name)}" title="워치리스트에 추가/제거" onclick="event.stopPropagation();toggleWatchEl(this)">${isWatched('stock',s.name)?'★':'☆'}</button>
       <span class="strow-name">${esc(s.name)}</span>
+      ${(D.ai_digest&&D.ai_digest.stock_reasons&&D.ai_digest.stock_reasons[s.name])?`<span class="strow-sub" title="AI 요약">${esc(D.ai_digest.stock_reasons[s.name].text)}</span>`:''}
       <span class="strow-mini">${momentumChip(s)}${themes}${tags}${chatPill}${vPill}</span>
       <canvas class="strow-spark" data-spark-name="${esc(s.name)}" width="156" height="52"></canvas>
       <button class="cmp-add ${isComparePicked(s.name)?'on':''}" data-cmp="${esc(s.name)}" onclick="event.stopPropagation();toggleCompare('${esc(s.name)}')">${isComparePicked(s.name)?'비교중':'비교'}</button>
