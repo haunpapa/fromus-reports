@@ -5,7 +5,10 @@ let vCohort = 'core';          // 'core'=채팅 콜 · 'report'=리포트 수급
 const PRIMARY_H = ((D.verify&&D.verify.meta&&D.verify.meta.primary)||20);
 const vPct = x => x==null ? '—' : (x>0?'+':'')+x.toFixed(1)+'%p';
 
-function verifyOn(){ return !!(D.verify && D.verify.enabled); }
+/* 검증 탭 일단 숨김 (2026-08-23) — 리포트 수급 코호트 h20 판정이 5건뿐이라 공개 전 보류.
+   false 로 바꾸면 탭·#verify 딥링크·홈 '검증 탭 →' 링크가 한꺼번에 돌아온다. 데이터(D.verify)는 그대로 실린다. */
+const VERIFY_TAB_HIDDEN = true;
+function verifyOn(){ return !VERIFY_TAB_HIDDEN && !!(D.verify && D.verify.enabled); }
 function syncVerifyTab(){ $$('.tab[data-tab="verify"]').forEach(b=>{ b.style.display = verifyOn()?'':'none'; }); }
 
 function vData(){ return (vCohort==='report' && D.verify && D.verify.report && D.verify.report.enabled) ? D.verify.report : D.verify; }

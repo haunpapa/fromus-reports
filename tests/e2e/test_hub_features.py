@@ -66,7 +66,7 @@ def test_search_source_and_period_filters(page, site_url):
         page.click('#searchPanel .sp-src[data-src="chat"]')
         # 핀 카드(.sr-pin)의 '종목' 은 제외 — .sr 안의 종류 배지만 본다
         page.wait_for_function(
-            "[...document.querySelectorAll('#searchPanel .sr .sr-kind')].every(k=>/채팅|목표가/.test(k.textContent))",
+            "[...document.querySelectorAll('#searchPanel .sr .sr-kind')].every(k=>/채팅/.test(k.textContent))",
             timeout=5000)
         # 칩을 눌러 패널을 다시 그려도 열린 채로 남아야 한다 (document 의 '바깥 클릭' 핸들러가 닫아버리던 회귀)
         assert page.locator("#searchPanel.open").is_visible()
@@ -143,8 +143,8 @@ def test_ai_daily_lines_when_present(page, site_url):
 
 def test_verify_cohort_toggle_and_histogram(page, site_url):
     _boot(page, site_url)
-    if not page.evaluate("!!(window.DATA.verify && window.DATA.verify.enabled)"):
-        pytest.skip("verify 비활성")
+    if not page.evaluate("typeof verifyOn==='function' && verifyOn()"):
+        pytest.skip("verify 비활성 또는 숨김(VERIFY_TAB_HIDDEN)")
     page.goto(site_url + "hub.html#verify")
     page.wait_for_selector("#view-verify .v-score", timeout=15000)
     assert page.locator("#vHist").count() == 1
@@ -156,3 +156,17 @@ def test_verify_cohort_toggle_and_histogram(page, site_url):
         if page.evaluate("(window.DATA.verify.themes||[]).length"):
             assert page.locator("#vThemes .v-row").count() >= 1
         assert "리포트" in page.inner_text("#view-verify .sec-sub")
+
+
+def test_verify_tab_hidden_when_flag_set(page, site_url):
+    """검증 탭은 일단 숨김 — 탭 버튼 3곳 display:none, #verify 딥링크는 홈으로, 홈 카드의 '검증 탭 →' 링크도 없어야 한다.
+    플래그가 없으면 ReferenceError 로 실패한다 — 플래그 자체가 계약이다."""
+    _boot(page, site_url, "#verify")
+    if not page.evaluate("VERIFY_TAB_HIDDEN"):
+        pytest.skip("검증 탭 활성(VERIFY_TAB_HIDDEN=false)")
+    assert page.evaluate(
+        "[...document.querySelectorAll('.tab[data-tab=\"verify\"]')].length >= 2 && "
+        "[...document.querySelectorAll('.tab[data-tab=\"verify\"]')].every(b=>getComputedStyle(b).display==='none')")
+    assert page.locator("#view-home.active").count() == 1, "#verify 는 홈으로 보내야 한다"
+    assert page.evaluate("document.querySelector('#view-verify').innerHTML.length") == 0
+    assert page.evaluate("document.querySelectorAll('#view-home [data-go=\"verify\"]').length") == 0, "홈에 죽은 '검증 탭 →' 링크"

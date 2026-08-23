@@ -48,7 +48,7 @@ function resultRow(it,tokens){
   const top=`<div class="sr-top"><span class="sr-kind">${esc(it.kind)}</span><span class="sr-title">${hl(it.title,tokens)}</span><span class="sr-date">${esc(fmtDate(it.date))}</span></div><div class="sr-snip">${hl(it.snippet,tokens)}</div>`;
   const x=it.extra||{};
   if(it.kind==='채팅뉴스') return `<a class="sr" href="${esc(safeHref(x.url))}" target="_blank" rel="noopener">${top}</a>`;
-  if(it.kind==='채팅의견'||it.kind==='목표가') return `<button class="sr" data-stock="${esc(x.stock||'')}">${top}</button>`;
+  if(it.kind==='채팅의견') return `<button class="sr" data-stock="${esc(x.stock||'')}">${top}</button>`;
   if(it.kind==='종목') return `<button class="sr" data-stock="${esc(it.title||'')}">${top}</button>`;
   return `<button class="sr" ${it.id&&FILE[it.id]?`data-report="${esc(it.id)}" data-q="${esc(it.title||'')}"`:''}>${top}</button>`;
 }

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""검색 인덱스 보강 — 사전 토큰화(hay) + 채팅 항목(뉴스·의견·목표가). 순수 함수.
+"""검색 인덱스 보강 — 사전 토큰화(hay) + 채팅 항목(뉴스·의견). 순수 함수.
 
 리포트 항목은 hublib.aggregate.build_search 가 만든다. 이 모듈은 그 결과에 hay/source 를 붙이고,
 chat_kb 에서 채팅 항목을 더한다. 계약: 스펙 §3.3 C3
@@ -57,21 +57,9 @@ def _opinion_items(chat):
     return out
 
 
-def _target_items(chat):
-    out = []
-    for t in chat.get("targets") or []:
-        title = f"{t.get('stock') or ''} 목표가 {t.get('value') or ''}{(t.get('unit') or '').strip()}"
-        it = {"kind": "목표가", "title": title, "snippet": (t.get("raw") or "")[:SNIPPET_LIMIT],
-              "date": t.get("date") or "", "id": "", "tags": [t.get("stock") or "", t.get("sharer") or ""],
-              "extra": {"stock": t.get("stock") or "", "value": t.get("value") or "",
-                        "unit": (t.get("unit") or "").strip(), "sharer": t.get("sharer") or ""},
-              "source": "chat"}
-        out.append({**it, "hay": _hay(it)})
-    return out
-
-
 def build_chat_search(chat):
-    """chat_kb → 채팅뉴스·채팅의견·목표가 검색 항목. 봇·자료(research)·비 http 링크 제외."""
+    """chat_kb → 채팅뉴스·채팅의견 검색 항목. 봇·자료(research)·비 http 링크 제외.
+    목표가(chat.targets)는 싣지 않는다 — 채팅 탭 섹션과 함께 뺐다(2026-08-23)."""
     if not chat:
         return []
-    return _news_items(chat) + _opinion_items(chat) + _target_items(chat)
+    return _news_items(chat) + _opinion_items(chat)

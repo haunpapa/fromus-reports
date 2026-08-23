@@ -46,9 +46,9 @@ def test_tab_renders_via_hash(page, site_url, tab):
 
 def test_verify_tab_when_enabled(page, site_url):
     _boot(page, site_url)
-    enabled = page.evaluate("!!(window.DATA && window.DATA.verify && window.DATA.verify.enabled)")
+    enabled = page.evaluate("typeof verifyOn==='function' && verifyOn()")
     if not enabled:
-        pytest.skip("verify 비활성 빌드")
+        pytest.skip("verify 비활성 빌드 또는 숨김(VERIFY_TAB_HIDDEN)")
     page.goto(site_url + "hub.html#verify")
     page.wait_for_selector("#view-verify .v-score", timeout=15000)
 

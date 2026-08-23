@@ -29,19 +29,19 @@ def test_with_hay_adds_lowercase_haystack_and_source():
     assert "hay" not in items[0], "입력을 변경하면 안 된다"
 
 
-def test_build_chat_search_news_opinion_target():
+def test_build_chat_search_news_and_opinion_only():
+    """목표가는 검색 인덱스에 싣지 않는다 (2026-08-23 사용자 결정 — 채팅 탭 섹션과 함께 제거)."""
     from hublib.search import build_chat_search
     out = build_chat_search(_chat())
     kinds = [i["kind"] for i in out]
-    assert kinds.count("채팅뉴스") == 1 and kinds.count("채팅의견") == 1 and kinds.count("목표가") == 1
+    assert kinds.count("채팅뉴스") == 1 and kinds.count("채팅의견") == 1
+    assert "목표가" not in kinds, "chat.targets 가 있어도 검색 항목으로 만들지 않는다"
     news = next(i for i in out if i["kind"] == "채팅뉴스")
     assert news["title"] == "반도체 급등" and news["extra"] == {"url": "https://x/1", "outlet": "연합뉴스", "stocks": ["삼성전자"], "sharer": "탱이"}
     assert "삼성전자" in news["tags"] and "반도체·메모리" in news["tags"]
     op = next(i for i in out if i["kind"] == "채팅의견")
     assert op["title"] == "삼성전자 · 가" and op["snippet"] == "삼전 간다 길게"
     assert op["extra"] == {"stock": "삼성전자", "sharer": "가", "stance": "bullish", "date": "2026-08-01"}
-    tg = next(i for i in out if i["kind"] == "목표가")
-    assert tg["title"] == "구글 목표가 300달러" and tg["extra"]["stock"] == "구글"
     assert all(i["source"] == "chat" and i["hay"] for i in out)
 
 
