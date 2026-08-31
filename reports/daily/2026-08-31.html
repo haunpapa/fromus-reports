@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════
+  프롬어스 Daily Report — 참조 템플릿 v2.3 "Ink & Ledger Interactive" (등재: 2026년 8월 19일)
+  (v2.3 = v2.1 인터랙티브 레이어 + v2.2 가독성 값 패치 병합 — 두 계보 통합, 기존 규칙 무변경)
+
+  v2.2 가독성 패치 내역 (2026년 7월 15일 · 값만 변경, 클래스 불변, 치트시트 diff 없음):
+  --ink-3 대비 상향(#6e665c, WCAG AA), 캡션·해설 폰트 +1px 내외,
+  tl-desc 14px, 모바일(≤720px) 본문 폰트 보정. apply_readability_patch.py로 재현 가능.
+═══════════════════════════════════════════════════════════════════════════
+
+  사용법:
+  1. 이 파일이 head(CSS)와 footer의 단일 출처입니다. assemble.sh가
+     body 여는 태그까지를 head로, report-footer 블록부터 끝(스크립트 포함)을
+     footer로 추출해 날짜를 교체합니다. 참조 날짜는 v1과 동일하게 2026.08.31.
+     ※ 이 주석에 마커 리터럴(body 여는 태그 등)을 그대로 쓰면 추출이 오염되므로
+       서술형으로만 표기합니다.
+  2. body.html 프래그먼트 작성 범위:
+       cover → snav(스티키 내비) → .page(섹션 01~07 + daily-quote)
+     ✕ footer 금지 — 템플릿이 공급   ✕ #pbar 금지 — 스크립트가 자동 생성
+  3. CSS(:root·컴포넌트·다크모드 오버라이드)와 면책 문구는 절대 수정 금지.
+     클래스는 CLASS_CHEATSHEET.md(v2)에 있는 것만 사용 — lint W07 검출.
+  4. 조립+검사: bash assemble.sh --date YYYY-MM-DD --body body.html
+     [--images-meta meta.json]  → FAIL 0, WARN 0까지 보강.
+
+  비협상 요구사항 (모든 출력에 예외 없이 적용):
+  ✓ <meta name="color-scheme" content="light only">   ← <head>에 존재
+  ✓ :root { color-scheme: light only; }                ← CSS 변수 블록 안
+  ✓ @media (prefers-color-scheme: dark) { ... }        ← 다크모드 오버라이드
+  ✓ html, body { background-color: #faf8f5 !important; }
+  ✓ 푸터 면책 문구: "본 리포트는 ... 투자 권유가 아닙니다."
+  ✓ Google Fonts 링크에 Noto Sans KR → Playfair Display → JetBrains Mono 순서 유지
+    (Noto Serif KR은 그 뒤에 추가 — F06 정규식 순서)
+
+  v2 디자인 규칙:
+  - 타이포 2계층 — 명조(Noto Serif KR)는 커버 타이틀·섹션 타이틀·마감 인용구
+    3곳만. 본문 한글은 전부 Noto Sans KR(굵기로 위계). 영문 장식 = Playfair
+    Display, 숫자·라벨 = JetBrains Mono.
+  - 색 관례 — 상승·순매수 = 빨강(--up) / 하락·순매도 = 파랑(--dn), 국내 관례.
+    독자용 캡션에 관례 표기를 리포트당 1회 명시.
+  - key-message-box는 섹션 03 대표님 카드 전용(W08). 섹션 07은 .watch-card.
+  - 장중 흐름 SVG 모식도 — 실측치(전일종가·고점·저점·종가)만 라벨링하고
+    캡션에 "모식도" 문구 명시. SVG 내부 class 금지(프레젠테이션 속성만).
+  - 모션 — .rv(스크롤 리빌)·.cu(카운트업, data-v/data-d)는 선택 사용.
+    prefers-reduced-motion 자동 대응 내장.
+  - 티커(.ticker-item) — 그날 실측 시세만, 동일 목록 2회 반복(무한 루프).
+
+  v2.1 인터랙티브 규칙 (모두 선택 사용 · JS 미동작/인쇄 시 전체 내용이 그대로 보이도록 설계됨):
+  - 탭(.itabs > .itab-bar > .itab-btn[data-tab] + .itab-panel[data-tab]) —
+    첫 번째 탭이 자동 활성. 본문에는 상태 클래스(on)를 쓰지 않는다.
+    긴 섹션(예: 04 수급 카드 4장 이상)을 주제별로 묶을 때 사용.
+  - 타임라인 필터(.tl-filter > .tlf-chip[data-f]) — .tl-item에 data-cat="market stock ..."
+    (공백 구분, 복수 허용). data-f="all" 칩 필수(전체 보기). 카테고리 어휘는
+    market(시장) / stock(종목·테마) / edu(교육·리서치) / lead(대표님) 4종을 기본으로.
+  - 아코디언(details.acc > summary.acc-head + .acc-body) — 네이티브 details라
+    JS 없이 동작. 보조 설명(산출 근거·부연)을 접을 때만 사용 — 핵심 내용 금지.
+    인쇄 시 자동으로 펼쳐진다(beforeprint).
+  - 퀴즈(.quiz > .quiz-kicker + .quiz-q + .quiz-opt[data-ok] + .quiz-exp) —
+    정답 버튼 1개에만 data-ok="1". 리포트당 최대 1개, 섹션 05 교육 내용과 연결.
+    JS 미동작 시 해설이 그대로 노출된다(의도된 폴백).
+  - 장중 흐름 재생 — SVG의 메인 라인 path에 data-line="1"을 주면 스크립트가
+    '다시 그리기' 버튼(.chart-btn)을 자동 생성. 본문에 버튼을 직접 쓰지 않는다.
+  - 맨 위로 버튼(#totop) — 스크립트 자동 생성. 본문에 넣지 않는다(#pbar와 동일).
+  - JS 전용 상태 클래스: on / tl-hide / itabs-live / quiz-live / quiz-open / q-ok / q-no
+    — 본문에 직접 쓰지 않는다.
+  - 수급 다이버징 바(.flow-bar)는 리빌 시 자동으로 자라나는 애니메이션이 적용된다
+    (CSS 전용 · prefers-reduced-motion 자동 대응) — 본문 작성 방식은 v2와 동일.
+
+  콘텐츠 섹션 구성 (7섹션, v1과 동일):
+  01 Market Temperature · 02 Today's Timeline · 03 Team Insights
+  04 Key Moves · 05 Key Reading · 06 Action Plan · 07 Tomorrow
+
+  호칭 규칙: members.json 참조 (이혜나 대표님 / ~쌤 / ~멘토 / 나현석썜)
+
+  아래 본문 예시는 2026-07-02 리포트 전문(메타 쇼크 급락일)입니다.
+  조립 시 head/footer만 사용되고 본문 예시는 버려지므로,
+  컴포넌트 사용 예시로 자유롭게 참고하세요.
+═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#faf8f5">
+<meta name="description" content="프롬어스 Daily Report — 카카오톡 대화 분석 기반, 프로미를 위한 일일 시장 리포트">
+<title>프롬어스 Daily Report | 2026.08.31</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ TOKENS ═══════════ */
+:root {
+  color-scheme: light only;
+  /* paper & ink */
+  --bg: #faf8f5;
+  --paper: #fffdf9;
+  --ink: #171310;
+  --ink-2: #46403a;
+  --ink-3: #6e665c;
+  --ink-4: #b7ada0;
+  --line: #e6dfd3;
+  --line-soft: #f0eadf;
+  --card: #ffffff;
+  --wash: #f5f0e7;
+  /* brass (brand) */
+  --gold: #b8860b;
+  --gold-deep: #8a6508;
+  --gold-lift: #e2b13c;
+  --gold-soft: #efdfae;
+  --gold-bg: #fdf7e7;
+  /* KR market convention — 상승=빨강 · 하락=파랑 */
+  --up: #c73a3a;
+  --up-bg: #fdeeec;
+  --up-line: #f0c9c3;
+  --dn: #2b62d9;
+  --dn-bg: #edf3fe;
+  --dn-line: #cfdefa;
+  /* qualitative */
+  --red: #c73a3a;   --red-bg: #fdeeec;
+  --green: #178a4c; --green-bg: #eaf7ee; --green-line: #cfe9d6;
+  --blue: #2b62d9;  --blue-bg: #edf3fe;
+  --purple: #7a4fd8;--purple-bg: #f4effe; --purple-line: #ded1f7;
+  --amber: #b06a12; --amber-bg: #fdf3e3;
+  --gold-border: var(--gold-soft);
+  --blue-border: var(--dn-line);
+  --red-border: var(--up-line);
+  --green-border: var(--green-line);
+  --purple-border: var(--purple-line);
+  /* dark panel (cover / closing quote) */
+  --panel: #16110c;
+  --panel-2: #221a12;
+  --panel-ink: #f4edde;
+  --panel-dim: rgba(244,237,222,.58);
+  --panel-line: rgba(244,237,222,.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: light only; }
+  html, body { background-color: #faf8f5 !important; color: #171310 !important; }
+}
+
+/* ═══════════ BASE ═══════════ */
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+html, body { background-color: #faf8f5 !important; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  word-break: keep-all;
+}
+::selection { background: var(--gold); color: #fff; }
+b, strong { font-weight: 700; color: var(--ink); }
+svg { display:block; max-width:100%; height:auto; }
+.mono { font-family:'JetBrains Mono', monospace; font-feature-settings:'tnum' 1; }
+.serif { font-family:'Playfair Display','Noto Serif KR', serif; }
+.cu { font-variant-numeric: tabular-nums; }
+.subhead {
+  font-size:15.5px; font-weight:800; letter-spacing:-.2px;
+  margin:42px 0 16px; display:flex; align-items:center; gap:10px;
+}
+.subhead::after { content:''; flex:1; height:1px; background:var(--line); }
+
+/* ═══════════ PROGRESS BAR ═══════════ */
+#pbar {
+  position:fixed; top:0; left:0; right:0; height:3px; z-index:99;
+  background:linear-gradient(90deg, var(--gold-deep), var(--gold-lift));
+  transform-origin:0 50%; transform:scaleX(0);
+}
+
+/* ═══════════ COVER — dark ink panel ═══════════ */
+.cover {
+  position:relative; min-height:94vh;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  text-align:center; padding:88px 24px 0;
+  color:var(--panel-ink); overflow:hidden;
+  background:
+    radial-gradient(1100px 640px at 18% -12%, rgba(184,134,11,.26), transparent 62%),
+    radial-gradient(880px 560px at 86% 112%, rgba(199,58,58,.17), transparent 58%),
+    linear-gradient(178deg, #1b150f 0%, #14100b 68%, #100d09 100%);
+}
+.grain {
+  position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+}
+.cover-ghost {
+  position:absolute; right:-3%; bottom:9%; z-index:0;
+  font-family:'Playfair Display', serif; font-weight:800;
+  font-size:clamp(120px, 26vw, 290px); line-height:1; letter-spacing:-6px;
+  color:transparent; -webkit-text-stroke:1px rgba(226,177,60,.22);
+  user-select:none; pointer-events:none; white-space:nowrap;
+}
+.cover-content { position:relative; z-index:1; max-width:760px; }
+.cover-label {
+  display:inline-flex; align-items:center; gap:12px;
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:700;
+  letter-spacing:5px; text-transform:uppercase; color:var(--gold-lift);
+}
+.cover-label::before, .cover-label::after {
+  content:''; width:34px; height:1px; background:linear-gradient(90deg, transparent, rgba(226,177,60,.7));
+}
+.cover-label::after { background:linear-gradient(270deg, transparent, rgba(226,177,60,.7)); }
+.cover-title {
+  font-family:'Noto Serif KR','Playfair Display', serif; font-weight:900;
+  font-size:clamp(38px, 7.2vw, 72px); line-height:1.22; letter-spacing:-.025em;
+  margin:28px 0 18px; color:#f6efe0;
+  animation: coverUp .9s cubic-bezier(.2,.7,.2,1) both;
+}
+.cover-title em {
+  font-style:normal; color:transparent;
+  background:linear-gradient(98deg, #ecc35c 8%, #c9931b 54%, #f2d489 100%);
+  -webkit-background-clip:text; background-clip:text;
+}
+.cover-sub {
+  font-size:15.5px; color:var(--panel-dim); max-width:560px; margin:0 auto;
+  line-height:1.95; font-weight:400;
+  animation: coverUp .9s .12s cubic-bezier(.2,.7,.2,1) both;
+}
+.divider-gold {
+  width:56px; height:2px; border-radius:1px; margin:32px auto;
+  background:linear-gradient(90deg, transparent, var(--gold-lift), transparent);
+}
+.cover-meta {
+  display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+  animation: coverUp .9s .22s cubic-bezier(.2,.7,.2,1) both;
+}
+.cover-meta-item {
+  min-width:128px; padding:16px 20px 13px; border-radius:16px;
+  border:1px solid var(--panel-line); background:rgba(255,255,255,.035);
+  backdrop-filter: blur(4px);
+}
+.cover-meta-item .val {
+  font-family:'JetBrains Mono', monospace; font-size:25px; font-weight:700;
+  letter-spacing:-.5px; color:#ecc35c;
+}
+.cover-meta-item .lbl {
+  font-size:10.5px; letter-spacing:2.6px; text-transform:uppercase;
+  color:var(--panel-dim); margin-top:7px; font-weight:600;
+}
+.cover-scroll {
+  margin:46px auto 30px; font-family:'JetBrains Mono', monospace;
+  font-size:10.5px; font-weight:600; letter-spacing:3.5px; color:rgba(244,237,222,.42);
+}
+.cover-scroll-line {
+  display:block; width:1px; height:42px; margin:12px auto 0;
+  background:linear-gradient(rgba(236,195,92,.85), transparent);
+  animation: drip 2.2s ease-in-out infinite;
+}
+@keyframes coverUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
+@keyframes drip { 0% { transform:scaleY(0); transform-origin:top; } 55% { transform:scaleY(1); transform-origin:top; } 100% { transform:scaleY(0); transform-origin:bottom; } }
+
+/* ticker */
+.ticker {
+  position:relative; width:100%; overflow:hidden;
+  border-top:1px solid var(--panel-line); background:rgba(0,0,0,.28);
+}
+.ticker::before, .ticker::after {
+  content:''; position:absolute; top:0; bottom:0; width:60px; z-index:2; pointer-events:none;
+}
+.ticker::before { left:0; background:linear-gradient(90deg, #14100b, transparent); }
+.ticker::after { right:0; background:linear-gradient(270deg, #14100b, transparent); }
+.ticker-track {
+  display:inline-flex; white-space:nowrap; padding:13px 0;
+  animation: tick 38s linear infinite; will-change:transform;
+}
+.ticker-item {
+  font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:600;
+  letter-spacing:.5px; color:rgba(244,237,222,.78);
+  padding:0 26px; border-right:1px solid var(--panel-line);
+}
+.ticker-item b { color:#ecc35c; font-weight:700; }
+.tk-up { color:#ff8f85; }
+.tk-dn { color:#8fb3ff; }
+@keyframes tick { to { transform:translateX(-50%); } }
+
+/* ═══════════ STICKY NAV ═══════════ */
+.snav {
+  position:sticky; top:0; z-index:60;
+  background:rgba(250,248,245,.88);
+  -webkit-backdrop-filter:blur(10px) saturate(1.4); backdrop-filter:blur(10px) saturate(1.4);
+  border-bottom:1px solid var(--line);
+}
+.snav-in {
+  max-width:860px; margin:0 auto; display:flex; gap:6px; align-items:center;
+  padding:10px 16px; overflow-x:auto; scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+  mask-image:linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+}
+.snav-in::-webkit-scrollbar { display:none; }
+.nav-chip {
+  flex:0 0 auto; display:inline-flex; align-items:center; gap:7px;
+  padding:7px 13px; border-radius:999px; border:1px solid var(--line);
+  background:#fff; color:var(--ink-2); font-size:12px; font-weight:600;
+  text-decoration:none; transition:border-color .2s, color .2s, background .2s;
+}
+.nav-chip b { font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:700; color:var(--gold); letter-spacing:.5px; }
+.nav-chip:hover { border-color:var(--gold); color:var(--ink); }
+.nav-chip.on { background:var(--ink); border-color:var(--ink); color:#f4edde; }
+.nav-chip.on b { color:#ecc35c; }
+.nav-chip:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+/* ═══════════ LAYOUT ═══════════ */
+.page { max-width: 820px; margin: 0 auto; padding: 6px 24px 0; }
+.section { padding-top: 88px; scroll-margin-top: 54px; }
+.section-header {
+  border-top:2.5px solid var(--ink);
+  padding-top:18px; margin-bottom:36px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.section-num {
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700;
+  letter-spacing:2px; color:var(--gold-deep);
+  background:var(--gold-bg); border:1px solid var(--gold-soft);
+  padding:5px 11px; border-radius:999px;
+}
+.section-title {
+  font-family:'Noto Serif KR', serif; font-weight:900;
+  font-size:clamp(23px, 4.4vw, 31px); letter-spacing:-.02em; line-height:1.3;
+}
+.section-subtitle {
+  width:100%; font-family:'JetBrains Mono', monospace;
+  font-size:10.5px; font-weight:600; letter-spacing:2.2px; text-transform:uppercase;
+  color:var(--ink-3); margin-top:2px;
+}
+
+/* reveal on scroll */
+.rv { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.rv-init { opacity:0; transform:translateY(18px); }
+.rv.in { opacity:1; transform:none; }
+
+/* ═══════════ CALLOUT ═══════════ */
+.callout {
+  position:relative; padding:22px 24px 21px 56px; border-radius:16px;
+  font-size:14px; line-height:1.95; margin-bottom:22px;
+  background:var(--card); border:1px solid var(--line);
+}
+.callout-icon { position:absolute; left:19px; top:22px; font-size:19px; line-height:1.3; }
+.callout.red    { background:#fdf5f4; border-color:var(--up-line);    box-shadow:inset 3px 0 0 var(--up); }
+.callout.blue   { background:#f4f8fe; border-color:var(--dn-line);    box-shadow:inset 3px 0 0 var(--dn); }
+.callout.gold   { background:var(--gold-bg); border-color:var(--gold-soft); box-shadow:inset 3px 0 0 var(--gold); }
+.callout.green  { background:#f2faf4; border-color:var(--green-line);  box-shadow:inset 3px 0 0 var(--green); }
+.callout.purple { background:#f8f5fe; border-color:var(--purple-line); box-shadow:inset 3px 0 0 var(--purple); }
+
+/* ═══════════ 01. MARKET TEMP — bento ═══════════ */
+.temp-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:16px; margin:10px 0 8px; }
+.temp-card {
+  position:relative; grid-column:span 2; overflow:hidden;
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:22px 22px 18px;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.temp-card:hover { transform:translateY(-3px); box-shadow:0 16px 34px -22px rgba(23,19,16,.3); }
+.temp-card.wide { grid-column:span 4; }
+.temp-card.notes { grid-column:span 4; }
+.top-bar { position:absolute; top:0; left:0; right:0; height:3px; }
+.top-bar.up   { background:linear-gradient(90deg, var(--up), #e0705f); }
+.top-bar.down { background:linear-gradient(90deg, var(--dn), #6d94ea); }
+.top-bar.warn { background:linear-gradient(90deg, var(--amber), #d99a3f); }
+.temp-label {
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:1.8px; text-transform:uppercase; color:var(--ink-3);
+}
+.temp-val {
+  font-family:'JetBrains Mono', monospace; font-weight:700;
+  font-size:clamp(25px, 4.6vw, 31px); letter-spacing:-1.2px; margin:7px 0 3px;
+  font-variant-numeric:tabular-nums;
+}
+.temp-card.wide .temp-val { font-size:clamp(34px, 6vw, 44px); }
+.temp-chg {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:700;
+  padding:4px 10px; border-radius:8px; margin:3px 0 9px;
+}
+.temp-chg.up   { color:var(--up); background:var(--up-bg); }
+.temp-chg.down { color:var(--dn); background:var(--dn-bg); }
+.temp-chg.warn { color:var(--amber); background:var(--amber-bg); }
+.temp-explain { font-size:13.5px; color:var(--ink-3); line-height:1.75; }
+
+/* record card */
+.rec-list { margin-top:4px; }
+.rec-chip {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 2px; border-bottom:1px dashed var(--line);
+  font-size:13px; color:var(--ink-2);
+}
+.rec-chip:last-child { border-bottom:none; }
+.rec-ico {
+  width:30px; height:30px; flex:0 0 30px; border-radius:10px;
+  background:var(--wash); display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.rec-chip b { font-family:'JetBrains Mono', monospace; letter-spacing:-.3px; }
+
+/* intraday schematic chart */
+.chart-wrap { margin-top:18px; }
+.chart-cap { font-size:12px; color:var(--ink-3); line-height:1.7; margin-top:9px; }
+
+/* ═══════════ supply flow (diverging bars) ═══════════ */
+.flow {
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:24px 24px 18px; margin:8px 0 20px;
+}
+.flow-h {
+  display:flex; justify-content:space-between; gap:10px;
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-3); margin-bottom:12px;
+}
+.flow-h .tk-up, .flow-h .tk-dn { letter-spacing:.5px; }
+.flow-h .tk-up { color:var(--up); } .flow-h .tk-dn { color:var(--dn); }
+.flow-group {
+  font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--ink-4);
+  text-transform:uppercase; font-family:'JetBrains Mono', monospace;
+  margin:10px 0 2px; padding-top:8px; border-top:1px solid var(--line-soft);
+}
+.flow-h + .flow-group { border-top:none; padding-top:0; margin-top:2px; }
+.flow-row { display:grid; grid-template-columns:64px 1fr 96px; gap:12px; align-items:center; padding:9px 0; }
+.flow-name { font-size:13px; font-weight:600; color:var(--ink-2); }
+.flow-track { position:relative; height:22px; background:var(--wash); border-radius:6px; overflow:hidden; }
+.flow-track::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--line); }
+.flow-bar { position:absolute; top:3px; bottom:3px; border-radius:4px; max-width:50%; }
+.flow-bar.buy  { left:50%; background:linear-gradient(90deg, #d75a4a, var(--up)); border-radius:0 4px 4px 0; }
+.flow-bar.sell { right:50%; background:linear-gradient(270deg, #6d94ea, var(--dn)); border-radius:4px 0 0 4px; }
+.flow-val { font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:700; text-align:right; letter-spacing:-.3px; }
+.pos { color:var(--up); }
+.neg { color:var(--dn); }
+.flow-note {
+  font-size:12.5px; color:var(--ink-3); line-height:1.75;
+  margin-top:10px; padding-top:11px; border-top:1px dashed var(--line);
+}
+
+/* black days strip */
+.blackdays { display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin:10px 0 10px; }
+.bd-item {
+  position:relative; text-align:center; padding:15px 6px 13px;
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+}
+.bd-date { font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600; letter-spacing:.5px; color:var(--ink-3); }
+.bd-val  { font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:800; letter-spacing:-.4px; color:var(--dn); margin-top:3px; }
+.bd-item.cur { background:var(--ink); border-color:var(--ink); box-shadow:0 12px 24px -16px rgba(23,19,16,.55); }
+.bd-item.cur .bd-date { color:rgba(244,237,222,.55); }
+.bd-item.cur .bd-val  { color:#8fb3ff; }
+.bd-tag {
+  position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+  font-size:10px; font-weight:800; letter-spacing:1px; color:#fff;
+  background:var(--up); border-radius:999px; padding:2px 8px;
+}
+.bd-cap { font-size:12px; color:var(--ink-3); line-height:1.7; margin:10px 0 26px; }
+
+/* ═══════════ 02. TIMELINE ═══════════ */
+.timeline { position:relative; margin-top:10px; }
+.tl-item { position:relative; padding:0 0 40px 56px; }
+.tl-item::before {
+  content:''; position:absolute; left:17px; top:28px; bottom:-2px; width:2px;
+  background:linear-gradient(var(--line), var(--line-soft));
+}
+.tl-item:last-child { padding-bottom:8px; }
+.tl-item:last-child::before { display:none; }
+.tl-dot {
+  position:absolute; left:8px; top:5px; width:20px; height:20px; border-radius:50%;
+  border:3.5px solid #fff;
+}
+.tl-dot.crisis { background:var(--up);    box-shadow:0 0 0 2px var(--up-line),   0 0 0 7px rgba(199,58,58,.09); }
+.tl-dot.turn   { background:var(--amber); box-shadow:0 0 0 2px #ecd3ad,          0 0 0 7px rgba(176,106,18,.09); }
+.tl-dot.hope   { background:var(--green); box-shadow:0 0 0 2px var(--green-line),0 0 0 7px rgba(23,138,76,.09); }
+.tl-dot.info   { background:var(--dn);    box-shadow:0 0 0 2px var(--dn-line),   0 0 0 7px rgba(43,98,217,.09); }
+.tl-date {
+  display:inline-flex; font-family:'JetBrains Mono', monospace;
+  font-size:10.5px; font-weight:700; letter-spacing:1.2px; color:var(--ink-3);
+  background:var(--card); border:1px solid var(--line);
+  padding:4px 11px; border-radius:999px; margin-bottom:11px;
+}
+.tl-title {
+  font-family:'Noto Sans KR', sans-serif; font-weight:800;
+  font-size:16px; line-height:1.6; letter-spacing:-.3px; margin-bottom:8px;
+}
+.tl-desc { font-size:14px; color:var(--ink-2); line-height:1.9; }
+.tl-impact { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+.tl-tag {
+  font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; border:1px solid;
+  font-family:'JetBrains Mono', monospace; letter-spacing:-.2px;
+}
+.tl-tag.good    { color:var(--green); background:var(--green-bg); border-color:var(--green-line); }
+.tl-tag.bad     { color:var(--red);   background:var(--red-bg);   border-color:var(--up-line); }
+.tl-tag.neutral { color:var(--ink-3); background:var(--wash);     border-color:var(--line); }
+
+/* ═══════════ 03. INSIGHTS ═══════════ */
+.insight-card {
+  position:relative; background:var(--card); border:1px solid var(--line);
+  border-radius:20px; padding:30px; margin-bottom:24px;
+}
+.insight-card.lead {
+  border:1.5px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(140deg, #e8c467, var(--gold) 45%, #8a6508 100%) border-box;
+  box-shadow:0 24px 48px -34px rgba(184,134,11,.55);
+}
+.insight-top { display:flex; gap:14px; align-items:center; margin-bottom:16px; }
+.insight-avatar {
+  width:50px; height:50px; flex:0 0 50px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:19px;
+  box-shadow:0 10px 18px -10px rgba(0,0,0,.4);
+}
+.insight-name { font-weight:800; font-size:16.5px; letter-spacing:-.2px; }
+.insight-role {
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:500;
+  color:var(--ink-3); letter-spacing:.2px; margin-top:3px;
+}
+.insight-body { font-size:14px; color:var(--ink-2); line-height:1.95; }
+
+.key-message-box {
+  position:relative; margin:22px 0 10px; padding:24px 24px 10px;
+  background:linear-gradient(180deg, #fffdf6, #fcf5e1);
+  border:1px solid var(--gold-soft); border-radius:16px;
+}
+.key-message-box::before {
+  content:'💛 이혜나 대표님의 핵심 메시지';
+  display:block; font-family:'JetBrains Mono', monospace;
+  font-size:11px; font-weight:700; letter-spacing:1.2px;
+  color:var(--gold-deep); margin-bottom:6px;
+}
+.key-row { display:grid; grid-template-columns:38px 1fr; gap:14px; padding:16px 0; }
+.key-content { min-width:0; }
+.key-row + .key-row { border-top:1px dashed var(--gold-soft); }
+.key-num {
+  width:36px; height:36px; border-radius:12px;
+  background:var(--card); border:1px solid var(--gold-soft); color:var(--gold-deep);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display', serif; font-weight:800; font-size:16px;
+  box-shadow:0 5px 12px -7px rgba(184,134,11,.45);
+}
+.key-title { font-weight:800; font-size:14.5px; letter-spacing:-.2px; margin-bottom:4px; line-height:1.6; }
+.key-desc { font-size:13.5px; color:var(--ink-2); line-height:1.9; }
+
+/* speech-bubble quote — 카카오톡 오마주 */
+.insight-quote {
+  position:relative; margin:24px 4px 8px;
+  background:#fff6cf; border:1px solid #eedd9a;
+  border-radius:18px 18px 18px 5px;
+  padding:19px 22px 17px 50px;
+  font-family:'Noto Sans KR', sans-serif; font-weight:600;
+  font-size:14.5px; line-height:1.9; color:#5d4a10;
+}
+.insight-quote::before {
+  content:'“'; position:absolute; left:16px; top:7px;
+  font-family:'Playfair Display', serif; font-weight:800; font-size:34px; line-height:1;
+  color:#d3ab35;
+}
+.insight-quote::after {
+  content:''; position:absolute; left:-9px; bottom:13px;
+  border:9px solid transparent; border-right-color:#fff6cf; border-left:0;
+}
+
+.insight-bullets { list-style:none; margin:16px 0 4px; }
+.insight-bullets li {
+  position:relative; padding:13px 0 13px 33px;
+  font-size:13.5px; color:var(--ink-2); line-height:1.85;
+}
+.insight-bullets li + li { border-top:1px dashed var(--line); }
+.insight-bullets li::before { position:absolute; left:2px; top:13px; font-size:15px; }
+.insight-bullets li.news::before  { content:'📰'; }
+.insight-bullets li.chart::before { content:'📊'; }
+.insight-bullets li.edu::before   { content:'📚'; }
+.insight-bullets li.tip::before   { content:'💡'; }
+.insight-bullets li.robot::before { content:'🤖'; }
+.insight-bullets li.money::before { content:'💰'; }
+.insight-bullets li.eye::before   { content:'👁️'; }
+.insight-bullets li.warn::before  { content:'⚠️'; }
+
+/* ═══════════ 04. KEY MOVES ═══════════ */
+.sector-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px; }
+.sector-card {
+  background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.sector-card:hover { transform:translateY(-3px); box-shadow:0 16px 34px -22px rgba(23,19,16,.3); }
+.sector-head { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
+.sector-icon {
+  width:42px; height:42px; flex:0 0 42px; border-radius:13px;
+  background:var(--wash); display:flex; align-items:center; justify-content:center; font-size:20px;
+}
+.sector-name { font-weight:800; font-size:14.5px; letter-spacing:-.2px; }
+.sector-name-sub {
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:500;
+  color:var(--ink-3); letter-spacing:.4px; margin-top:2px;
+}
+.sector-stocks { display:flex; flex-wrap:wrap; gap:7px; margin:4px 0 14px; }
+.sector-stocks span {
+  font-size:12px; font-weight:600; color:var(--ink-2);
+  background:var(--wash); border:1px solid var(--line);
+  padding:5px 10px; border-radius:8px; letter-spacing:-.2px;
+}
+.sector-note {
+  font-size:13.5px; color:var(--ink-3); line-height:1.8;
+  border-top:1px dashed var(--line); padding-top:11px;
+}
+
+/* ═══════════ 05. KEY READING ═══════════ */
+.edu-card {
+  position:relative; background:var(--card); border:1px solid var(--line);
+  border-radius:18px; padding:28px 26px 24px 32px; margin-bottom:22px; overflow:hidden;
+}
+.edu-card::before {
+  content:''; position:absolute; left:0; top:18px; bottom:18px; width:4px;
+  border-radius:0 4px 4px 0; background:var(--spine, var(--gold));
+}
+.edu-tag {
+  display:inline-flex; font-size:11px; font-weight:700; letter-spacing:.3px;
+  padding:5px 11px; border-radius:999px; margin-bottom:11px; border:1px solid;
+}
+.edu-tag.gold   { color:var(--gold-deep); background:var(--gold-bg);   border-color:var(--gold-soft); }
+.edu-tag.purple { color:var(--purple);    background:var(--purple-bg); border-color:var(--purple-line); }
+.edu-tag.blue   { color:var(--dn);        background:var(--dn-bg);     border-color:var(--dn-line); }
+.edu-tag.green  { color:var(--green);     background:var(--green-bg);  border-color:var(--green-line); }
+.edu-title {
+  font-family:'Noto Sans KR', sans-serif; font-weight:800;
+  font-size:16.5px; line-height:1.65; letter-spacing:-.3px; margin-bottom:12px;
+}
+.edu-body { font-size:13.5px; color:var(--ink-2); line-height:1.95; }
+.edu-box { border-radius:14px; padding:17px 19px; margin:18px 0; font-size:13px; line-height:1.9; border:1px solid; }
+.edu-box.formula { background:#f4f7fe; border-color:var(--dn-line); }
+.edu-box.tip     { background:#fffaea; border-color:#f0e2ab; }
+.edu-box.example { background:#f3faf5; border-color:var(--green-line); }
+.edu-box.warning { background:#fdf3f1; border-color:var(--up-line); }
+
+/* ═══════════ 06. ACTION PLAN ═══════════ */
+.checklist { display:flex; flex-direction:column; gap:12px; margin-top:8px; }
+.check-item {
+  display:grid; grid-template-columns:32px 1fr; gap:14px; align-items:start;
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px; font-size:13.5px; line-height:1.85; color:var(--ink-2);
+  transition:transform .2s ease, border-color .2s ease;
+}
+.check-item:hover { transform:translateX(4px); border-color:var(--ink-4); }
+.check-icon {
+  width:30px; height:30px; border-radius:10px; margin-top:2px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:14px; border:1px solid;
+}
+.check-icon.do    { color:var(--green); background:var(--green-bg); border-color:var(--green-line); }
+.check-icon.dont  { color:var(--red);   background:var(--red-bg);   border-color:var(--up-line); }
+.check-icon.watch { color:var(--dn);    background:var(--dn-bg);    border-color:var(--dn-line); }
+
+/* ═══════════ 07. TOMORROW ═══════════ */
+.watch-card {
+  background:var(--card); border:1.5px solid var(--dn-line); border-radius:20px;
+  padding:14px 28px; box-shadow:0 20px 44px -34px rgba(43,98,217,.55);
+}
+.watch-card .key-row + .key-row { border-top:1px dashed var(--line); }
+.watch-card .key-num { border-color:var(--line); box-shadow:none; font-size:15px; }
+
+/* ═══════════ DAILY QUOTE — dark bookend ═══════════ */
+.daily-quote {
+  position:relative; margin:84px 0 64px; overflow:hidden;
+  border-radius:26px; padding:64px 30px 54px; text-align:center;
+  color:#f0e8d5;
+  background:
+    radial-gradient(720px 340px at 82% -24%, rgba(236,195,92,.2), transparent 62%),
+    radial-gradient(520px 300px at 8% 118%, rgba(199,58,58,.14), transparent 58%),
+    linear-gradient(158deg, #1b150f, #13100b);
+}
+.daily-quote blockquote {
+  position:relative; z-index:1;
+  font-family:'Noto Serif KR', serif; font-weight:800;
+  font-size:clamp(20px, 4vw, 27px); line-height:1.75; letter-spacing:-.02em;
+  color:#eec25f; max-width:580px; margin:0 auto 16px;
+}
+.daily-quote cite {
+  position:relative; z-index:1; font-style:normal;
+  font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500;
+  letter-spacing:.5px; color:rgba(240,232,213,.55);
+}
+.dq-mark {
+  position:absolute; left:6%; top:-2%; z-index:0;
+  font-family:'Playfair Display', serif; font-weight:800; font-size:190px; line-height:1;
+  color:rgba(236,195,92,.09); user-select:none; pointer-events:none;
+}
+.dq-bubble {
+  position:relative; z-index:1; max-width:400px; margin:30px auto 0;
+  background:#ffe462; color:#413306;
+  border-radius:20px 20px 20px 6px; padding:18px 22px;
+  font-size:14px; font-weight:600; line-height:1.95; text-align:left;
+  box-shadow:0 18px 36px -20px rgba(0,0,0,.6);
+}
+.dq-bubble::after {
+  content:''; position:absolute; left:-9px; bottom:15px;
+  border:10px solid transparent; border-right-color:#ffe462; border-left:0;
+}
+.dq-bubble small { display:block; margin-top:8px; font-size:11.5px; font-weight:500; color:#7a6410; }
+
+/* ═══════════ FOOTER ═══════════ */
+.report-footer {
+  max-width:820px; margin:0 auto; padding:40px 20px 72px;
+  text-align:center; color:var(--ink-3); font-size:12.5px; line-height:1.9;
+  border-top:1px solid var(--line);
+}
+.report-footer .logo {
+  font-family:'Playfair Display', serif; font-size:22px; letter-spacing:.5px;
+  color:var(--gold); margin-bottom:10px;
+}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 720px) {
+  .cover { min-height:88vh; padding-top:76px; }
+  .cover-meta-item { min-width:100px; padding:13px 14px 11px; }
+  .cover-meta-item .val { font-size:21px; }
+  .temp-grid { grid-template-columns:1fr 1fr; gap:13px; }
+  .temp-card { grid-column:span 1; }
+  .temp-card.wide, .temp-card.notes { grid-column:span 2; }
+  .sector-grid { grid-template-columns:1fr; }
+  .flow-row { grid-template-columns:52px 1fr 82px; gap:9px; }
+  .blackdays { gap:8px; }
+  .bd-val { font-size:13px; }
+  .bd-date { font-size:10px; }
+  .tl-item { padding-left:48px; }
+  .tl-dot { left:5px; }
+  .tl-item::before { left:14px; }
+  .insight-card, .edu-card { padding:24px 20px; }
+  .edu-card { padding-left:25px; }
+  .key-message-box { padding:20px 18px 8px; }
+  .section { padding-top:64px; }
+  .daily-quote { padding:52px 22px 46px; }
+  .tl-desc, .insight-body { font-size:14.5px; }
+  .temp-explain, .key-desc, .insight-bullets li, .edu-body { font-size:14px; }
+}
+@media (max-width: 400px) {
+  .blackdays { grid-template-columns:repeat(5, 1fr); }
+  .bd-item { padding:10px 3px 9px; border-radius:11px; }
+}
+
+/* ═══════════ MOTION SAFETY & PRINT ═══════════ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  .ticker-track, .cover-scroll-line, .cover-title, .cover-sub, .cover-meta { animation:none !important; }
+  .rv, .temp-card, .sector-card, .check-item { transition:none !important; }
+  .rv-init { opacity:1 !important; transform:none !important; }
+}
+
+/* ═══════════ v2.1 INTERACTIVE ═══════════ */
+/* tabs — JS가 .itabs-live 부여 전에는 모든 패널 노출(무JS 폴백) */
+.itabs { margin:8px 0 20px; }
+.itab-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.itab-btn {
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-3); font-family:'Noto Sans KR', sans-serif; font-size:12.5px; font-weight:700;
+  letter-spacing:-.2px; padding:9px 16px; border-radius:999px; cursor:pointer;
+  transition:border-color .18s ease, background .18s ease, color .18s ease;
+}
+.itab-btn:hover { border-color:var(--gold-soft); color:var(--ink-2); }
+.itab-btn.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+.itabs-live .itab-panel { display:none; }
+.itabs-live .itab-panel.on { display:block; }
+
+/* timeline filter */
+.tl-filter { display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 24px; }
+.tlf-chip {
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-3); font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:600;
+  letter-spacing:.4px; padding:7px 13px; border-radius:999px; cursor:pointer;
+  transition:border-color .18s ease, background .18s ease, color .18s ease;
+}
+.tlf-chip:hover { border-color:var(--gold-soft); color:var(--ink-2); }
+.tlf-chip.on { background:var(--gold); border-color:var(--gold); color:#fff; }
+.tl-item.tl-hide { display:none; }
+
+/* accordion (native details — JS 불필요) */
+.acc { border:1px solid var(--line); border-radius:14px; background:var(--card); margin:14px 0 6px; overflow:hidden; }
+.acc-head {
+  list-style:none; cursor:pointer; padding:14px 18px; font-size:13.5px; font-weight:700;
+  color:var(--ink-2); display:flex; align-items:center; justify-content:space-between; gap:10px;
+  -webkit-user-select:none; user-select:none;
+}
+.acc-head::-webkit-details-marker { display:none; }
+.acc-head::after {
+  content:'+'; font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--gold);
+  font-size:17px; line-height:1; transition:transform .2s ease; flex:0 0 auto;
+}
+.acc[open] > .acc-head::after { transform:rotate(45deg); }
+.acc[open] > .acc-head { border-bottom:1px dashed var(--line); }
+.acc-body { padding:6px 18px 16px; }
+.acc-body .edu-box { margin:8px 0 2px; }
+
+/* pop quiz */
+.quiz {
+  background:var(--card); border:1px solid var(--gold-soft); border-radius:18px;
+  padding:24px 24px 20px; margin:22px 0 8px;
+}
+.quiz-kicker {
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-deep); margin-bottom:10px;
+}
+.quiz-q { font-size:15px; font-weight:800; color:var(--ink); letter-spacing:-.3px; line-height:1.55; margin-bottom:14px; }
+.quiz-opt {
+  display:block; width:100%; text-align:left; appearance:none; -webkit-appearance:none; cursor:pointer;
+  background:var(--wash); border:1px solid var(--line); border-radius:12px;
+  font-family:'Noto Sans KR', sans-serif; font-size:13.5px; font-weight:500; color:var(--ink-2);
+  padding:12px 15px; margin:8px 0; line-height:1.6;
+  transition:border-color .18s ease, background .18s ease;
+}
+.quiz-opt:hover:not(:disabled) { border-color:var(--gold-soft); background:var(--gold-bg); }
+.quiz-opt:disabled { cursor:default; opacity:.72; }
+.quiz-opt.q-ok { background:var(--green-bg); border-color:var(--green-line); color:var(--green); font-weight:700; opacity:1; }
+.quiz-opt.q-no { background:var(--up-bg); border-color:var(--up-line); color:var(--up); opacity:1; }
+.quiz-exp {
+  font-size:13px; color:var(--ink-2); line-height:1.8; margin-top:12px;
+  padding-top:13px; border-top:1px dashed var(--line);
+}
+.quiz-live .quiz-exp { display:none; }
+.quiz-live.quiz-open .quiz-exp { display:block; }
+
+/* chart replay button (스크립트 자동 생성 — 본문 작성 금지) */
+.chart-btn {
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-3); font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.6px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-top:10px;
+  transition:border-color .18s ease, color .18s ease;
+}
+.chart-btn:hover { border-color:var(--gold-soft); color:var(--gold-deep); }
+
+/* back to top (스크립트 자동 생성) */
+#totop {
+  position:fixed; right:18px; bottom:20px; z-index:60; width:42px; height:42px;
+  border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); color:var(--panel-ink);
+  font-family:'JetBrains Mono', monospace; font-size:16px; line-height:1; cursor:pointer;
+  opacity:0; visibility:hidden; transform:translateY(8px);
+  transition:opacity .25s ease, visibility .25s ease, transform .25s ease;
+  box-shadow:0 6px 18px rgba(23,19,16,.22);
+}
+#totop.on { opacity:.92; visibility:visible; transform:translateY(0); }
+
+/* flow bar grow-in — rv 리빌 연동(CSS 전용, reduced-motion 자동 대응) */
+.rv-init .flow-bar.buy  { transform:scaleX(0); transform-origin:left center; }
+.rv-init .flow-bar.sell { transform:scaleX(0); transform-origin:right center; }
+.rv.in .flow-bar { transform:scaleX(1); transition:transform .9s cubic-bezier(.25,.8,.35,1) .15s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .itab-btn, .tlf-chip, .quiz-opt, .chart-btn, #totop, .acc-head::after, .flow-bar { transition:none !important; }
+}
+@media (max-width: 620px) {
+  .quiz { padding:20px 18px 16px; }
+  .itab-btn { font-size:12px; padding:8px 14px; }
+  #totop { right:14px; bottom:16px; width:40px; height:40px; }
+}
+@media print {
+  #totop, .chart-btn, .tl-filter, .itab-bar { display:none !important; }
+  .tl-item.tl-hide { display:block !important; }
+  .itabs-live .itab-panel { display:block !important; }
+  .quiz-live .quiz-exp { display:block !important; }
+}
+
+@media print {
+  #pbar, .snav, .ticker, .cover-scroll { display:none !important; }
+  .cover, .daily-quote { min-height:auto; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+</head>
+<body>
+<!-- COVER -->
+<div class="cover">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cover-ghost" aria-hidden="true">+0.46%</div>
+  <div class="cover-content">
+    <div class="cover-label">From Us · Daily Report</div>
+    <h1 class="cover-title">
+      <em>셋 다 팔았는데</em>,<br>지수는 고가에서 닫았습니다
+    </h1>
+    <p class="cover-sub">
+      워시와 중동이 겹쳐 −3%대로 열린 장이 +0.46%로 마감했어요.<br>
+      현물은 외국인·기관·개인 모두 순매도. 답은 선물과 8월 마지막 종가에 있었습니다.
+    </p>
+    <div class="divider-gold"></div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="val"><span class="cu" data-v="6820.02" data-d="2">6,820.02</span></div><div class="lbl">KOSPI</div></div>
+      <div class="cover-meta-item"><div class="val">−<span class="cu" data-v="15784" data-d="0">15,784</span></div><div class="lbl">코스피 현물 3주체 합계(억)</div></div>
+      <div class="cover-meta-item"><div class="val"><span class="cu" data-v="123" data-d="0">123</span></div><div class="lbl">Messages</div></div>
+    </div>
+    <div class="cover-scroll">SCROLL<span class="cover-scroll-line"></span></div>
+  </div>
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-item">KOSPI <b>6,820.02</b> <span class="tk-up">▲0.46%</span></span>
+      <span class="ticker-item">KOSDAQ <b>834.29</b> <span class="tk-dn">▼0.49%</span></span>
+      <span class="ticker-item">USD/KRW <b>1,370.5</b> <span class="tk-dn">▼9.0</span></span>
+      <span class="ticker-item">WTI <b>$85.02</b> <span class="tk-up">▲1.94%</span></span>
+      <span class="ticker-item">US 10Y <b>4.713%</b></span>
+      <span class="ticker-item">KTB 3Y <b>3.837%</b></span>
+      <span class="ticker-item">삼성전자 <span class="tk-up">▲1.17%</span></span>
+      <span class="ticker-item">SK하이닉스 <span class="tk-up">▲1.27%</span></span>
+      <span class="ticker-item">삼성전기 <span class="tk-up">▲2.60%</span></span>
+      <span class="ticker-item">코스피 거래대금 <b>26.0조</b></span>
+      <span class="ticker-item">KOSPI <b>6,820.02</b> <span class="tk-up">▲0.46%</span></span>
+      <span class="ticker-item">KOSDAQ <b>834.29</b> <span class="tk-dn">▼0.49%</span></span>
+      <span class="ticker-item">USD/KRW <b>1,370.5</b> <span class="tk-dn">▼9.0</span></span>
+      <span class="ticker-item">WTI <b>$85.02</b> <span class="tk-up">▲1.94%</span></span>
+      <span class="ticker-item">US 10Y <b>4.713%</b></span>
+      <span class="ticker-item">KTB 3Y <b>3.837%</b></span>
+      <span class="ticker-item">삼성전자 <span class="tk-up">▲1.17%</span></span>
+      <span class="ticker-item">SK하이닉스 <span class="tk-up">▲1.27%</span></span>
+      <span class="ticker-item">삼성전기 <span class="tk-up">▲2.60%</span></span>
+      <span class="ticker-item">코스피 거래대금 <b>26.0조</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY NAV -->
+<nav class="snav" aria-label="섹션 이동">
+  <div class="snav-in">
+    <a class="nav-chip" href="#s01"><b>01</b>시장 온도</a>
+    <a class="nav-chip" href="#s02"><b>02</b>타임라인</a>
+    <a class="nav-chip" href="#s03"><b>03</b>인사이트</a>
+    <a class="nav-chip" href="#s04"><b>04</b>수급</a>
+    <a class="nav-chip" href="#s05"><b>05</b>리딩</a>
+    <a class="nav-chip" href="#s06"><b>06</b>액션 플랜</a>
+    <a class="nav-chip" href="#s07"><b>07</b>내일</a>
+    <a class="nav-chip" href="#s08"><b>08</b>퀴즈</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- 01. MARKET TEMPERATURE -->
+<div class="section" id="s01">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-title">오늘의 시장 온도</div>
+      <div class="section-subtitle">Market Temperature · 8월 31일 마감 기준</div>
+    </div>
+  </div>
+
+  <div class="callout purple rv">
+    <span class="callout-icon">🎢</span>
+    <b>아침의 공포가 오후까지 가지 않은 하루</b>였어요. 금요일 밤 잭슨홀에서 나온 케빈 워시 의장의 매파 발언에, 미군의 이란 호르무즈 기뢰 발사대 타격 소식이 겹치면서 코스피는 6,613으로 열어 장중 6,547까지 밀렸습니다. 전일 종가(6,788.88) 대비 −3.5%. 그런데 오후 들어 대형주에 저가 매수가 들어오며 6,820.02(+0.46%)로, 그것도 장중 고가 근처에서 마감했어요. 코스닥은 장중 805선까지 −3%대를 겪은 뒤 834.29(−0.49%)로 좁혀 마쳤습니다.
+  </div>
+
+  <div class="temp-grid rv">
+    <div class="temp-card wide">
+      <div class="top-bar up"></div>
+      <div class="temp-label">KOSPI · 코스피</div>
+      <div class="temp-val"><span class="cu" data-v="6820.02" data-d="2">6,820.02</span></div>
+      <div class="temp-chg up">▲ 31.14p (+0.46%)</div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 660 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="8월 31일 코스피 장중 흐름 모식도">
+          <defs>
+            <linearGradient id="kospiFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c0392b" stop-opacity="0.16"/>
+              <stop offset="100%" stop-color="#c0392b" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="44" y1="76" x2="636" y2="76" stroke="#c9c0b2" stroke-width="1" stroke-dasharray="4 5"/>
+          <text x="634" y="69" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#8a8177">전일 종가 6,788.88</text>
+          <path d="M 60 166 C 90 179, 120 195, 150 200 C 200 196, 250 179, 300 159 C 350 141, 400 125, 450 111 C 500 99, 550 83, 590 70 C 606 65, 620 62, 630 60 L 630 208 L 60 208 Z" fill="url(#kospiFill)"/>
+          <path data-line="1" d="M 60 166 C 90 179, 120 195, 150 200 C 200 196, 250 179, 300 159 C 350 141, 400 125, 450 111 C 500 99, 550 83, 590 70 C 606 65, 620 62, 630 60" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="60" cy="166" r="4.5" fill="#ffffff" stroke="#c0392b" stroke-width="2"/>
+          <text x="56" y="150" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#46403a">시가 6,613</text>
+          <circle cx="150" cy="200" r="4.5" fill="#c0392b"/>
+          <text x="163" y="216" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#46403a">저가 6,547</text>
+          <circle cx="630" cy="60" r="5" fill="#b8860b"/>
+          <text x="626" y="45" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#8a6508">마감 6,820.02</text>
+          <text x="60" y="230" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#b7ada0">09:00</text>
+          <text x="340" y="230" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#b7ada0">12:00</text>
+          <text x="630" y="230" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#b7ada0">15:30</text>
+        </svg>
+        <div class="chart-cap">※ 장중 흐름 모식도 — 전일 종가 6,788.88 · 시가 6,613 · 저가 6,547 · 마감 6,820.02 네 값만 실측치이고, 곡선 형태는 개형이에요. 색은 국내 관례(상승·순매수=빨강 · 하락·순매도=파랑)를 따랐습니다.</div>
+      </div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar down"></div>
+      <div class="temp-label">코스닥</div>
+      <div class="temp-val"><span class="cu" data-v="834.29" data-d="2">834.29</span></div>
+      <div class="temp-chg down">▼ 4.12p (−0.49%)</div>
+      <div class="temp-explain">장중 805선까지 −3%대. 제약 −2.5%, 일반서비스 −2.1%가 지수를 눌렀어요. 3일 만의 하락.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar down"></div>
+      <div class="temp-label">원/달러 환율</div>
+      <div class="temp-val"><span class="cu" data-v="1370.5" data-d="1">1,370.5</span></div>
+      <div class="temp-chg down">▼ 9.0원</div>
+      <div class="temp-explain">3일 연속 원화 강세. 장중에는 13개월 만에 1,360원대까지 내려갔습니다.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar up"></div>
+      <div class="temp-label">WTI 유가</div>
+      <div class="temp-val">$<span class="cu" data-v="85.02" data-d="2">85.02</span></div>
+      <div class="temp-chg up">▲ 1.94%</div>
+      <div class="temp-explain">중동 타격 소식에 하루 만에 반등. 같은 날 브렌트유는 89.31달러로 −0.39%였어요.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar warn"></div>
+      <div class="temp-label">美 10년물 금리</div>
+      <div class="temp-val"><span class="cu" data-v="4.713" data-d="3">4.713</span>%</div>
+      <div class="temp-chg warn">▲ 4.3bp · 달러지수 99.6</div>
+      <div class="temp-explain">워시 발언 뒤 2년물은 4.22%→4.35%로 뛴 반면 장기물은 완만. 커브가 눕는 중이에요.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar warn"></div>
+      <div class="temp-label">국고채 3년물</div>
+      <div class="temp-val"><span class="cu" data-v="3.837" data-d="3">3.837</span>%</div>
+      <div class="temp-chg warn">▲ 5.2bp</div>
+      <div class="temp-explain">국내 단기물도 동반 상승(10년물 4.313%, +3.3bp). 금리 부담은 주식이 아니라 채권에 먼저 왔습니다.</div>
+    </div>
+    <div class="temp-card notes">
+      <div class="top-bar warn"></div>
+      <div class="temp-label">오늘의 기록 · Record</div>
+      <div class="rec-list">
+        <div class="rec-chip"><span class="rec-ico">🔁</span><span>MSCI 정기 리밸런싱 <b>종가 기준일</b></span></div>
+        <div class="rec-chip"><span class="rec-ico">💰</span><span>거래대금 코스피 <b>26.0조</b> · 코스닥 <b>5.3조</b></span></div>
+        <div class="rec-chip"><span class="rec-ico">🌏</span><span>상해 <b>+0.9%</b> 홀로 강세 · 니케이 −0.1%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="subhead">📊 수급 — 셋 다 팔았는데 지수가 오른 이유</h3>
+
+  <div class="callout blue rv">
+    <span class="callout-icon">⚔️</span>
+    코스피 현물에서는 외국인·기관·개인 <b>세 주체가 모두 순매도</b>였어요. 합쳐서 1조5,784억원. 그런데 지수는 올랐습니다. 답은 아래 두 번째 그룹에 있어요 — 같은 시간 KOSPI200 선물에서 외국인이 3,608억, 투신이 2,142억을 사들였습니다. 현물을 팔면서 선물을 산 겁니다.
+  </div>
+
+  <div class="flow rv">
+    <div class="flow-h"><span class="tk-dn">◀ 순매도</span><span>단위: 억원 · 두 그룹 동일 눈금</span><span class="tk-up">순매수 ▶</span></div>
+    <div class="flow-group">KOSPI 현물</div>
+    <div class="flow-row">
+      <div class="flow-name">외국인</div>
+      <div class="flow-track"><div class="flow-bar sell" style="width:40%"></div></div>
+      <div class="flow-val neg">−6,404</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-name">기관</div>
+      <div class="flow-track"><div class="flow-bar sell" style="width:50%"></div></div>
+      <div class="flow-val neg">−7,922</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-name">개인</div>
+      <div class="flow-track"><div class="flow-bar sell" style="width:9%"></div></div>
+      <div class="flow-val neg">−1,454</div>
+    </div>
+    <div class="flow-group">KOSPI200 선물</div>
+    <div class="flow-row">
+      <div class="flow-name">외국인</div>
+      <div class="flow-track"><div class="flow-bar buy" style="width:23%"></div></div>
+      <div class="flow-val pos">+3,608</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-name">투신</div>
+      <div class="flow-track"><div class="flow-bar buy" style="width:14%"></div></div>
+      <div class="flow-val pos">+2,142</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-name">개인</div>
+      <div class="flow-track"><div class="flow-bar sell" style="width:19%"></div></div>
+      <div class="flow-val neg">−3,048</div>
+    </div>
+    <div class="flow-note">코스닥은 개인만 +2,533억으로 홀로 순매수(외국인 −549억 · 기관 −2,016억). 연기금은 코스피 −357억 · 코스닥 −294억. 순매수=빨강 · 순매도=파랑, 국내 관례 표기예요.</div>
+  </div>
+
+  <div class="callout gold rv">
+    <span class="callout-icon">🔁</span>
+    여기에 하나가 더 겹칩니다. 8월 13일과 25일 리포트에서 두 차례 예고했던 <b>MSCI 정기 리밸런싱의 종가 기준일이 바로 오늘</b>이었어요. LG이노텍 신규 편입, 49종 편출. 오늘 프로그램 매매가 차익 −984억·비차익 −2,732억으로 함께 나온 걸 보면, 마감 무렵 수급에는 패시브 자금의 기계적 매매가 섞여 있었다고 보는 편이 안전합니다. 외국인 현물 순매도 −6,404억을 곧바로 "한국 주식을 싫어한다"로 읽지 않아도 되는 이유예요.
+  </div>
+
+  <details class="acc">
+    <summary class="acc-head">🔍 업종·해외 증시 숫자로 더 보기</summary>
+    <div class="acc-body">
+      <div class="edu-box">
+        <b>코스피 업종</b> — 전기·전자 +1.2%, 화학 +1.1%, 부동산 +0.5%, 유통 +0.5%. 규모별로는 대형 +0.6%, 중형 −0.6%, 소형 −0.2%로 대형주만 웃었어요.<br>
+        <b>외국인 업종별 순매도</b> — 전기·전자 −4,114억, 금융 −989억, 기계·장비 −910억.<br>
+        <b>해외 증시</b> — 다우 53,560(−0.02%), 나스닥 26,402(−0.5%), DAX 26,436(−0.5%), 니케이 66,312(−0.1%), 상해종합 3,986(+0.9%), 대만 46,129(−0.4%), 홍콩 25,509(−0.3%). 아시아에서 한국·대만·일본의 장중 낙폭이 컸다는 게 오수진님 마감 시황의 관찰이었습니다.
+      </div>
+    </div>
+  </details>
+</div>
+
+<!-- 02. TIMELINE -->
+<div class="section" id="s02">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-title">오늘 무슨 일이 있었나요?</div>
+      <div class="section-subtitle">Today's Timeline · 시간별 흐름</div>
+    </div>
+  </div>
+
+  <div class="callout purple rv">
+    <span class="callout-icon">🧭</span>
+    오늘의 흐름은 <b>"전력·배터리로 연 아침 → 워시와 중동이 만든 급락 → 되돌림 → 저녁의 실전 예고"</b>였어요. 새벽부터 방에서는 이미 9월 캘린더와 잭슨홀 정리가 돌고 있었고, 장이 흔들린 뒤에도 대화의 무게중심은 "무엇을 공부할까"에 있었습니다.
+  </div>
+
+  <div class="tl-filter" role="group" aria-label="타임라인 필터">
+    <button class="tlf-chip" type="button" data-f="all">전체</button>
+    <button class="tlf-chip" type="button" data-f="market">시장 흐름</button>
+    <button class="tlf-chip" type="button" data-f="stock">종목·테마</button>
+    <button class="tlf-chip" type="button" data-f="edu">교육·리서치</button>
+    <button class="tlf-chip" type="button" data-f="lead">대표님</button>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item rv" data-cat="edu stock">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">06:50~07:01 — 탱이쌤</div>
+      <div class="tl-title">구리 사재기와 전력기기, 그리고 전고체</div>
+      <div class="tl-desc">
+        탱이쌤이 관세 회피용 구리 사재기 기사로 문을 열고, 전력 사이클을 세 가지로 정리했어요 — AI 데이터센터 수요 폭증, 20년 묵은 노후 전력망 교체, 신재생 확대. "수주가 조금 꺾였다고 끝이 아니"라는 결론이었고, 잠재 위험으로는 데이터센터 투자 급감과 이미 반영된 주가를 함께 짚었습니다. 이어 전고체 양산 기대에 기관이 삼성SDI를 담고 있다는 기사도 공유했어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag neutral">효성중공업 · HD현대일렉트릭 · LS일렉트릭</span>
+        <span class="tl-tag good">삼성SDI 전고체</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="market edu">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">07:45~07:56 — 오수진님</div>
+      <div class="tl-title">주간 히트맵: 지수는 올랐는데 절반이 빨간색</div>
+      <div class="tl-desc">
+        지난주 미국 시장을 히트맵으로 정리해 왔어요. 마이크로소프트(+6.27%)·메타(+5.11%)·애플(+3.35%) 같은 소수 메가캡이 방어한 반면 헬스케어(일라이 릴리 −6.43%)·에너지(엑손모빌 −5.09%)·테슬라(−3.89%)는 무너진 양극화 장세. 이동평균선 상회 비율도 S&P500이 200일선 69% vs 5일선 33%로 벌어져 있었습니다. 9월 주요 일정과 이번 주 실적 일정까지 함께 공유했어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag neutral">S&amp;P500 200일선 69% · 5일선 33%</span>
+        <span class="tl-tag bad">나스닥100 50일선 49%</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="market">
+      <div class="tl-dot crisis"></div>
+      <div class="tl-date">07:57~08:10 — 밝쌤</div>
+      <div class="tl-title">"미군, 한 달여 만에 이란 공습" 속보</div>
+      <div class="tl-desc">
+        호르무즈의 기뢰 발사대를 타격했다는 속보였어요. 사상자가 나오면서 이란도 맞대응을 선언했고, 수 주간 이어지던 중동의 소강 국면이 끝났다는 평가가 붙었습니다. 유가가 반응하자 "워시 발언 직후라 유가 주목도가 특히 높아졌다"는 게 오늘 시장의 공통된 진단이었어요. 같은 시각 밝쌤은 K뷰티 ODM 설비 증설과 틱톡발 K컬처 소비 사슬 기사도 함께 올렸습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag bad">WTI +1.94%</span>
+        <span class="tl-tag bad">아시아 동반 급락 출발</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="lead stock">
+      <div class="tl-dot turn"></div>
+      <div class="tl-date">09:12~09:33 — 김병철쌤 · 이혜나 대표님</div>
+      <div class="tl-title">마벨 실적, 그리고 다시 꺼낸 2차전지 영상</div>
+      <div class="tl-desc">
+        김병철쌤이 금요일 나온 마벨(MRVL) FY27 2분기 실적을 정리했어요 — 매출 27.4억달러(+37% YoY), 데이터센터 21.7억달러(+46%), 다음 분기 가이던스 31.5억달러. 이어 이혜나 대표님이 8월 13일에 "간곡하게 꼭 봐달라"고 부탁했던 2차전지 전망 영상을 다시 올리며 <b>"조심스럽게 전망대로 이번 2차전지 대상승장이 온다면, 저는 삼성SDI 신고가 봅니다"</b>라고 덧붙였습니다. 전고점을 직접 확인해 보라는 숙제도 함께요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">마벨 데이터센터 +46%</span>
+        <span class="tl-tag good">삼성SDI 신고가 전망</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="market">
+      <div class="tl-dot crisis"></div>
+      <div class="tl-date">09:00~10:00 — 개장</div>
+      <div class="tl-title">코스피 −3%대, 코스닥은 805선까지</div>
+      <div class="tl-desc">
+        6,613으로 열린 지수는 9시 30분 전후 6,547에서 저점을 찍었어요. 삼성전자와 SK하이닉스가 장 초반 3%대 낙폭으로 출발했고, 코스닥은 한때 3%대 급락. 미국 금리와 유가에 민감한 한국·대만·일본의 낙폭이 컸다는 점에서, 개별 기업 이슈가 아니라 매크로가 만든 하락이었습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag bad">코스피 저가 6,547</span>
+        <span class="tl-tag bad">코스닥 저가 805선</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="edu market">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">11:50 — 나현석썜</div>
+      <div class="tl-title">"잭슨홀에서 워시는 무엇을 바꿨나"</div>
+      <div class="tl-desc">
+        지난주부터 예고했던 잭슨홀 리서치를 PDF와 함께 정리해 왔어요. 핵심은 워시 의장이 금리 인상을 선언한 게 아니라 <b>인상 가능성을 정책 선택지로 되돌려 놓았다</b>는 것. 포워드 가이던스·PCE·할인율 세 용어까지 풀어 주며, 시장이 "금리 하락을 기다리는 전략"에서 "높은 금리를 이겨낼 이익 성장주"로 무게중심을 옮기게 됐다고 마무리했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag warn">9월 인상 확률 35%→57%</span>
+        <span class="tl-tag neutral">7월 PCE 3.7%</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="lead market">
+      <div class="tl-dot hope"></div>
+      <div class="tl-date">14:05~15:44 — 대표님 · 마감</div>
+      <div class="tl-title">"남은 2주는 실전으로" — 그리고 지수는 플러스로</div>
+      <div class="tl-desc">
+        비 오는 월요일 오후, 이혜나 대표님이 남은 2주의 운영 방식을 공지했어요. 숙제는 의무, 검색식에서 나온 차트에 재료를 붙여 관심종목으로 지켜보기. "완전하게 떠먹여주는 투자란 존재하지 않는다"는 문장이 오늘의 핵심이었습니다. 그사이 시장은 조용히 낙폭을 되돌려 코스피가 +0.46%로 마감했어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">코스피 +0.46% 반등 마감</span>
+        <span class="tl-tag neutral">숙제 · 검색식 · 관심종목</span>
+      </div>
+    </div>
+
+    <div class="tl-item rv" data-cat="edu">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">18:00~19:04 — 김은지쌤</div>
+      <div class="tl-title">초판본 배달, 오늘은 '제2의 플라자합의'</div>
+      <div class="tl-desc">
+        오랜만에 돌아온 초판본 기사 분류였어요. 시황·산업·기업으로 나눠 배달한 뒤, 오늘 볼 기사로 베선트 미 재무장관의 대중 다자 압박 구상을 골랐습니다. 미국 혼자가 아니라 G20이 함께 중국산에 관세를 매기고, 그 관세를 지렛대로 위안화 절상을 압박하자는 얘기. 우리에게 미치는 영향까지 세 줄로 정리해 왔어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag warn">중국 무역흑자 1.2조달러 전망</span>
+        <span class="tl-tag neutral">10월 EU–중국 협상</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout blue rv">
+    <span class="callout-icon">🗂️</span>
+    <b>그 밖의 흐름</b> — 황유정쌤 키움 한지영 주간 전망(08:07)과 7월 산업활동동향, 설비투자 5개월 만의 최대폭 증가(10:37) · 김병철쌤 봇의 M7·국채·환율·크립토·ETF 시세 묶음(10:00) · 오수진님 마감 시황과 개인 ETF 순매수 TOP10(16:14) · 문지영쌤 마감 데이터(17:50).
+  </div>
+</div>
+
+<!-- 03. INSIGHTS -->
+<div class="section" id="s03">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-title">프벤져스 핵심 한마디</div>
+      <div class="section-subtitle">Team Insights · 오늘 우리 리더들이 전한 메시지</div>
+    </div>
+  </div>
+
+  <div class="insight-card lead rv">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#d4a84b,#b8922f)">혜</div>
+      <div><div class="insight-name">이혜나 대표님</div><div class="insight-role">리드 전략가 · 오늘 26건 발언 · 전략 총괄</div></div>
+    </div>
+    <div class="insight-body">
+      오늘 대표님의 하루는 <b>"복습 → 실전 전환 공지 → 3분기 관점 재확인"</b>으로 이어졌어요. 급락한 아침에도 지수 얘기는 거의 하지 않았고, 대신 8월 13일에 부탁했던 숙제를 다시 꺼냈습니다.
+    </div>
+
+    <div class="key-message-box">
+      <div class="key-row">
+        <div class="key-num">1</div>
+        <div class="key-content">
+          <div class="key-title">2차전지 영상, 아직 안 보신 분들 꼭</div>
+          <div class="key-desc">8월 13일 "기어코 시간을 내시어 직접 시청하셨으면 좋겠습니다"라며 올렸던 그 영상이에요. 오늘 다시 꺼내며 <b>"이번 2차전지 대상승장이 온다면 삼성SDI 신고가를 본다"</b>고 조심스럽게 덧붙였습니다.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">2</div>
+        <div class="key-content">
+          <div class="key-title">남은 2주는 실전 — 숙제는 의무</div>
+          <div class="key-desc">"완전하게 떠먹여주는 투자란 존재하지 않음. 반드시 본인의 노력이 투자를 완성시킴." 검색식에서 나온 차트에 <b>상승 모멘텀이 될 재료를 직접 찾아 붙이고</b>, 관심종목에 넣어 지켜보는 것이 오늘의 숙제였어요.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">3</div>
+        <div class="key-content">
+          <div class="key-title">정규반은 "반도체 사(史)"를 가르치지 않는다</div>
+          <div class="key-desc">커리큘럼 질문에 대한 답 — 시의성 있는 산업 강의, 실시간 정보와 인사이트, 하락장 마인드셋, 그리고 투자뷰 전달. 산업의 역사가 아니라 <b>그 산업이 지금 어느 위치에 있는지</b>를 가르친다는 설명이었습니다.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">4</div>
+        <div class="key-content">
+          <div class="key-title">3분기는 바닥을 다지는 시간</div>
+          <div class="key-desc">장 마감 뒤 17시 32분, "여전히 같은 말만 반복하고 있지만"이라는 단서와 함께 3분기 관점을 다시 확인했어요. 급한 경사로를 만들지 않기 위해 <b>지금은 다지는 구간</b>이라는 것. 지식허브 집계 기준 '쏠림 경계·조급함 내려놓기' 계열 메시지는 누적 37회째입니다(KB 8/25 집계 기준).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-quote">
+      3분기는 코스피가 견고하게 바닥을 다지는 시간. 뚠뚠히 다지고 다부지게, 때 되면 갈 겁니다.
+    </div>
+  </div>
+
+  <div class="insight-card rv">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#9b7ae8,#7c5ccc)">탱</div>
+      <div><div class="insight-name">탱이쌤</div><div class="insight-role">교육 콘텐츠 · 오늘 16건 발언 · 쉬운 경제 설명</div></div>
+    </div>
+    <div class="insight-body">
+      탱이쌤은 오늘 <b>전력과 배터리</b> 두 축을 새싹이 눈높이로 정리했어요. 특히 "왜 이번 전력 사이클은 이전과 다른가"를 세 문장으로 압축한 게 오늘의 백미였습니다.
+    </div>
+    <ul class="insight-bullets">
+      <li class="edu"><b>전력 사이클이 다른 이유 3가지</b> — AI 데이터센터의 수요 폭증, 20년 투자가 밀린 노후 전력망 교체, 신재생 확대에 따른 새 기자재 수요. 여기에 구리·핵심광물 부족과 중국 배제가 겹쳐 "수주가 조금 꺾여도 끝이 아니"라는 결론.</li>
+      <li class="warn"><b>다만 위험도 같이</b> — 데이터센터 투자 급감 가능성과 이미 주가에 많이 반영된 점을 잠재 위험으로 명시했어요. 기대만 전하지 않고 반대편을 같이 놓는 방식이 이 방의 습관입니다.</li>
+      <li class="chart"><b>나트륨이온배터리</b> — 세계 최대 배터리 회사 CATL이 공급 계약을 시작했고, 국내에선 삼성SDI가 경쟁에 뛰어들고 있다는 소식. 개념 설명은 섹션 05에 정리해 뒀어요.</li>
+    </ul>
+    <div class="insight-quote">
+      수주가 조금 꺾였다고 끝이 아니라는 말씀.
+    </div>
+  </div>
+
+  <div class="insight-card rv">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#4a8fe7,#2563eb)">팀</div>
+      <div><div class="insight-name">오수진님 · 나현석썜 · 김병철쌤 · 황유정쌤 · 김은지쌤 · 밝쌤 · 문지영쌤</div><div class="insight-role">시황 · 리서치 · 데이터 · 뉴스 큐레이션</div></div>
+    </div>
+    <ul class="insight-bullets">
+      <li class="chart"><b>오수진님</b>(28건) — 오늘 가장 많이 말한 사람. 미국 주간 히트맵·이동평균선 상회 비율·크립토 공포탐욕지수를 아침에, 마감 시황과 개인 ETF 순매수 TOP10을 오후에 정리했어요. "워시 발언 자체의 영향은 제한적이었고, 지수 변동성을 키운 건 중동"이라는 진단이 오늘 시장 해석의 기준선이 됐습니다.</li>
+      <li class="edu"><b>나현석썜</b> — 잭슨홀 워시 연설을 PDF 리서치로 정리. 결론을 한 줄로 옮기면 "좋은 경기가 곧 금리 하락을 의미하지 않는 국면"이에요.</li>
+      <li class="money"><b>김병철쌤</b>(18건) — 마벨 실적 정리와 봇 시세 묶음, 그리고 한국시장 마감 브리핑 3부작. 오늘의 공부 포인트로 "합작공장은 두 회사가 공동 출자해 세운 별도 법인"을 남겼어요.</li>
+      <li class="news"><b>황유정쌤</b> — 키움 한지영 주간 전망을 아침에 공유. 코스피 주간 예상 레인지 6,400~7,200pt와 함께 "이번 주는 8월 수출과 브로드컴 실적이 변수"라는 두 축을 제시했습니다.</li>
+      <li class="news"><b>김은지쌤</b>(18건) — 초판본 신문을 시황·산업·기업으로 분류해 배달하고, 대중 공동관세 기사를 우리에게 미치는 영향까지 붙여 정리했어요.</li>
+      <li class="news"><b>밝쌤 · 문지영쌤</b> — 밝쌤은 이란 공습 속보와 K뷰티 수요 기사를, 문지영쌤은 마감 데이터를 각각 올려 아침과 저녁의 양 끝을 채웠습니다.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 04. KEY MOVES -->
+<div class="section" id="s04">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-title">오늘의 수급 포인트</div>
+      <div class="section-subtitle">Key Moves · 기관 자금이 고른 이름들</div>
+    </div>
+  </div>
+
+  <div class="callout green rv">
+    <span class="callout-icon">🎯</span>
+    오늘 수급표에서 가장 눈에 띈 건 <b>2차전지·소재의 이름들</b>이었어요. 연기금 코스피 순매수 1~3위가 삼성SDI·엘앤에프·SK이노베이션이고, 투신 3위도 삼성SDI입니다. 아침에 대표님이 2차전지 영상을 다시 꺼낸 것과 우연히 겹친 하루였지만, 지식허브 집계로 보면 우연이 아니에요 — 8월 14~21일 주간 누적에서도 연기금 순매수 상위에 삼성SDI(486.91억)·엘앤에프(242.54억)가 나란히 있었습니다(KB 8/25 집계 기준). <b>2주 넘게 이어지고 있는 흐름</b>이라는 뜻이죠.
+  </div>
+
+  <div class="itabs rv">
+    <div class="itab-bar" role="tablist">
+      <button class="itab-btn" type="button" data-tab="km1">🏛️ 기관 순매수 TOP</button>
+      <button class="itab-btn" type="button" data-tab="km2">📈 시총 상위 · 특징주</button>
+    </div>
+    <div class="itab-panel" data-tab="km1">
+      <div class="sector-grid">
+        <div class="sector-card rv">
+          <div class="sector-head">
+            <div class="sector-icon">🔋</div>
+            <div><div class="sector-name">연기금 · 코스피 순매수</div><div class="sector-name-sub">1~3위가 모두 배터리·에너지</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>삼성SDI 197.61억</span>
+            <span>엘앤에프 183.81억</span>
+            <span>SK이노베이션 183.26억</span>
+            <span>아모레퍼시픽 163.30억</span>
+            <span>KB금융 148.77억</span>
+          </div>
+          <div class="sector-note">
+            포스코퓨처엠(64.20억)까지 더하면 상위 11개 중 넷이 배터리 체인이에요. 마감 시황에서 짚힌 "SK온 대규모 해외 수주"가 배경으로 언급됐고, LG에너지솔루션은 +2.16%로 마감했습니다.
+          </div>
+        </div>
+
+        <div class="sector-card rv">
+          <div class="sector-head">
+            <div class="sector-icon">🏦</div>
+            <div><div class="sector-name">투신 · 코스피 순매수</div><div class="sector-name-sub">반도체 소부장과 지수 ETF</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>한미반도체 624.94억</span>
+            <span>SK스퀘어 234.19억</span>
+            <span>삼성SDI 198.34억</span>
+            <span>TIGER 미국나스닥100 166.64억</span>
+            <span>LG이노텍 153.06억</span>
+          </div>
+          <div class="sector-note">
+            1위 한미반도체 한 종목에만 624억이 들어갔어요. 5위 LG이노텍은 오늘 MSCI 신규 편입 종목이라 패시브 수요가 섞였을 가능성을 함께 봐야 합니다.
+          </div>
+        </div>
+
+        <div class="sector-card rv">
+          <div class="sector-head">
+            <div class="sector-icon">🔬</div>
+            <div><div class="sector-name">코스닥 · 소부장에 집중</div><div class="sector-name-sub">투신 · 연기금 · 사모</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>[투신] 리노공업 156.22억</span>
+            <span>이오테크닉스 49.17억</span>
+            <span>[연기금] HPSP 29.53억</span>
+            <span>[사모] 실리콘투 86.00억</span>
+            <span>레인보우로보틱스 45.55억</span>
+          </div>
+          <div class="sector-note">
+            코스닥 지수는 −0.49%였지만 기관 자금은 반도체 후공정·검사 장비에 몰렸어요. 지수의 방향과 자금의 방향이 갈린 전형적인 날입니다.
+          </div>
+        </div>
+
+        <div class="sector-card rv">
+          <div class="sector-head">
+            <div class="sector-icon">💵</div>
+            <div><div class="sector-name">개인 ETF 순매수</div><div class="sector-name-sub">오수진님 정리 · 코스콤 기준</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>TIGER 미국S&amp;P500 267억</span>
+            <span>KODEX 미국S&amp;P500 160억</span>
+            <span>KODEX 미국나스닥100 133억</span>
+            <span>TIGER 미국나스닥100 76억</span>
+          </div>
+          <div class="sector-note">
+            네 종목에만 636억이 몰렸어요. 국내 변동성이 커진 날 개인 자금은 미국 대표지수로 향했다는 관찰이었습니다.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="itab-panel" data-tab="km2">
+      <div class="sector-grid">
+        <div class="sector-card rv">
+          <div class="sector-head">
+            <div class="sector-icon">📊</div>
+            <div><div class="sector-name">시총 상위 — 아침 낙폭을 되돌린 이름들</div><div class="sector-name-sub">장 초반 3%대 하락 → 반등 마감</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>삼성전기 +2.60%</span>
+            <span>LG에너지솔루션 +2.16%</span>
+            <span>삼성바이오로직스 +2.15%</span>
+            <span>SK하이닉스 +1.27%</span>
+            <span>삼성전자 +1.17%</span>
+          </div>
+          <div class="sector-note">
+            SK하이닉스에는 일본 합작공장 검토와 솔리다임·엔비디아의 AI 인프라 공동 개발 소식이 함께 들어왔어요. 시총 상위에서 약세로 마친 건 삼성생명(−1.29%) 정도였습니다.
+          </div>
+        </div>
+
+        <div class="sector-card rv">
+          <div class="sector-head">
+            <div class="sector-icon">🚨</div>
+            <div><div class="sector-name">특징주 — 이유가 확인된 것과 아닌 것</div><div class="sector-name-sub">상·하한가와 급락</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>에넥스 −29.91%(하한가)</span>
+            <span>신풍제약 +13%대</span>
+            <span>뷰노 −24.46%</span>
+            <span>알테오젠 −3.91%</span>
+            <span>사토시홀딩스·엑사이엔씨 등 상한가 4종</span>
+          </div>
+          <div class="sector-note">
+            에넥스는 시가총액 미달에 따른 관리종목 지정 우려, 신풍제약은 코로나 재확산 기대가 배경이에요. 반면 상한가 4종과 뷰노·SGC에너지의 급락은 <b>확인된 뉴스가 없습니다</b> — 이유를 모르는 상승은 따라가지 않는다는 이 방의 오랜 원칙이 그대로 적용되는 자리예요.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 05. KEY READING -->
+<div class="section" id="s05">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-title">오늘 읽어둘 리포트</div>
+      <div class="section-subtitle">Key Reading · 잭슨홀 · 이번 주 일정 · 초판본</div>
+    </div>
+  </div>
+
+  <div class="edu-card rv" style="--spine:var(--gold)">
+    <div class="edu-tag gold">🏔️ 잭슨홀 해설</div>
+    <div class="edu-title">하나증권 DIN "잭슨홀에서 워시는 무엇을 바꿨나"</div>
+    <div class="edu-body">
+      나현석썜이 정리해 온 리서치의 원자료입니다. 결론부터 옮기면 <b>워시 의장은 금리 인상을 선언한 게 아니라 인상 가능성을 정책 선택지로 되돌려 놓았다</b>는 것.
+
+      <div class="edu-box formula">
+        <b>🔍 세 가지 변화</b><br><br>
+        ① <b>금리의 상단이 다시 열렸다</b> — 7월 PCE 전년비 3.7%, 최근 6개월 4.1%인 반면 실업률은 4.1%로 안정적. 물가 대응을 우선할 명분이 커졌고, 9월 인상 확률은 35%→57%, 미 2년물은 4.22%→4.35%로 올랐어요.<br>
+        ② <b>포워드 가이던스 시대의 후퇴</b> — "결정이 아니라 규율에 전념하겠다"는 표현. 예측 가능성이 낮아지는 대신 금리 변동성은 구조적으로 커질 수 있습니다.<br>
+        ③ <b>좋은 경기가 곧 금리 하락은 아니다</b> — 미국 기업 설비·무형자산 투자가 전년비 약 9% 증가해 2021년 이후 최고. 증가분의 절반 이상을 AI가 차지합니다.
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 그래서 무엇이 달라지나</b><br><br>
+        하나증권은 투자자의 질문이 "금리가 어디로 가나"에서 <b>"어떤 기업의 이익이 높은 금리를 이겨낼 수 있나"</b>로 바뀌었다고 정리했어요. 할인율 상승에 취약한 고PER·무이익 성장주의 부담은 커지고, 높은 금리에도 EPS가 증가하는 반도체 HBM·전력기기·변압기·조선·냉각·데이터센터 인프라의 상대적 매력은 유지된다는 시각입니다.
+      </div>
+
+      <details class="acc">
+        <summary class="acc-head">📌 오늘 새로 나온 용어 — 포워드 가이던스</summary>
+        <div class="acc-body">
+          <div class="edu-box example">
+            <b>포워드 가이던스</b>란 중앙은행이 앞으로 금리를 어떻게 움직일지 미리 힌트를 주는 소통 방식이에요. 시장이 다음 스텝을 어느 정도 예측할 수 있게 해 주는 장치죠. 워시 의장은 이 힌트가 오히려 시장을 왜곡할 수 있다고 보고 앞으로는 덜 주겠다는 입장입니다.<br><br>
+            <b>우리에게 주는 의미</b>는 간단해요 — 이제 "연준이 뭐라고 했나"를 받아 적는 대신, 물가와 고용 지표를 직접 보고 판단해야 하는 국면입니다. 9월 4일 고용보고서에 시선이 쏠리는 이유가 여기 있어요.<br><br>
+            참고로 수익률 곡선이 눕는 오늘의 현상(단기 금리↑ · 장기 금리 보합)은 지난 리포트에서 다룬 '커브 스티프닝'의 반대편입니다. 개념이 헷갈리면 지식허브의 해당 회차를 다시 열어 보세요.
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="edu-card rv" style="--spine:var(--purple)">
+    <div class="edu-tag purple">📅 이번 주 전망</div>
+    <div class="edu-title">키움 한지영 "잭슨홀 이후에도 달라지지 않은 것들"</div>
+    <div class="edu-body">
+      황유정쌤이 아침에 공유한 주간 전망이에요. 주간 코스피 예상 레인지는 <b>6,400~7,200pt</b>. 워시 발언이 매파적으로 해석됐지만 금요일 미 3대 지수의 낙폭이 제한적이었고 장기금리가 급등하지 않았다는 점에서, "시장이 감당할 수 있는 범위였다"고 봤습니다.
+
+      <div class="edu-box formula">
+        <b>📌 이번 주 두 개의 관문</b><br><br>
+        ① <b>9/1(화) 한국 8월 수출</b> — 컨센서스는 전년비 +62.9%(7월 +62.8%). 반도체 수출이 6월 +199.5% → 7월 +178.8%에 이어 100%대 중후반을 유지하는지가 관건이에요.<br>
+        ② <b>9/3(목) 새벽 브로드컴 실적</b> — 컨센서스 상회 여부보다 AI 가속기·네트워크 매출의 <b>성장 지속성</b>과 가이던스 상향 강도가 중요하다는 진단.
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 왜 이 두 개인가</b><br><br>
+        지난주 국내 반도체주는 주주환원과 엔비디아 서프라이즈라는 호재에도 약세였어요. 키움은 이를 펀더멘털 훼손이 아니라 "높아진 기대치와 수급 이슈"로 봤고, 그렇다면 <b>8월 수출로 실체를 확인한 뒤의 수급 변화</b>가 코스피 7,000pt 재진입의 열쇠가 됩니다. 오늘 금요일 마벨 실적에서 데이터센터 매출이 +46%로 나온 것도 같은 맥락의 사전 신호였어요.
+      </div>
+    </div>
+  </div>
+
+  <div class="edu-card rv" style="--spine:var(--dn)">
+    <div class="edu-tag blue">🗞️ 은지쌤의 초판본</div>
+    <div class="edu-title">"값싼 중국산에 더는 못 버텨" — 베선트가 꺼내든 대중 공동관세</div>
+    <div class="edu-body">
+      스콧 베선트 미 재무장관이 G20 재무장관 회의를 하루 앞둔 30일(현지시간) 로이터 인터뷰에서 꺼낸 구상이에요. 미국 대 중국의 1대1 맞대결을 <b>G20을 끌어들인 다자 압박</b>으로 바꾸겠다는 것.
+
+      <div class="edu-box example">
+        <b>📖 왜 지금인가</b><br><br>
+        미국이 관세로 막자 중국 제품이 유럽·중남미로 흘러가는 '풍선효과'가 생겼기 때문이에요. 중국 무역흑자는 2021년 6,764억달러에서 지난해 1조1,890억달러로 늘었고 올해는 1조2,000억달러(약 1,650조원)에 이를 전망입니다.<br><br>
+        구상의 핵심은 <b>관세를 지렛대로 위안화 절상을 압박</b>하는 것 — 주요국이 공동 관세를 매기고, 중국이 위안화 가치를 올리면 관세를 낮춰 주는 방식. 1985년 플라자합의를 40년 만에 중국을 상대로 다시 하자는 뜻이라 '제2의 플라자합의'라는 별명이 붙었어요.
+      </div>
+
+      <div class="edu-box warning">
+        <b>⚠️ 우리에게 미치는 영향 — 은지쌤 정리</b><br><br>
+        ① 미국·유럽으로 못 가는 중국 제품이 한국 시장이나 제3국 시장으로 밀려들면 철강·석유화학·배터리처럼 중국과 겹치는 산업이 가격 경쟁에서 밀릴 수 있어요.<br>
+        ② G20 차원의 공동 전선을 요구받으면 최대 안보 동맹(미국)과 최대 교역국(중국) 사이에서 입장을 정해야 하는 상황이 옵니다.<br>
+        ③ 위안화가 오르면 원화도 함께 움직이는 경향이 있어 환율에도 영향을 줘요. 오늘 원/달러가 1,370.5원까지 내려온 흐름과 이어서 봐 두면 좋습니다.
+      </div>
+
+      실현 여부는 아직 불확실해요. EU는 지난해 대중 무역에서 4,120억달러 적자를 볼 만큼 경계심이 크지만 교역 의존도도 높습니다. <b>10월 예정된 EU–중국 무역 협상</b>이 첫 가늠자가 될 전망이에요.
+    </div>
+  </div>
+
+  <div class="edu-card rv" style="--spine:var(--green)">
+    <div class="edu-tag green">🧠 탱이의 쉬운 설명</div>
+    <div class="edu-title">나트륨이온배터리가 뭔데?</div>
+    <div class="edu-body">
+      탱이쌤이 오늘 아침 풀어 준 개념이에요. 원리는 리튬이온배터리와 같은데, <b>이온 자리에 훨씬 구하기 쉬운 나트륨</b>을 쓰는 배터리입니다. 나트륨은 소금에서 나오죠.
+
+      <div class="edu-box example">
+        <b>🖐 리튬 대비 장단점</b><br><br>
+        <b>단점</b> — 에너지 밀도가 리튬보다 낮습니다. 같은 무게로 갈 수 있는 거리가 짧다는 뜻이에요.<br>
+        <b>장점</b> — 원료비가 저렴해 LFP 계열 기업의 원가를 낮출 수 있고, 상대적으로 저온에서 성능이 좋고 안정성도 높은 것으로 지금까지는 보고됩니다.<br><br>
+        세계 최대 배터리 회사인 <b>CATL이 공급 계약을 시작</b>했고, 국내에선 삼성SDI가 이 경쟁에 뛰어들고 있다는 게 오늘의 뉴스였어요.
+      </div>
+
+      <b>연결해서 볼 것</b>: 2차전지를 지금 다시 보는 이유 자체는 지난 회차에서 이미 정리해 뒀으니 지식허브의 해당 편을 참고하시고, 오늘은 여기에 한 겹만 더 얹으면 됩니다 — 전고체는 성능의 상단을 열고, 나트륨이온은 원가의 하단을 낮춰요. 같은 산업의 서로 다른 방향이고, 오늘 기관 수급이 삼성SDI에 몰린 배경에는 이 두 이야기가 함께 깔려 있습니다.
+    </div>
+  </div>
+</div>
+
+<!-- 06. ACTION PLAN -->
+<div class="section" id="s06">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-title">오늘 우리가 할 일</div>
+      <div class="section-subtitle">Action Plan · 프로미 체크리스트</div>
+    </div>
+  </div>
+
+  <div class="callout gold rv">
+    <span class="callout-icon">🎯</span>
+    오늘의 원칙은 대표님의 문장 그대로예요 — <b>"완전하게 떠먹여주는 투자란 존재하지 않는다."</b> 지수가 아침의 공포를 되돌린 날일수록, 손이 아니라 눈과 노트를 쓰는 게 맞습니다.
+  </div>
+
+  <div class="checklist rv">
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>오늘의 숙제부터</b> — 검색식에서 나온 차트 중 자리가 좋아 보이는 종목을 골라, 상승 모멘텀이 될 재료를 직접 찾아 붙이고 관심종목에 넣어 두기</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>2차전지 전망 영상 시청</b> — 8월 13일에 이어 오늘 다시 부탁하신 숙제예요. 요약만 훑지 말고 직접 보라는 당부가 두 번 반복됐습니다</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>적립 리듬은 그대로</b> — 아침에 −3%였든 마감에 +0.46%였든 이번 달 금액은 바꾸지 않기. 지식허브에 누적 154회 기록된 이 방의 가장 오래된 원칙이에요(KB 8/25 집계 기준)</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>기관이 담은 이름 확인</b> — 삼성SDI·엘앤에프·SK이노베이션·한미반도체·리노공업. 사는 게 아니라 왜 담았는지 재료를 찾아보는 연습으로</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>9/1(화) 한국 8월 수출</b> — 반도체 수출 증가율이 100%대 중후반을 유지하는지. 이번 주 국내 증시 방향의 첫 관문</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>9/3(목) 새벽 브로드컴 실적</b> — 숫자보다 AI 매출 가이던스의 상향 강도를 볼 것</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>유가와 중동</b> — 워시 발언 이후라 유가 상승은 곧 인플레 자극, 즉 금리 인상 명분으로 연결됩니다. WTI 흐름을 매일 한 번씩</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>이유 없는 상한가 추격 금지</b> — 오늘 상한가 4종과 뷰노·SGC에너지 급락은 확인된 뉴스가 없어요. 이유를 모르는 상승은 따라가지 않습니다</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>오늘 수급을 그대로 믿지 않기</b> — MSCI 리밸런싱 종가 기준일이었어요. 외국인 순매도 숫자에는 패시브의 기계적 매매가 섞여 있습니다</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>레버리지로 되돌림에 올라타지 않기</b> — 아침 −3.5%와 마감 +0.46%가 하루에 오간 날엔 배율이 계좌를 먼저 흔듭니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- 07. TOMORROW -->
+<div class="section" id="s07">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-title">내일 체크포인트</div>
+      <div class="section-subtitle">Tomorrow's Watchlist · 9월 첫 주에 주목할 것</div>
+    </div>
+  </div>
+
+  <div class="watch-card rv">
+    <div class="key-row">
+      <div class="key-num" style="background:var(--red-bg);color:var(--red)">🇰🇷</div>
+      <div class="key-content">
+        <div class="key-title">9/1(화) 한국 8월 수출 · 미 ISM 제조업</div>
+        <div class="key-desc">수출 컨센서스는 전년비 +62.9%. 같은 날 밤 미국 ISM 제조업(예상 55.2, 이전 55.6)과 JOLTS 구인건수(예상 7.330M)도 나옵니다.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--purple-bg);color:var(--purple)">💾</div>
+      <div class="key-content">
+        <div class="key-title">9/3(목) 새벽 브로드컴 실적</div>
+        <div class="key-desc">엔비디아 뒤를 잇는 AI 반도체 확인 자리예요. ASIC·네트워크로 수요가 번지는지를 보는 창이고, 같은 날 오스틴에서는 테슬라 사이버캡 출시 행사도 예정돼 있습니다.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--gold-bg);color:var(--gold)">📊</div>
+      <div class="key-content">
+        <div class="key-title">9/4(금) 미 8월 고용보고서</div>
+        <div class="key-desc">비농업 신규고용 예상 +5.8만건(7월 −2.3만건), 실업률 4.1%, 시간당 임금 +0.3%. 포워드 가이던스가 후퇴한 국면에서 시장이 직접 읽어야 할 첫 지표입니다.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--green-bg);color:var(--green)">🔋</div>
+      <div class="key-content">
+        <div class="key-title">배터리 3사 ESS 3차 입찰</div>
+        <div class="key-desc">지난 리포트에서 예고했던 이벤트예요. 오늘 연기금·투신 자금이 삼성SDI·엘앤에프·SK이노베이션으로 향한 흐름과 이어서 볼 대목입니다.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--blue-bg);color:var(--blue)">🎓</div>
+      <div class="key-content">
+        <div class="key-title">9/6(토) 프롬어스 온라인 컨퍼런스</div>
+        <div class="key-desc">오후 2~4시, 500석 규모로 예고됐던 일정이에요. 이 방의 운영은 9월 13일까지 이어지고, 남은 2주는 실전 모드로 진행됩니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 08. QUIZ -->
+<div class="section" id="s08">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div>
+      <div class="section-title">오늘의 복습 퀴즈</div>
+      <div class="section-subtitle">Review Quiz · 리포트를 닫기 전 다섯 문제</div>
+    </div>
+  </div>
+
+  <div class="callout blue rv">
+    <span class="callout-icon">✏️</span>
+    외운 걸 확인하는 문제가 아니라, <b>오늘 리포트의 논리를 따라왔는지</b>를 묻는 다섯 문제예요. 틀려도 괜찮습니다 — 해설에 근거 섹션을 적어 뒀으니 그쪽으로 돌아가 다시 읽으면 그게 오늘의 진짜 공부예요.
+  </div>
+
+  <div class="quiz rv">
+    <div class="quiz-kicker">Q1 · 수급 (섹션 01)</div>
+    <div class="quiz-q">코스피 현물에서 외국인·기관·개인이 모두 순매도였는데도 지수가 올랐습니다. 이 조합을 설명하는 가장 결정적인 관찰은 무엇일까요?</div>
+    <button class="quiz-opt" type="button">① 코스닥에서 개인이 2,533억을 순매수했기 때문</button>
+    <button class="quiz-opt" type="button" data-ok="1">② 같은 시간 KOSPI200 선물에서 외국인 +3,608억, 투신 +2,142억의 순매수가 나왔기 때문</button>
+    <button class="quiz-opt" type="button">③ 원/달러가 9원 내리며 원화가 강세를 보였기 때문</button>
+    <button class="quiz-opt" type="button">④ 상해종합지수가 +0.9%로 홀로 올랐기 때문</button>
+    <div class="quiz-exp">정답은 ②. ①③④도 오늘 실제로 있었던 사실이지만, 코스피 지수를 직접 밀어 올린 힘은 아니에요. 현물을 팔면서 선물을 사는 건 방향을 포기한 게 아니라 도구를 바꾼 것에 가깝습니다. 근거는 섹션 01의 수급 그래프를 다시 보세요.</div>
+  </div>
+
+  <div class="quiz rv">
+    <div class="quiz-kicker">Q2 · 이벤트 성격 (섹션 01·04)</div>
+    <div class="quiz-q">오늘 외국인의 코스피 현물 순매도 −6,404억을 "외국인이 한국 주식을 던졌다"로 단정하기 어려운 이유는?</div>
+    <button class="quiz-opt" type="button">① 금액이 1조원에 못 미쳐 규모가 작기 때문</button>
+    <button class="quiz-opt" type="button">② 외국인이 삼성전자와 SK하이닉스를 순매수했기 때문</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ MSCI 정기 리밸런싱 종가 기준일이라 패시브 자금의 기계적 매매가 섞였기 때문</button>
+    <button class="quiz-opt" type="button">④ 거래대금이 26.0조로 평소보다 적었기 때문</button>
+    <div class="quiz-exp">정답은 ③. 같은 날 프로그램 비차익이 −2,732억으로 함께 나온 것도 방증이에요. ②는 사실과 다릅니다 — 외국인은 전기·전자 업종에서만 −4,114억을 팔았어요. 8월 13일과 25일 리포트에서 두 차례 예고했던 일정이라는 점까지 기억해 두면 좋겠습니다. 근거는 섹션 01의 마지막 안내문.</div>
+  </div>
+
+  <div class="quiz rv">
+    <div class="quiz-kicker">Q3 · 논리 구조 (섹션 05)</div>
+    <div class="quiz-q">하나증권은 워시 의장이 "금리 전망"이 아니라 "시장의 문법"을 바꿨다고 봤어요. 투자자의 질문이 어떻게 바뀌었다는 뜻일까요?</div>
+    <button class="quiz-opt" type="button">① "언제 금리가 내려가나" → "얼마나 빨리 내려가나"</button>
+    <button class="quiz-opt" type="button" data-ok="1">② "금리가 어디로 가나" → "어떤 기업의 이익이 높은 금리를 이겨낼 수 있나"</button>
+    <button class="quiz-opt" type="button">③ "연준이 뭐라고 하나" → "한국은행이 뭐라고 하나"</button>
+    <button class="quiz-opt" type="button">④ "성장주냐 가치주냐" → "국내냐 해외냐"</button>
+    <div class="quiz-exp">정답은 ②. 포워드 가이던스가 후퇴하면 금리 경로 자체를 맞히기 어려워지니, 방향 맞히기 대신 <b>금리를 견딜 이익</b>을 찾는 쪽으로 무게중심이 옮겨갑니다. 그래서 할인율에 취약한 고PER·무이익 성장주보다 EPS가 증가하는 쪽의 상대 매력이 유지된다는 결론이 붙었어요. 근거는 섹션 05 첫 카드.</div>
+  </div>
+
+  <div class="quiz rv">
+    <div class="quiz-kicker">Q4 · 산업 구조 (섹션 03·05)</div>
+    <div class="quiz-q">전고체와 나트륨이온배터리는 같은 2차전지 산업 안에서 서로 다른 방향을 겨냥합니다. 오늘 리포트의 설명대로라면 그 차이는?</div>
+    <button class="quiz-opt" type="button">① 전고체는 국내 기업용, 나트륨이온은 중국 기업용</button>
+    <button class="quiz-opt" type="button">② 전고체는 ESS용, 나트륨이온은 전기차용</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ 전고체는 성능의 상단을 열고, 나트륨이온은 원가의 하단을 낮춘다</button>
+    <button class="quiz-opt" type="button">④ 전고체는 에너지 밀도를 낮추고, 나트륨이온은 밀도를 높인다</button>
+    <div class="quiz-exp">정답은 ③. 나트륨이온은 에너지 밀도가 리튬보다 낮은 대신 원료비가 싸고 저온 안정성이 좋아요(④는 방향이 반대). ①도 얼핏 맞아 보이지만 삼성SDI가 나트륨이온 경쟁에 뛰어들고 있다는 게 오늘의 뉴스였습니다. 근거는 섹션 05의 탱이쌤 카드.</div>
+  </div>
+
+  <div class="quiz rv">
+    <div class="quiz-kicker">Q5 · 이번 주 관문 (섹션 05·07)</div>
+    <div class="quiz-q">키움은 이번 주 브로드컴 실적에서 "컨센서스 상회 여부보다 더 중요한 것"이 있다고 봤어요. 무엇일까요?</div>
+    <button class="quiz-opt" type="button">① 주주환원 규모의 확대 여부</button>
+    <button class="quiz-opt" type="button">② 매출총이익률이 60%를 넘는지 여부</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ AI 가속기·네트워크 매출의 성장 지속성과 가이던스 상향 강도</button>
+    <button class="quiz-opt" type="button">④ 엔비디아 대비 시가총액 순위 변동</button>
+    <div class="quiz-exp">정답은 ③. 시장이 AI 투자를 예전보다 높은 잣대로 보기 시작했기 때문에, 한 분기 숫자보다 <b>앞으로도 이어질 것인가</b>가 관건이라는 논리예요. 금요일 마벨의 데이터센터 매출 +46%가 같은 질문의 예고편이었습니다. 근거는 섹션 05의 키움 카드와 섹션 07.</div>
+  </div>
+
+  <div class="callout gold rv">
+    <span class="callout-icon">🔁</span>
+    다섯 문제 중 틀린 게 있다면 해설에 적힌 섹션으로 돌아가 그 부분만 다시 읽어 보세요. 특히 Q1·Q2를 놓쳤다면 오늘 수급표를 한 번 더 볼 만합니다 — 숫자를 읽는 것과 <b>숫자가 만들어진 사정을 읽는 것</b>은 다른 일이니까요.
+  </div>
+</div>
+
+<!-- DAILY QUOTE -->
+<div class="daily-quote rv">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="dq-mark" aria-hidden="true">“</div>
+  <blockquote>"3분기는 코스피가 견고하게<br>바닥을 다지는 시간입니다."</blockquote>
+  <cite>— 이혜나 대표님, 2026년 8월 31일 오후 5시 32분</cite>
+  <div class="divider-gold"></div>
+  <div class="dq-bubble">
+    제가 돌아올 때까지 우리 검색식에서<br>자리가 좋아 보이는 애들 있나 공부하고 계시기☺️
+    <small>뚠뚠히 다지고 다부지게, 때 되면 갈 겁니다 💛</small>
+  </div>
+</div>
+
+</div><!-- .page end -->
+
+<div class="report-footer">
+  <div class="logo serif">From Us</div>
+  <p>프롬어스 Daily Report · 2026.08.31 (월)</p>
+  <p style="margin-top:8px">카카오톡 대화 분석 기반 · 프로미를 위한 일일 리포트</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--ink-4)">본 리포트는 프롬어스 내부 대화를 분석하여 생성되었으며, 투자 권유가 아닙니다.</p>
+</div>
+
+<script>
+(function () {
+  var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* progress bar — v2: body 프래그먼트에 #pbar 불필요, 스크립트가 자동 생성 */
+  var bar = document.createElement('div');
+  bar.id = 'pbar';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.insertBefore(bar, document.body.firstChild);
+  {
+    var onScroll = function () {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      bar.style.transform = 'scaleX(' + (max > 0 ? h.scrollTop / max : 0) + ')';
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* nav active state */
+  var chips = [].slice.call(document.querySelectorAll('.nav-chip'));
+  var secs = [].slice.call(document.querySelectorAll('.section[id]'));
+  if ('IntersectionObserver' in window && secs.length && chips.length) {
+    var nio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) {
+          chips.forEach(function (c) {
+            c.classList.toggle('on', c.getAttribute('href') === '#' + e.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-28% 0px -62% 0px' });
+    secs.forEach(function (s) { nio.observe(s); });
+  }
+
+  /* ═══ v2.1 interactive ═══ */
+  /* 숨겨져 있다가 표시되는 요소는 리빌 관찰이 누락될 수 있어 강제 노출 */
+  function forceReveal(scope) {
+    if (scope.classList && scope.classList.contains('rv-init')) scope.classList.add('in');
+    [].forEach.call(scope.querySelectorAll('.rv-init'), function (el) { el.classList.add('in'); });
+  }
+
+  /* tabs — 첫 탭 자동 활성. 무JS 시 모든 패널 노출(itabs-live 미부여) */
+  [].forEach.call(document.querySelectorAll('.itabs'), function (tabs) {
+    var btns = [].slice.call(tabs.querySelectorAll('.itab-btn'));
+    var panels = [].slice.call(tabs.querySelectorAll('.itab-panel'));
+    if (!btns.length || !panels.length) return;
+    tabs.classList.add('itabs-live');
+    function show(id) {
+      btns.forEach(function (b) {
+        var hit = b.getAttribute('data-tab') === id;
+        b.classList.toggle('on', hit);
+        b.setAttribute('aria-selected', hit ? 'true' : 'false');
+      });
+      panels.forEach(function (p) {
+        var hit = p.getAttribute('data-tab') === id;
+        p.classList.toggle('on', hit);
+        if (hit) forceReveal(p);
+      });
+    }
+    btns.forEach(function (b) {
+      b.setAttribute('role', 'tab');
+      b.addEventListener('click', function () { show(b.getAttribute('data-tab')); });
+    });
+    show(btns[0].getAttribute('data-tab'));
+  });
+
+  /* timeline filter — data-f="all" 칩이 전체 보기 */
+  [].forEach.call(document.querySelectorAll('.tl-filter'), function (bar) {
+    var chips = [].slice.call(bar.querySelectorAll('.tlf-chip'));
+    var root = bar.closest('.section') || document;
+    var items = [].slice.call(root.querySelectorAll('.tl-item'));
+    if (!chips.length || !items.length) return;
+    function apply(f) {
+      chips.forEach(function (c) { c.classList.toggle('on', c.getAttribute('data-f') === f); });
+      items.forEach(function (it) {
+        var cats = (it.getAttribute('data-cat') || '').split(/\s+/);
+        var hit = f === 'all' || cats.indexOf(f) !== -1;
+        it.classList.toggle('tl-hide', !hit);
+        if (hit) forceReveal(it);
+      });
+    }
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () { apply(c.getAttribute('data-f')); });
+    });
+    apply('all');
+  });
+
+  /* pop quiz — 1회 응답, 정답은 q-ok / 오답 선택은 q-no */
+  [].forEach.call(document.querySelectorAll('.quiz'), function (q) {
+    var opts = [].slice.call(q.querySelectorAll('.quiz-opt'));
+    if (!opts.length) return;
+    q.classList.add('quiz-live');
+    opts.forEach(function (o) {
+      o.addEventListener('click', function () {
+        if (q.classList.contains('quiz-open')) return;
+        opts.forEach(function (x) {
+          x.disabled = true;
+          if (x.hasAttribute('data-ok')) x.classList.add('q-ok');
+        });
+        if (!o.hasAttribute('data-ok')) o.classList.add('q-no');
+        q.classList.add('quiz-open');
+      });
+    });
+  });
+
+  /* intraday replay — path[data-line]이 있는 chart-wrap에 버튼 자동 부착 */
+  if (!rm) {
+    [].forEach.call(document.querySelectorAll('.chart-wrap'), function (w) {
+      var line = w.querySelector('svg path[data-line]');
+      if (!line || !line.getTotalLength) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chart-btn';
+      btn.textContent = '▶ 장중 흐름 다시 그리기';
+      w.insertBefore(btn, w.querySelector('.chart-cap') || null);
+      var L = line.getTotalLength();
+      btn.addEventListener('click', function () {
+        line.style.transition = 'none';
+        line.style.strokeDasharray = L + ' ' + L;
+        line.style.strokeDashoffset = L;
+        void line.getBoundingClientRect();
+        line.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.25,.8,.35,1)';
+        line.style.strokeDashoffset = '0';
+      });
+    });
+  }
+
+  /* back to top — #pbar처럼 자동 생성 */
+  var totop = document.createElement('button');
+  totop.type = 'button';
+  totop.id = 'totop';
+  totop.setAttribute('aria-label', '맨 위로');
+  totop.textContent = '↑';
+  document.body.appendChild(totop);
+  totop.addEventListener('click', function () {
+    try { scrollTo({ top: 0, behavior: rm ? 'auto' : 'smooth' }); } catch (e) { scrollTo(0, 0); }
+  });
+  var ttoggle = function () {
+    totop.classList.toggle('on', (document.documentElement.scrollTop || document.body.scrollTop || 0) > innerHeight * 1.2);
+  };
+  addEventListener('scroll', ttoggle, { passive: true });
+  ttoggle();
+
+  /* 인쇄 시 아코디언 전부 펼침 */
+  addEventListener('beforeprint', function () {
+    [].forEach.call(document.querySelectorAll('details.acc'), function (d) { d.setAttribute('open', ''); });
+  });
+  /* ═══ /v2.1 interactive ═══ */
+
+  if (rm || !('IntersectionObserver' in window)) return;
+
+  /* scroll reveal */
+  var rio = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
+  document.querySelectorAll('.rv').forEach(function (el) {
+    el.classList.add('rv-init');
+    rio.observe(el);
+  });
+
+  /* number count-up */
+  function fmt(n, d) {
+    return n.toLocaleString('ko-KR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+  var cio = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      cio.unobserve(el);
+      var v = parseFloat(el.getAttribute('data-v'));
+      var d = parseInt(el.getAttribute('data-d') || '0', 10);
+      if (isNaN(v)) return;
+      var t0 = null, dur = 950;
+      function step(t) {
+        if (!t0) t0 = t;
+        var p = Math.min((t - t0) / dur, 1);
+        var k = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(v * k, d);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.cu').forEach(function (el) { cio.observe(el); });
+})();
+</script>
+</body>
+</html>
