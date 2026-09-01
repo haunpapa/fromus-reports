@@ -138,3 +138,51 @@ def test_stock_jobs_retries_key_with_fail_sentinel():
                       "mentions": [{"date": "2026-09-01", "label": "l", "note": "n"}]}]}
     cache.put("stock:삼성전자:2026-09-01", {_FAIL_KEY: {"n": 1, "at": "2026-09-01"}})
     assert [j["name"] for j in stock_jobs(kb, cache)] == ["삼성전자"]
+
+
+def _news_kb(urls):
+    return {"build": {"to": "2026-09-01"},
+            "chat": {"news": [{"title": f"t{i}", "url": u} for i, u in enumerate(urls)]}}
+
+
+def test_news_batch_submits_and_records_pending():
+    """배치 경로: 미분류 뉴스를 제출하고 배치 id 를 캐시에 남긴다. 동기 호출은 하지 않는다."""
+    from hublib.ai_summary import AiCache, _run_news_flags, _PENDING_KEY
+    cache = AiCache(path="/nonexistent/x.json")
+    submitted = {}
+
+    def submit(reqs):
+        submitted["reqs"] = reqs
+        return "batch_abc"
+
+    batch = {"submit": submit, "retrieve": lambda i: "in_progress", "results": lambda i: []}
+    out = _run_news_flags(_news_kb(["https://a", "https://b"]), cache, call=None, batch=batch)
+    assert out == {}                                     # 아직 분류 결과 없음
+    assert cache.get(_PENDING_KEY)["id"] == "batch_abc"
+    assert submitted["reqs"], "미분류 뉴스가 배치 요청으로 제출돼야 함"
+
+
+def test_news_batch_collects_finished_results():
+    """전일 배치가 끝났으면 결과를 캐시에 반영하고 pending 을 지운 뒤 새 배치를 제출한다."""
+    import json as _j
+    from hublib.ai_summary import AiCache, _run_news_flags, _PENDING_KEY
+    cache = AiCache(path="/nonexistent/x.json")
+    cache.put(_PENDING_KEY, {"id": "batch_old", "at": "2026-08-31",
+                             "chunks": {"b0": ["https://a", "https://b"]}})
+    results = [{"custom_id": "b0", "text": _j.dumps({"flags": {"https://a": "neutral", "https://b": "relevant"}})}]
+    batch = {"submit": lambda reqs: "batch_new", "retrieve": lambda i: "ended",
+             "results": lambda i: results}
+    out = _run_news_flags(_news_kb(["https://a", "https://b", "https://c"]), cache, call=None, batch=batch)
+    assert out == {"https://a": "neutral"}
+    assert cache.get("news:https://a") == "neutral" and cache.get("news:https://b") == "relevant"
+    assert cache.get(_PENDING_KEY)["id"] == "batch_new"   # 남은 c 가 새 배치로
+
+
+def test_news_flags_sync_fallback_without_batch():
+    """batch 미주입(키 없음·SDK 없음) 시 기존 동기 경로 그대로."""
+    import json as _j
+    from hublib.ai_summary import AiCache, _run_news_flags
+    cache = AiCache(path="/nonexistent/x.json")
+    call = lambda p, m: _j.dumps({"flags": {"https://a": "neutral"}})
+    out = _run_news_flags(_news_kb(["https://a"]), cache, call)
+    assert out == {"https://a": "neutral"}
