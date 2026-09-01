@@ -7,8 +7,8 @@ import re
 
 import pytest
 
-# search 는 지연 로딩 청크다. 채팅 항목 편입 + hay 사전 토큰화(raw 의 약 40%) 로 6,200항목 ≈ 5.3MB /
-# gzip 1.0MB — 계획서의 5.0MB 는 실측 전 값이라 6.0MB 로 잡는다(첫 빌드부터 우는 경보는 곧 무시된다).
+# search 는 지연 로딩 청크다. hay 사전 토큰화(raw 의 약 40%)는 2026-09 에 제거 — 클라이언트가 재계산한다.
+# 예산 6.0MB 는 hay 포함 시절 실측 기준이라 여유가 크다(첫 빌드부터 우는 경보는 곧 무시된다).
 BUDGET_MB = {"core": 2.5, "chat": 3.5, "search": 6.0, "glossary": 1.0, "stockchat": 3.0}
 
 

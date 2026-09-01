@@ -20,12 +20,13 @@ def _chat():
     }
 
 
-def test_with_hay_adds_lowercase_haystack_and_source():
+def test_with_hay_adds_source_but_not_hay():
+    """hay 는 클라이언트(30_search.js hayOf)가 재계산한다 — 전송량 39% 절감 (2026-09)."""
     from hublib.search import with_hay
-    items = [{"kind": "종목", "title": "SK하이닉스", "snippet": "HBM 수혜", "date": "", "id": "", "tags": ["반도체·메모리"]}]
+    items = [{"title": "SK하이닉스", "snippet": "HBM 수혜", "tags": ["반도체·메모리"], "kind": "종목"}]
     out = with_hay(items)
-    assert out[0]["hay"] == "sk하이닉스 hbm 수혜 반도체·메모리 종목"
     assert out[0]["source"] == "report"
+    assert "hay" not in out[0], "hay 는 더 이상 서버에서 만들지 않는다"
     assert "hay" not in items[0], "입력을 변경하면 안 된다"
 
 
@@ -42,7 +43,7 @@ def test_build_chat_search_news_and_opinion_only():
     op = next(i for i in out if i["kind"] == "채팅의견")
     assert op["title"] == "삼성전자 · 가" and op["snippet"] == "삼전 간다 길게"
     assert op["extra"] == {"stock": "삼성전자", "sharer": "가", "stance": "bullish", "date": "2026-08-01"}
-    assert all(i["source"] == "chat" and i["hay"] for i in out)
+    assert all(i["source"] == "chat" and "hay" not in i for i in out)
 
 
 def test_build_chat_search_skips_bot_and_research_and_bad_urls():

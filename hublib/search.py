@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""검색 인덱스 보강 — 사전 토큰화(hay) + 채팅 항목(뉴스·의견). 순수 함수.
+"""검색 인덱스 보강 — source 부착 + 채팅 항목(뉴스·의견). 순수 함수. hay 는 클라이언트가 재계산한다.
 
-리포트 항목은 hublib.aggregate.build_search 가 만든다. 이 모듈은 그 결과에 hay/source 를 붙이고,
+리포트 항목은 hublib.aggregate.build_search 가 만든다. 이 모듈은 그 결과에 source 를 붙이고,
 chat_kb 에서 채팅 항목을 더한다. 계약: 스펙 §3.3 C3
 """
 from hublib.verify import BOT_SHARER
@@ -10,14 +10,9 @@ OPINION_TYPES = ("view", "position")
 SNIPPET_LIMIT = 300
 
 
-def _hay(it):
-    return " ".join(filter(None, [it.get("title", ""), it.get("snippet", ""),
-                                  " ".join(it.get("tags") or []), it.get("kind", "")])).lower()
-
-
 def with_hay(items):
-    """리포트 인덱스 항목에 hay·source 를 붙인 새 리스트."""
-    return [{**it, "source": it.get("source", "report"), "hay": _hay(it)} for it in (items or [])]
+    """리포트 인덱스 항목에 source 를 붙인 새 리스트. hay 는 클라이언트가 재계산한다(30_search.js hayOf)."""
+    return [{**it, "source": it.get("source", "report")} for it in (items or [])]
 
 
 def _is_http(u):
@@ -37,7 +32,7 @@ def _news_items(chat):
               "extra": {"url": n["url"], "outlet": n.get("outlet") or "", "stocks": stocks,
                         "sharer": n.get("sharer") or ""},
               "source": "chat"}
-        out.append({**it, "hay": _hay(it)})
+        out.append(it)
     return out
 
 
@@ -53,7 +48,7 @@ def _opinion_items(chat):
                   "extra": {"stock": name, "sharer": m.get("sharer") or "", "stance": m.get("stance") or "",
                             "date": m.get("date") or ""},
                   "source": "chat"}
-            out.append({**it, "hay": _hay(it)})
+            out.append(it)
     return out
 
 
