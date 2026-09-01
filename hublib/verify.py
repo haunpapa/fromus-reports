@@ -9,6 +9,7 @@
 import datetime
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 BOT_SHARER = "김병철(봇)"
 BENCHED_MARKETS = ("KR", "US")     # 대응 벤치마크 지수가 있는 시장
@@ -363,10 +364,14 @@ def _start_for(cache_last, first_call_date):
     return d.isoformat()
 
 
-def fetch_prices(calls, cache, loaders=None):
+PRICE_WORKERS = 8   # 직렬 96티커 ≈ 120초 → 8워커 ≈ 15~30초. 소스별 레이트리밋 안쪽.
+
+
+def fetch_prices(calls, cache, loaders=None, workers=PRICE_WORKERS):
     """콜 목록 → {'<market>:<ticker>': [(date, close)]}.
 
     종목당 1회만 요청하고, 캐시가 있으면 마지막 날부터 증분만 받는다.
+    네트워크 호출만 스레드풀로 겹치고, 캐시 쓰기는 메인 스레드에서만 한다(PriceCache 는 thread-safe 아님).
     한 종목이 실패해도 빈 시계열로 격리하고 나머지는 계속한다.
     """
     loaders = loaders or DEFAULT_LOADERS
@@ -377,19 +382,24 @@ def fetch_prices(calls, cache, loaders=None):
         if prev is None or c["date"] < prev["first"]:
             wanted[key] = {"market": c["market"], "ticker": c["ticker"], "first": c["date"]}
 
-    out = {}
-    for key in sorted(wanted):
+    def _one(key):                      # 워커: 읽기(cache.get/last)와 네트워크만 — 쓰기 없음
         w = wanted[key]
         loader = loaders.get(w["market"])
         old = cache.get(key)
         if loader is None:
-            out[key] = old
-            continue
+            return key, old, None
         start = _start_for(cache.last(key), w["first"])
         try:
-            fresh = loader(w["ticker"], start)
+            return key, old, loader(w["ticker"], start)
         except Exception as e:
             print(f"  ✗ 검증 가격 {key} 실패: {repr(e)[:100]}")
+            return key, old, None
+
+    out = {}
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
+        results = list(ex.map(_one, sorted(wanted)))   # 입력 순서 보존 → 결정론 유지
+    for key, old, fresh in results:                    # 캐시 쓰기는 여기(메인 스레드)서만
+        if fresh is None:
             out[key] = old
             continue
         points = merge_points(old, fresh)

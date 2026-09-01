@@ -321,6 +321,25 @@ def test_fetch_prices_requests_each_ticker_once(tmp_path):
     assert hits == ["000660"], "같은 종목을 콜 수만큼 반복 요청하면 안 됨"
 
 
+def test_fetch_prices_parallel_isolates_failures(tmp_path):
+    """병렬화 후에도 한 종목 실패가 다른 종목·캐시를 오염시키지 않는다."""
+    from hublib.verify import PriceCache, fetch_prices
+    cache = PriceCache(str(tmp_path / "p.json"))
+    calls = [{"market": "KR", "ticker": t, "date": "2026-08-01"} for t in ("A", "B", "C", "D")]
+
+    def loader(ticker, start):
+        if ticker == "B":
+            raise RuntimeError("boom")
+        return [("2026-08-01", 100.0), ("2026-08-04", 101.0)]
+
+    out = fetch_prices(calls, cache, loaders={"KR": loader})
+    assert out["KR:B"] == []                       # 실패는 빈 시계열로 격리
+    for t in ("A", "C", "D"):
+        assert len(out[f"KR:{t}"]) == 2            # 나머지는 정상
+        assert cache.last(f"KR:{t}") == "2026-08-04"  # 캐시도 갱신됨
+    assert cache.last("KR:B") is None
+
+
 # ── 조립 ─────────────────────────────────────────────────────────
 def test_build_verify_end_to_end_with_fake_loaders(tmp_path):
     from hublib.verify import build_verify
