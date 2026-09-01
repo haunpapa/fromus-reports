@@ -193,9 +193,9 @@ def _run_stock_reasons(kb, cache, call):
 _PENDING_KEY = "__news_batch__"
 
 
-def _news_batch_requests(todo, model, batch=NEWS_BATCH):
+def _news_batch_requests(todo, model, chunk_size=NEWS_BATCH):
     """미분류 뉴스 → (Batches API 요청 목록, {custom_id: [url]} 청크 멤버십). custom_id 'b<i>' 는 40건 묶음 인덱스."""
-    chunks = [todo[i:i + batch] for i in range(0, len(todo), batch)]
+    chunks = [todo[i:i + chunk_size] for i in range(0, len(todo), chunk_size)]
     reqs = [{"custom_id": f"b{i}",
              "params": {"model": model, "max_tokens": 1500,
                         "messages": [{"role": "user", "content": NEWS_PROMPT.format(ctx=_j(chunk))}]}}
@@ -228,13 +228,13 @@ def _apply_news_results(cache, results, chunk_urls):
 
 def _run_news_flags(kb, cache, call, batch=None):
     if batch is None:
-        def one(batch):                        # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
+        def one(chunk):                        # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
             try:
-                d = parse_json(call(NEWS_PROMPT.format(ctx=_j(batch)), 1500))
-                return batch, d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
+                d = parse_json(call(NEWS_PROMPT.format(ctx=_j(chunk)), 1500))
+                return chunk, d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
             except Exception as e:
                 print(f"  ✗ AI news batch: {repr(e)[:80]}")
-                return batch, {}
+                return chunk, {}
 
         with ThreadPoolExecutor(max_workers=AI_WORKERS) as ex:
             results = list(ex.map(one, news_batches(kb, cache)))
@@ -257,6 +257,15 @@ def _run_news_flags(kb, cache, call, batch=None):
                 cache.put(_PENDING_KEY, {})               # 수거 완료
         except Exception as e:
             print(f"  ✗ 뉴스 배치 수거 실패: {repr(e)[:80]}")
+        left = cache.get(_PENDING_KEY)                    # 수거 성공이면 위에서 {} 로 비워져 이 블록은 건너뛴다
+        if isinstance(left, dict) and left.get("id") and left.get("at"):
+            try:
+                age = (datetime.date.today() - datetime.date.fromisoformat(left["at"])).days
+                if age >= 2:   # Batches 는 24h 내 ended 보장 — 그 뒤로도 수거가 안 되면 잠김으로 보고 푼다
+                    print(f"  ⚠ 뉴스 배치 {left['id']} 미수거 {age}일 — pending 초기화(재제출 허용)")
+                    cache.put(_PENDING_KEY, {})
+            except ValueError:
+                pass           # at 파싱 실패 — 무시(다음 제출이 정상 형식으로 덮는다)
     todo = [{"title": n.get("title") or "", "url": n.get("url") or ""}
             for n in ((kb.get("chat") or {}).get("news") or [])
             if n.get("url") and not cache.get(f"news:{n['url']}")]

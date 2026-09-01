@@ -178,6 +178,20 @@ def test_news_batch_collects_finished_results():
     assert cache.get(_PENDING_KEY)["id"] == "batch_new"   # 남은 c 가 새 배치로
 
 
+def test_news_batch_stale_pending_reset_allows_resubmit():
+    """2일 이상 미수거 pending 은 잠김으로 보고 초기화 — 새 배치 제출을 허용한다."""
+    import datetime as _dt
+    from hublib.ai_summary import AiCache, _run_news_flags, _PENDING_KEY
+    cache = AiCache(path="/nonexistent/x.json")
+    stale_at = (_dt.date.today() - _dt.timedelta(days=2)).isoformat()
+    cache.put(_PENDING_KEY, {"id": "batch_stuck", "at": stale_at, "chunks": {"b0": ["https://a"]}})
+    batch = {"submit": lambda reqs: "batch_new", "retrieve": lambda i: "in_progress",
+             "results": lambda i: []}
+    out = _run_news_flags(_news_kb(["https://a"]), cache, call=None, batch=batch)
+    assert out == {}
+    assert cache.get(_PENDING_KEY)["id"] == "batch_new"   # stale 이 풀려 재제출됨
+
+
 def test_news_flags_sync_fallback_without_batch():
     """batch 미주입(키 없음·SDK 없음) 시 기존 동기 경로 그대로."""
     import json as _j
