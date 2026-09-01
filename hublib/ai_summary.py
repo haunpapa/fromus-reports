@@ -137,9 +137,12 @@ def _cached_or_call(cache, key, prompt, call, max_tokens, parse):
     hit = cache.get(key)
     fail = _fail_info(hit)
     if fail:
-        expiry = (datetime.date.fromisoformat(fail["at"]) + datetime.timedelta(days=FAIL_TTL_DAYS)).isoformat()
-        if fail.get("n", 0) >= FAIL_MAX and datetime.date.today().isoformat() < expiry:
-            return None
+        try:
+            expiry = (datetime.date.fromisoformat(fail["at"]) + datetime.timedelta(days=FAIL_TTL_DAYS)).isoformat()
+            if fail.get("n", 0) >= FAIL_MAX and datetime.date.today().isoformat() < expiry:
+                return None
+        except (KeyError, ValueError):
+            fail = None            # 손상된 센티널 — 무시하고 재시도(다음 기록이 정상 형식으로 덮는다)
         hit = None
     if hit is not None:
         return hit

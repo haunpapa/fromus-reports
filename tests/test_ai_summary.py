@@ -104,6 +104,21 @@ def test_success_after_failure_overwrites_sentinel():
     assert _cached_or_call(cache, "k", "p", lambda p, m: (_ for _ in ()).throw(RuntimeError()), 100, lambda d: d) == {"text": "정상"}
 
 
+def test_corrupt_sentinel_is_ignored_and_retried():
+    """손상된 센티널(at 누락 등)은 예외 없이 무시하고 재시도한다."""
+    from hublib.ai_summary import AiCache, _cached_or_call, _FAIL_KEY
+    cache = AiCache(path="/nonexistent/skip-load.json")
+    cache.put("k", {_FAIL_KEY: {"n": 99}})          # at 없음 — 해석 불가
+    calls = {"n": 0}
+
+    def ok_call(prompt, max_tokens):
+        calls["n"] += 1
+        return '{"text": "정상"}'
+
+    assert _cached_or_call(cache, "k", "p", ok_call, 100, lambda d: d) == {"text": "정상"}
+    assert calls["n"] == 1                          # 예외 없이 재시도(호출 발생)
+
+
 def test_stock_jobs_retries_key_with_fail_sentinel():
     """실패 센티널은 '결과 있음'이 아니다 — stock_jobs 가 재시도 대상으로 취급해야 한다."""
     from hublib.ai_summary import AiCache, stock_jobs, _FAIL_KEY
