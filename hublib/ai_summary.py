@@ -212,11 +212,20 @@ def _run_news_flags(kb, cache, call):
             if n.get("url") and cache.get(f"news:{n['url']}") == "neutral"}
 
 
+def _stage(fn, *args):
+    """단계 격리 — 실패는 None 으로 흡수하고 로그만 남긴다."""
+    try:
+        return fn(*args)
+    except Exception as e:
+        print(f"  ✗ AI 단계 {fn.__name__} 실패: {repr(e)[:80]}")
+        return None
+
+
 def run(kb, cache, call, model=""):
     """kb + 캐시 + call → ai_digest.json 내용. 어떤 단계가 실패해도 나머지는 진행한다."""
     to, cutoff = _cutoff(kb)
     return {"generated": _fmt_kst(), "range": f"{cutoff}~{to}", "model": model,
-            "digest": _run_weekly(kb, cache, call, to, cutoff),
-            "daily": _run_daily(kb, cache, call, to),
-            "stock_reasons": _run_stock_reasons(kb, cache, call),
-            "news_flags": _run_news_flags(kb, cache, call)}
+            "digest": _stage(_run_weekly, kb, cache, call, to, cutoff),
+            "daily": _stage(_run_daily, kb, cache, call, to),
+            "stock_reasons": _stage(_run_stock_reasons, kb, cache, call) or {},
+            "news_flags": _stage(_run_news_flags, kb, cache, call) or {}}

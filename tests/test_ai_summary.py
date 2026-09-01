@@ -119,6 +119,17 @@ def test_corrupt_sentinel_is_ignored_and_retried():
     assert calls["n"] == 1                          # 예외 없이 재시도(호출 발생)
 
 
+def test_run_isolates_stage_failures(monkeypatch):
+    """한 단계가 터져도 나머지 단계는 진행한다 — docstring 의 계약을 실제로 지킨다."""
+    import hublib.ai_summary as A
+    cache = A.AiCache(path="/nonexistent/skip-load.json")
+    monkeypatch.setattr(A, "_run_weekly", lambda *a: (_ for _ in ()).throw(RuntimeError("weekly boom")))
+    kb = {"build": {"to": "2026-09-01"}, "stance": [], "sentiment": [], "stocks": [], "chat": {}}
+    out = A.run(kb, cache, lambda p, m: '{"lines": ["a"]}')
+    assert out["digest"] is None            # 터진 단계는 None
+    assert "stock_reasons" in out and "news_flags" in out   # 나머지는 실행됨
+
+
 def test_stock_jobs_retries_key_with_fail_sentinel():
     """실패 센티널은 '결과 있음'이 아니다 — stock_jobs 가 재시도 대상으로 취급해야 한다."""
     from hublib.ai_summary import AiCache, stock_jobs, _FAIL_KEY
