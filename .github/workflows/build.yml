@@ -89,6 +89,7 @@ jobs:
       - name: Collect (파싱·집계·시세 — 1회만)
         env:
           MARKET_MOMENTUM_AUTO_INSTALL: "0"   # CI 는 requirements 로만 설치 — 런타임 pip 금지(누락 시 조용한 6초 설치 대신 즉시 에러 → 모멘텀 생략)
+          MARKET_MOMENTUM_HISTORY_STOCKS: "40"   # 정밀 보강 복원 — SIGALRM 제거·8워커 병렬화로 이제 ~10초 (2026-09 후속 A2)
           PYTHONUNBUFFERED: "1"               # 로그 실시간 flush — 스텝 내부 구간 프로파일링 가능하게
         run: python build_hub.py --phase collect --src . --json knowledge_base.json
 
