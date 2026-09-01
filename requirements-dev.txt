@@ -1,2 +1,4 @@
+-r requirements.txt
 pytest>=8
 pytest-playwright>=0.5
+playwright==1.62.0
