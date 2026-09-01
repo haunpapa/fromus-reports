@@ -22,7 +22,7 @@ on:
       - 'vendor/**'
       - 'tests/e2e/**'
   schedule:
-    - cron: '30 22 * * *'   # 매일 07:30 KST — 시세·trade·다이제스트 자동 갱신
+    - cron: '30 22 * * 0-4'   # UTC 일~목 22:30 = KST 월~금 07:30 — 직전 거래일 종가 반영. 주말 아침 2회는 금요일과 동일 데이터라 생략
   workflow_dispatch:
 
 permissions:
@@ -37,6 +37,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20        # fetch_prices 행 방어 — 정상 빌드는 5분 이내
     steps:
       - uses: actions/checkout@v6
 
