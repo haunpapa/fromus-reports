@@ -63,23 +63,33 @@ function renderAnalytics(){
     <div class="an-card">
       <div class="an-title">🌡 시장 심리(센티멘트) 추이</div>
       <div class="an-sub">리포트 텍스트의 긍정/부정 키워드 비율 — +100 강한 낙관 · −100 강한 비관 · 막대를 누르면 해당 리포트</div>
-      <div class="idx-chart" style="height:210px"><canvas id="cSent"></canvas></div>
+      <div class="idx-chart" id="cSent" style="height:210px"></div>
     </div>`;
   drawSentiment();
 }
+/* 인라인 SVG 센티멘트 막대 (C3 — Chart.js 대체). 막대 클릭→리포트, 호버 정보는 <title> 네이티브 툴팁.
+   CSS 변수 색을 그리는 시점에 굽는다 — 테마 전환 시 setTheme 가 재호출해 색을 갱신한다. */
 function drawSentiment(){
-  const el=document.getElementById('cSent'); if(!el)return;
+  const wrap=document.getElementById('cSent'); if(!wrap)return;   // .idx-chart 랩 자체 — 재그리기 가능
   const S=(D.sentiment||[]);
-  if(!window.Chart||S.length<2){const w=el.closest('.idx-chart');if(w)w.innerHTML='<div class="empty">센티멘트 데이터가 없습니다 — build_hub.py 재실행 필요</div>';return;}
+  if(S.length<2){wrap.innerHTML='<div class="empty">센티멘트 데이터가 없습니다 — build_hub.py 재실행 필요</div>';return;}
   const cs=getComputedStyle(document.documentElement);
-  const colors=S.map(p=>p.score>=15?(cs.getPropertyValue('--green').trim()||'#247a3d'):p.score<=-15?(cs.getPropertyValue('--red').trim()||'#c2402f'):(cs.getPropertyValue('--gold').trim()||'#9a7508'));
-  const ch=new Chart(el,{type:'bar',
-    data:{labels:S.map(p=>fmtDate(p.date)),datasets:[{data:S.map(p=>p.score),backgroundColor:colors,borderRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      onClick:(_e,els)=>{if(els&&els.length)openReport(S[els[0].index].id);},
-      plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:(c)=>{const p=S[c.dataIndex];return (p.headline||'')+'  (긍정 '+p.pos+' · 부정 '+p.neg+')';}}}},
-      scales:{y:{min:-100,max:100,grid:{color:cs.getPropertyValue('--grid').trim()||'#ece6d7'},ticks:{font:{family:'JetBrains Mono',size:9}}},
-              x:{grid:{display:false},ticks:{font:{family:'JetBrains Mono',size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8}}}}});
-  (window.__charts=window.__charts||[]).push(ch);
+  const G=cs.getPropertyValue('--green').trim()||'#247a3d', R=cs.getPropertyValue('--red').trim()||'#c2402f',
+        GD=cs.getPropertyValue('--gold').trim()||'#9a7508', GRID=cs.getPropertyValue('--grid').trim()||'#ece6d7';
+  const W=640, H=210, P=18, mid=H/2;
+  const bw=Math.max(2,(W-2*P)/S.length-2);
+  const bars=S.map((p,i)=>{
+    const c=p.score>=15?G:p.score<=-15?R:GD;
+    const h=Math.abs(p.score)/100*(H/2-P);
+    const x=P+(W-2*P)*i/S.length, y=p.score>=0?mid-h:mid;
+    return `<rect class="fu-bar" data-i="${i}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,h).toFixed(1)}" rx="1.5" fill="${c}" style="cursor:pointer">
+      <title>${fmtDate(p.date)} · ${p.score}점${p.headline?(' · '+p.headline):''} (긍정 ${p.pos} · 부정 ${p.neg})</title></rect>`;
+  }).join('');
+  wrap.innerHTML=`<svg class="fu-bars" viewBox="0 0 ${W} ${H}" role="img" aria-label="센티멘트 추이">
+    <line x1="${P}" y1="${mid}" x2="${W-P}" y2="${mid}" stroke="${GRID}" stroke-width="1"/>
+    ${bars}</svg>`;
+  wrap.querySelector('svg').addEventListener('click', e=>{
+    const r=e.target.closest('.fu-bar'); if(r) openReport(S[+r.dataset.i].id);
+  });
 }
 

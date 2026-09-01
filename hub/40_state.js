@@ -5,9 +5,10 @@ function setTheme(t){
   document.documentElement.setAttribute('data-theme',t);
   try{localStorage.setItem('fu-theme',t);}catch(e){}
   const btn=$('#themeBtn'); if(btn) btn.textContent = t==='dark'?'☀️':'🌙';
-  if(window.__charts){window.__charts.forEach(c=>{try{c.destroy();}catch(e){}});window.__charts=[];}
   if(typeof drawTrend==='function') drawTrend();
   if(typeof drawStockSparks==='function') drawStockSparks();
+  // SVG 센티멘트 막대는 CSS 변수 색을 그리는 시점에 굽는다 — 분석 탭이 렌더된 상태면 재그리기 (C3)
+  if(typeof RENDERED!=='undefined' && RENDERED.has('analytics') && typeof drawSentiment==='function') drawSentiment();
 }
 (function(){const b=$('#themeBtn'); if(b){b.textContent=curTheme()==='dark'?'☀️':'🌙'; b.addEventListener('click',()=>setTheme(curTheme()==='dark'?'light':'dark'));}})();
 

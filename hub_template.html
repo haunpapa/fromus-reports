@@ -27,7 +27,6 @@
 <link rel="stylesheet" media="print" onload="this.media='all'"
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
-<script defer src="./vendor/chart.umd.min.js" id="chartjs"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    From Us Knowledge Hub — 'Ink & Gold' Design System v5
@@ -186,6 +185,7 @@ mark{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:0 2px
 .idx-h{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-3);margin-bottom:8px;font-family:'JetBrains Mono',monospace;}
 .idx-h i{width:9px;height:9px;border-radius:3px;display:inline-block;}
 .idx-chart{position:relative;height:170px;}
+.idx-chart svg{display:block;width:100%;height:100%;}
 
 /* ── 칩/태그/배지 ─────────────────────────────────────────── */
 .chip{display:inline-flex;align-items:center;gap:6px;margin:0 6px 8px 0;padding:6px 13px;border-radius:999px;
@@ -814,15 +814,6 @@ function showUpdateToast(gen){
     return;
   }
   try{ sessionStorage.removeItem('kbRetried'); }catch(_e){}
-  // Chart.js 가 부트보다 늦게 도착하면 — 가드가 스킵해 둔 차트만 다시 그린다
-  (function(){
-    var s=document.getElementById('chartjs');
-    if(!s || window.Chart) return;
-    s.addEventListener('load', function(){
-      try{ if(typeof renderHome==='function') renderHome(); }catch(e){}
-      try{ if(typeof RENDERED!=='undefined' && RENDERED.has('analytics') && typeof renderAnalytics==='function') renderAnalytics(); }catch(e){}
-    });
-  })();
   if(boot){ boot.style.opacity = '0'; setTimeout(function(){ boot.remove(); }, 200); }
   // 새 빌드 감지 (P6) — 셸은 SWR 이라 재방문 첫 화면이 구 셸일 수 있다. version.json 은 ?nosw= 로 SW 를 우회한다.
   setTimeout(function(){

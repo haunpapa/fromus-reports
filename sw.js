@@ -7,7 +7,7 @@
 const CACHE = 'fu-hub-v5';
 const REPORTS_CACHE = 'fu-reports-v1';
 const REPORTS_MAX = 30;                       // FIFO 상한 — 리포트는 매일 늘므로 방치하면 무한 증식
-const PRECACHE = ['./hub.html', './vendor/chart.umd.min.js'];
+const PRECACHE = ['./hub.html'];
 // kb.core.<h>.json · kb.chat.<h>.json … | 구 형식 kb.<h>.json 도 인식(청크명 'legacy')
 const KB_RE = /\/kb\.(?:([a-z]+)\.)?[0-9a-f]{6,}\.json$/;
 // hub.app.<h>.js — 앱 JS 해시 파일. kb 청크와 동일한 cache-first + 구해시 정리(청크명 'app')
