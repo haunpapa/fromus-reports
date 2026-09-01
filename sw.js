@@ -1,8 +1,12 @@
-/* From Us Knowledge Hub — Service Worker v4
+/* From Us Knowledge Hub — Service Worker v5
    셸(html): stale-while-revalidate — 캐시 즉시 표시 + 백그라운드 갱신
    kb.<chunk>.<hash>.json: cache-first — 해시가 바뀌면 URL이 바뀌므로 영구 캐시 안전.
-   청크별로 구 해시만 정리한다 (chat 청크를 받으면서 core 캐시를 지우면 안 된다). */
-const CACHE = 'fu-hub-v4';
+   청크별로 구 해시만 정리한다 (chat 청크를 받으면서 core 캐시를 지우면 안 된다).
+   /reports/: 별도 캐시(fu-reports-v1) + FIFO 상한 — 리포트는 매일 늘므로 방치하면 무한 증식.
+   v5 범프: v4 에 SWR 로 쌓인 레거시 /reports/ 잔류분(~7.7MB)을 activate 정리로 통째 회수. */
+const CACHE = 'fu-hub-v5';
+const REPORTS_CACHE = 'fu-reports-v1';
+const REPORTS_MAX = 30;                       // FIFO 상한 — 리포트는 매일 늘므로 방치하면 무한 증식
 const PRECACHE = ['./hub.html', './vendor/chart.umd.min.js'];
 // kb.core.<h>.json · kb.chat.<h>.json … | 구 형식 kb.<h>.json 도 인식(청크명 'legacy')
 const KB_RE = /\/kb\.(?:([a-z]+)\.)?[0-9a-f]{6,}\.json$/;
@@ -16,7 +20,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(ks => Promise.all(
+      ks.filter(k => k !== CACHE && k !== REPORTS_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -49,6 +54,27 @@ self.addEventListener('fetch', e => {
           });
         }
         return r;
+      }))
+    );
+    return;
+  }
+
+  // 리포트 원문 — 별도 캐시(SWR) + 근사 FIFO 상한.
+  // Cache API keys()는 삽입순 보장이 명시 스펙은 아니나 실구현이 삽입순 — 근사 FIFO로 충분.
+  if (path.includes('/reports/')) {
+    e.respondWith(
+      caches.open(REPORTS_CACHE).then(c => c.match(e.request).then(cached => {
+        const net = fetch(e.request).then(r => {
+          if (r && r.ok) {
+            const cp = r.clone();
+            c.put(e.request, cp).then(async () => {
+              const keys = await c.keys();
+              for (const k of keys.slice(0, Math.max(0, keys.length - REPORTS_MAX))) await c.delete(k);
+            });
+          }
+          return r;
+        }).catch(() => cached);
+        return cached || net;
       }))
     );
     return;
