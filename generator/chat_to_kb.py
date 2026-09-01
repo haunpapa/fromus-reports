@@ -32,6 +32,11 @@ def build(msgs, links, signals, public=False):
                 "stocks":{},"themes":{},"news":[],"targets":[],
                 "readings":[],"glossary":[],"actions":[],"strategy":[],"qna":[]}
     by_idx={m["idx"]:m for m in msgs}
+    for m in msgs:                       # 파생값 1회 계산 — 7개 수집 루프가 재사용 (2026-09 후속 A3)
+        body = m["body"]
+        m["_clean"] = URL.sub("", body).strip()
+        m["_teacher"] = m["sender"] in TEACHERS
+        m["_stocks"] = T.match_stocks(body)
     # ---------- stocks ----------
     stocks={}
     def S(name):
@@ -48,7 +53,7 @@ def build(msgs, links, signals, public=False):
     # 전 메시지 스캔: count + 근접도 게이팅 테마(동시출현 노이즈 차단)
     for m in msgs:
         body=m["body"]
-        for canon in sorted(T.match_stocks(body)):
+        for canon in sorted(m["_stocks"]):
             S(canon)["count"]+=1
             for th in sorted(T.match_themes_for_stock(body, canon)):
                 S(canon)["themes"][th]+=1
@@ -93,7 +98,7 @@ def build(msgs, links, signals, public=False):
     for m in msgs:
         tps=T.parse_target_prices(m["body"])
         if not tps: continue
-        sset=T.match_stocks(m["body"])
+        sset=m["_stocks"]
         stock=sorted(CANON(x) for x in sset)[:1]
         for tp in tps:
             rec={"stock":stock[0] if stock else "","value":tp["value"],"unit":tp["unit"],
@@ -106,8 +111,8 @@ def build(msgs, links, signals, public=False):
          "쉽게 설명","예를 들","예시","한마디로","정리하면","풀어서","이해하기 쉽","요약하면")
     GLOSS=("용어","개념","뜻","란?","란 ","이란","무엇","정의")
     for m in msgs:
-        if m["sender"] not in TEACHERS: continue
-        text=URL.sub("",m["body"]).strip()
+        if not m["_teacher"]: continue
+        text=m["_clean"]
         if len(text)<140: continue
         if text.lstrip().startswith("[") or any(mk in text for mk in SRC_MARK): continue  # 퍼온 리서치 제외
         if not any(k in text for k in EDU): continue
@@ -121,8 +126,8 @@ def build(msgs, links, signals, public=False):
     WATCH=("지켜","주목","대기","관찰","체크","확인하","주시","봐야")
     DO=("하세요","챙기","점검","준비","매수 대기","확인 필수","해두","담아두","기억해")
     for m in msgs:
-        if m["sender"] not in TEACHERS: continue
-        text=URL.sub("",m["body"]).strip()
+        if not m["_teacher"]: continue
+        text=m["_clean"]
         if not (8<len(text)<300): continue
         ph=T.principle_hits(text)
         kind=""
@@ -135,8 +140,8 @@ def build(msgs, links, signals, public=False):
     # ---------- strategy (원칙 버킷) ----------
     strategy=[]
     for m in msgs:
-        if m["sender"] not in TEACHERS: continue
-        text=URL.sub("",m["body"]).strip()
+        if not m["_teacher"]: continue
+        text=m["_clean"]
         ph=T.principle_hits(text)
         if not ph or len(text)<20: continue
         strategy.append({"title":ph[0][0],"emoji":ph[0][1],"desc":re.sub(r"\s+"," ",text)[:200],
@@ -146,8 +151,8 @@ def build(msgs, links, signals, public=False):
     QEND=("?","？")
     QKW=("궁금","질문있","여쭤","인가요","될까요","맞나요","어떻게 하","해야 하나","뭔가요","무엇인가")
     for m in msgs:
-        if m["sender"] in TEACHERS: continue
-        text=URL.sub("",m["body"]).strip()
+        if m["_teacher"]: continue
+        text=m["_clean"]
         if not(6<len(text)<120): continue
         if text.lstrip().startswith("[") or any(mk in text for mk in SRC_MARK): continue  # 헤드라인/리서치 제외
         is_q = text.rstrip().endswith(QEND) or any(k in text for k in QKW)
@@ -156,8 +161,8 @@ def build(msgs, links, signals, public=False):
         ans=None
         for j in range(m["idx"]+1,min(m["idx"]+6,len(msgs))):
             nb=by_idx.get(j)
-            if nb and nb.get("room")==m.get("room") and nb["sender"] in TEACHERS:
-                at=URL.sub("",nb["body"]).strip()
+            if nb and nb.get("room")==m.get("room") and nb["_teacher"]:
+                at=nb["_clean"]
                 if len(at)>=10: ans={"a":re.sub(r'\s+',' ',at)[:240],"a_by":nb["sender"],"a_date":nb["date"]}; break
         if ans:
             qna.append({"q":re.sub(r'\s+',' ',text)[:160],"q_by":m["sender"],"q_date":m["date"],**ans})
@@ -175,6 +180,9 @@ def build(msgs, links, signals, public=False):
           "stocks":len(stocks),"themes":len(themes),"news":len(news)}
     kb={"build":meta,"stocks":stocks,"themes":themes,"news":news,"targets":targets,
             "readings":readings,"glossary":glossary,"actions":actions,"strategy":strategy,"qna":qna}
+    # build() 는 호출자의 msgs dict 를 참조로 쓴다 — 파생 임시 키를 정리해 입력 오염 방지(불변성 원칙과의 절충)
+    for m in msgs:
+        m.pop("_clean", None); m.pop("_teacher", None); m.pop("_stocks", None)
     return _sanitize(kb) if public else kb
 
 def _find(*names):

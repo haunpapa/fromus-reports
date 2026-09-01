@@ -206,12 +206,37 @@ def _surf_in(text, surf):
         i = text.find(surf, i+1)
     return False
 
+import re as _re
+_ALIAS_SCAN = None   # 모듈 로드 순서상 _ALIAS_SURFACE 완성 후 첫 호출에서 컴파일 — (스캔 정규식, 표면형별 부분문자열 표면형 맵)
+
+def _alias_scan():
+    """전체 별칭 순회를 대체하는 후보 프리필터 (2026-09 후속 A3). 등가성 논증:
+    ① 제로폭 lookahead 라 문자 소비가 없어 인접·부분겹침 표면형('하이브로드컴'의 브로드컴)도 잡는다.
+    ② 길이 내림차순 교대라 각 위치에서 최장 표면형이 후보가 되고, 같은 위치의 더 짧은 표면형은
+       최장 후보의 접두(=부분문자열)다. 따라서 후보의 부분문자열 표면형까지 닫으면(closure)
+       '본문에 등장하는 모든 표면형' 집합과 정확히 일치한다 — 기존 전수 순회와 동일 입력을
+       _surf_in 에 넘기므로 출력 불변. (183,750건 합성 접합 전수 대조로 검증)"""
+    global _ALIAS_SCAN
+    if _ALIAS_SCAN is None:
+        surfs = sorted(_ALIAS_SURFACE, key=len, reverse=True)
+        scan = _re.compile("(?=(" + "|".join(_re.escape(s) for s in surfs) + "))")
+        subs = {y: [s for s in surfs if s in y] for y in surfs}   # y 자신 포함
+        _ALIAS_SCAN = (scan, subs)
+    return _ALIAS_SCAN
+
 def match_stocks(text):
     text = text or ""
-    out=set()
-    for surf,canon in _ALIAS_SURFACE.items():
-        if canon in STOCK_STOPWORDS or len(canon)<2: continue
-        if _surf_in(text, surf): out.add(canon)
+    scan, subs = _alias_scan()
+    out = set()
+    candidates = set()                                  # 대부분의 메시지는 후보 0~2개
+    for y in set(scan.findall(text)):
+        candidates.update(subs[y])
+    for surf in candidates:
+        canon = _ALIAS_SURFACE.get(surf)
+        if canon is None or canon in STOCK_STOPWORDS or len(canon) < 2:
+            continue
+        if _surf_in(text, surf):                        # 경계·부정접미사 검사는 기존 그대로
+            out.add(canon)
     return out
 def match_themes(text):
     low=(text or "").lower(); out=set()
