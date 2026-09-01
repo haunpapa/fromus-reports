@@ -78,3 +78,37 @@ def test_run_survives_bad_responses(tmp_path):
     from hublib.ai_summary import AiCache, run
     out = run(_kb(), AiCache(str(tmp_path / "ai.json")), lambda p, m: "garbage", model="m")
     assert out["digest"] is None and out["daily"] is None and out["stock_reasons"] == {} and out["news_flags"] == {}
+
+
+def test_failed_call_writes_sentinel_and_stops_after_max():
+    """실패도 캐시한다 — FAIL_MAX 회 이후엔 재호출하지 않는다 (비용 무한 반복 차단, 2026-09)."""
+    from hublib.ai_summary import AiCache, _cached_or_call, FAIL_MAX
+    cache = AiCache(path="/nonexistent/skip-load.json")
+    calls = {"n": 0}
+
+    def bad_call(prompt, max_tokens):
+        calls["n"] += 1
+        return "이건 JSON 이 아님"
+
+    for _ in range(FAIL_MAX + 2):
+        assert _cached_or_call(cache, "k", "p", bad_call, 100, lambda d: d) is None
+    assert calls["n"] == FAIL_MAX          # 이후 호출은 센티널이 흡수
+
+
+def test_success_after_failure_overwrites_sentinel():
+    from hublib.ai_summary import AiCache, _cached_or_call
+    cache = AiCache(path="/nonexistent/skip-load.json")
+    assert _cached_or_call(cache, "k", "p", lambda p, m: "깨진 응답", 100, lambda d: d) is None
+    ok = _cached_or_call(cache, "k", "p", lambda p, m: '{"text": "정상"}', 100, lambda d: d)
+    assert ok == {"text": "정상"}
+    assert _cached_or_call(cache, "k", "p", lambda p, m: (_ for _ in ()).throw(RuntimeError()), 100, lambda d: d) == {"text": "정상"}
+
+
+def test_stock_jobs_retries_key_with_fail_sentinel():
+    """실패 센티널은 '결과 있음'이 아니다 — stock_jobs 가 재시도 대상으로 취급해야 한다."""
+    from hublib.ai_summary import AiCache, stock_jobs, _FAIL_KEY
+    cache = AiCache(path="/nonexistent/skip-load.json")
+    kb = {"stocks": [{"name": "삼성전자", "count": 3,
+                      "mentions": [{"date": "2026-09-01", "label": "l", "note": "n"}]}]}
+    cache.put("stock:삼성전자:2026-09-01", {_FAIL_KEY: {"n": 1, "at": "2026-09-01"}})
+    assert [j["name"] for j in stock_jobs(kb, cache)] == ["삼성전자"]

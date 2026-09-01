@@ -92,7 +92,7 @@ def stock_jobs(kb, cache, limit=STOCK_JOBS_PER_RUN):
             continue
         last = max(m.get("date") or "" for m in ms)
         key = f"stock:{s['name']}:{last}"
-        if cache.get(key):
+        if _usable(cache.get(key)):
             continue
         ctx = [{"date": m.get("date"), "label": m.get("label") or m.get("theme") or "", "note": (m.get("note") or "")[:160]}
                for m in sorted(ms, key=lambda m: m.get("date") or "", reverse=True)[:6]]
@@ -113,18 +113,46 @@ def _j(obj):
     return json.dumps(obj, ensure_ascii=False, indent=1)
 
 
+_FAIL_KEY = "__fail__"
+FAIL_MAX = 3           # 이 횟수 연속 실패하면 TTL 동안 재시도하지 않는다
+FAIL_TTL_DAYS = 7      # TTL 이 지나면 1회 더 시도 (모델·프롬프트가 고쳐졌을 수 있다)
+
+
+def _fail_info(hit):
+    """캐시 값이 실패 센티널이면 그 dict, 아니면 None."""
+    return hit[_FAIL_KEY] if isinstance(hit, dict) and _FAIL_KEY in hit else None
+
+
+def _usable(hit):
+    """진짜 결과인가 — 실패 센티널·None 은 결과가 아니다."""
+    return hit is not None and _fail_info(hit) is None
+
+
 def _cached_or_call(cache, key, prompt, call, max_tokens, parse):
-    """캐시 히트면 그대로, 아니면 1회 호출 후 파싱 성공분만 캐시. 실패는 None."""
+    """캐시 히트면 그대로. 실패도 센티널로 캐시해 FAIL_MAX 회 이후 TTL 까지 재호출하지 않는다.
+
+    _run_stock_reasons 가 워커 스레드에서 부른다 — 센티널 cache.put 도 성공 put 과 같은
+    단일 dict 연산(CPython)이라 스레드 안전성은 기존과 동일하다.
+    """
     hit = cache.get(key)
+    fail = _fail_info(hit)
+    if fail:
+        expiry = (datetime.date.fromisoformat(fail["at"]) + datetime.timedelta(days=FAIL_TTL_DAYS)).isoformat()
+        if fail.get("n", 0) >= FAIL_MAX and datetime.date.today().isoformat() < expiry:
+            return None
+        hit = None
     if hit is not None:
         return hit
     try:
         val = parse(parse_json(call(prompt, max_tokens)))
     except Exception as e:
         print(f"  ✗ AI {key}: {repr(e)[:80]}")
-        return None
+        val = None
     if val is not None:
-        cache.put(key, val)
+        cache.put(key, val)                                     # 성공이 센티널을 덮는다
+    else:
+        n = (fail or {}).get("n", 0) + 1
+        cache.put(key, {_FAIL_KEY: {"n": n, "at": datetime.date.today().isoformat()}})
     return val
 
 
@@ -154,7 +182,7 @@ def _run_stock_reasons(kb, cache, call):
         ms = s.get("mentions") or []
         if ms and s["name"] not in reasons:
             hit = cache.get(f"stock:{s['name']}:{max(m.get('date') or '' for m in ms)}")
-            if hit:
+            if _usable(hit):
                 reasons[s["name"]] = hit
     return reasons
 
