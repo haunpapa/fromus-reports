@@ -83,7 +83,7 @@ function drawSentiment(){
     const h=Math.abs(p.score)/100*(H/2-P);
     const x=P+(W-2*P)*i/S.length, y=p.score>=0?mid-h:mid;
     return `<rect class="fu-bar" data-i="${i}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,h).toFixed(1)}" rx="1.5" fill="${c}" style="cursor:pointer">
-      <title>${fmtDate(p.date)} · ${p.score}점${p.headline?(' · '+p.headline):''} (긍정 ${p.pos} · 부정 ${p.neg})</title></rect>`;
+      <title>${fmtDate(p.date)} · ${p.score}점${p.headline?(' · '+esc(p.headline)):''} (긍정 ${p.pos} · 부정 ${p.neg})</title></rect>`;
   }).join('');
   wrap.innerHTML=`<svg class="fu-bars" viewBox="0 0 ${W} ${H}" role="img" aria-label="센티멘트 추이">
     <line x1="${P}" y1="${mid}" x2="${W-P}" y2="${mid}" stroke="${GRID}" stroke-width="1"/>

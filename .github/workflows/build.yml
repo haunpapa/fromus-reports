@@ -19,7 +19,6 @@ on:
       - 'sw.js'
       - 'hublib/**'
       - 'hub/**'
-      - 'vendor/**'
       - 'tests/e2e/**'
       - '.github/workflows/build.yml'   # 워크플로 수정도 빌드로 검증 — CI 핫픽스가 트리거를 못 타는 사각지대 방지
       - 'requirements*.txt'
