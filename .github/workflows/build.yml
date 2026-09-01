@@ -21,6 +21,8 @@ on:
       - 'hub/**'
       - 'vendor/**'
       - 'tests/e2e/**'
+      - '.github/workflows/build.yml'   # 워크플로 수정도 빌드로 검증 — CI 핫픽스가 트리거를 못 타는 사각지대 방지
+      - 'requirements*.txt'
   schedule:
     - cron: '30 22 * * 0-4'   # UTC 일~목 22:30 = KST 월~금 07:30 — 직전 거래일 종가 반영. 주말 아침 2회는 금요일과 동일 데이터라 생략
   workflow_dispatch:
