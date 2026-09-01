@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""검색 인덱스 보강 — hay 사전 토큰화 + 채팅 kind (스펙 C3)."""
+"""검색 인덱스 보강 — source 부착 + 채팅 kind (스펙 C3)."""
 import os
 import sys
 

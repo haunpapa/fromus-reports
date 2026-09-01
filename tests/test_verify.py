@@ -456,7 +456,7 @@ def test_build_verify_report_cohort_with_fake_loaders(tmp_path):
 
 
 def test_krx_listing_downloads_once_per_build(monkeypatch):
-    """momentum 과 verify 가 KRX 목록을 공유한다 — 빌드당 다운로드 1회 (2026-09 진단)."""
+    """_load_krx_listing 은 lru_cache 로 빌드당 1회만 실행된다 (2026-09 진단)"""
     import hublib.momentum as mom
     calls = {"n": 0}
 
@@ -476,3 +476,4 @@ def test_krx_listing_downloads_once_per_build(monkeypatch):
         assert calls["n"] == 1
     finally:
         mom._load_krx_listing.cache_clear()   # 다른 테스트에 가짜 목록이 새지 않게
+        mom._build_ticker_map.cache_clear()
