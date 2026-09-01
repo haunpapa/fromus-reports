@@ -111,7 +111,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          cp index.html hub.html knowledge_base.json trade.html manifest.webmanifest sw.js _site/
+          cp index.html hub.html trade.html manifest.webmanifest sw.js _site/
           cp ai_digest.json _site/ 2>/dev/null || true
           cp feed.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
