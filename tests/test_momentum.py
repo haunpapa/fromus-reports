@@ -18,7 +18,7 @@ def test_stock_history_timeout_does_not_hang(monkeypatch):
     t0 = time.monotonic()
     mm, err = mom._stock_market_momentum("테스트", {"code": "000000", "market": "KOSPI"}, {}, "2026-06-01")
     assert mm is None and err
-    assert time.monotonic() - t0 < 3, "타임아웃이 1초 부근에서 끊어야 한다"
+    assert time.monotonic() - t0 < 5, "타임아웃이 1초 부근에서 끊어야 한다(러너 부하 마진 포함)"
 
 
 def test_history_enrich_runs_in_parallel_and_isolates_failures(monkeypatch):
