@@ -267,14 +267,12 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
     with open(json_in, encoding="utf-8") as f:
         data = json.load(f)
 
-    # AI 위클리 다이제스트 반영 (ai_digest.py 산출물 — 없으면 무시) + knowledge_base.json 재기록
+    # AI 위클리 다이제스트 반영 (ai_digest.py 산출물 — 없으면 무시)
     try:
         if os.path.exists("ai_digest.json"):
             with open("ai_digest.json", encoding="utf-8") as f:
                 data["ai_digest"] = json.load(f)
             print("ℹ️ ai_digest.json 반영")
-            with open(json_in, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=1)
             flags = (data["ai_digest"] or {}).get("news_flags") or {}
             if flags:
                 data = _apply_news_flags(data, flags)

@@ -54,9 +54,9 @@ def test_collect_then_render(tmp_path):
             assert (src / man[name]).exists(), f"{name} 청크 파일 없음"
     assert (src / "version.json").exists()
     assert json.loads((src / "version.json").read_text(encoding="utf-8"))["core"] == man["core"]
-    # render 가 knowledge_base.json 에도 다이제스트를 반영했는지
+    # render 는 원본 kb 를 재기록하지 않는다 — ai_digest 는 kb.core 로만 나간다 (2026-09 진단 Task 4)
     kb2 = json.loads((src / "kb_raw.json").read_text(encoding="utf-8"))
-    assert kb2["ai_digest"]["digest"]["title"] == "테스트다이제스트"
+    assert kb2["ai_digest"] is None, "render 가 knowledge_base.json 을 재기록하면 안 된다"
 
 
 def test_render_reuses_existing_kb_without_recollect(tmp_path):
