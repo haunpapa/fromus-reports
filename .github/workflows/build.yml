@@ -109,7 +109,9 @@ jobs:
         run: python build_hub.py --phase render --json knowledge_base.json --out hub.html
 
       - name: Run tests
-        run: python -m pytest tests/ generator/test_parse.py -q
+        # e2e 는 브라우저 설치 후 별도 스텝에서 돈다 — pytest-playwright 가 설치 단일화로 이 시점에 이미 깔려 있어,
+        # 제외하지 않으면 브라우저 없는 상태에서 e2e 를 수집·실행하다 실패한다
+        run: python -m pytest tests/ generator/test_parse.py -q --ignore=tests/e2e
 
       - name: kb 크기 예산 (경고만, 코어 2배 초과 시 실패)
         run: KB_BUDGET_CHECK=1 python -m pytest tests/test_budget.py -q
