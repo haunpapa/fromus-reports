@@ -118,9 +118,23 @@ jobs:
           cp version.json _site/
           cp -r reports icons vendor _site/
 
+      - name: Install Playwright
+        id: pw
+        run: |
+          pip install pytest-playwright
+          echo "version=$(python -c 'import playwright; print(playwright.__version__)')" >> "$GITHUB_OUTPUT"
+
+      # 브라우저 리비전은 playwright 버전에 따라가므로 버전을 캐시 키로 쓴다 —
+      # 히트 시 install 이 다운로드를 건너뛰어 매 실행 ~40초를 아낀다.
+      - name: Restore Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-browsers-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
       - name: E2E 스모크 (셸 JS — _site 기준)
         run: |
-          pip install pytest-playwright && python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium
           E2E_SITE_DIR=_site python -m pytest tests/e2e -q
 
       - name: Job Summary (kb 크기·예산·E2E 타이밍)

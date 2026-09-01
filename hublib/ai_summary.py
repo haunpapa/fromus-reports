@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 from hublib.ai_prompts import DAILY_PROMPT, NEWS_PROMPT, STOCK_PROMPT, WEEKLY_PROMPT
 from hublib.config import _fmt_kst
@@ -15,6 +16,7 @@ WINDOW_DAYS = 7
 STOCK_JOBS_PER_RUN = 30
 NEWS_BATCH = 40
 NEWS_MAX_BATCHES = 5
+AI_WORKERS = 6                # 종목·뉴스 호출 동시성 — API 레이트리밋 안쪽에서 지연만 겹치게
 CACHE_VERSION = 1
 
 
@@ -142,12 +144,12 @@ def _run_daily(kb, cache, call, to):
 
 
 def _run_stock_reasons(kb, cache, call):
-    reasons = {}
-    for job in stock_jobs(kb, cache):
-        r = _cached_or_call(cache, job["key"], STOCK_PROMPT.format(name=job["name"], ctx=_j(job["ctx"])), call, 200,
-                            lambda d, j=job: {"text": d["text"], "as_of": j["as_of"]} if isinstance(d, dict) and d.get("text") else None)
-        if r:
-            reasons[job["name"]] = r
+    def one(job):
+        return job["name"], _cached_or_call(cache, job["key"], STOCK_PROMPT.format(name=job["name"], ctx=_j(job["ctx"])), call, 200,
+                                            lambda d, j=job: {"text": d["text"], "as_of": j["as_of"]} if isinstance(d, dict) and d.get("text") else None)
+
+    with ThreadPoolExecutor(max_workers=AI_WORKERS) as ex:
+        reasons = {name: r for name, r in ex.map(one, stock_jobs(kb, cache)) if r}
     for s in kb.get("stocks") or []:          # 이번에 새로 만들지 않았어도 캐시에 있는 최신 것은 싣는다
         ms = s.get("mentions") or []
         if ms and s["name"] not in reasons:
@@ -158,13 +160,17 @@ def _run_stock_reasons(kb, cache, call):
 
 
 def _run_news_flags(kb, cache, call):
-    for batch in news_batches(kb, cache):      # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
+    def one(batch):                            # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
         try:
             d = parse_json(call(NEWS_PROMPT.format(ctx=_j(batch)), 1500))
-            got = d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
+            return batch, d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
         except Exception as e:
             print(f"  ✗ AI news batch: {repr(e)[:80]}")
-            got = {}
+            return batch, {}
+
+    with ThreadPoolExecutor(max_workers=AI_WORKERS) as ex:
+        results = list(ex.map(one, news_batches(kb, cache)))
+    for batch, got in results:                 # 캐시 기록은 메인 스레드에서만
         for item in batch:
             flag = got.get(item["url"])
             if flag not in ("neutral", "relevant") and got:
