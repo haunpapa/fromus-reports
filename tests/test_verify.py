@@ -453,3 +453,26 @@ def test_build_verify_report_cohort_with_fake_loaders(tmp_path):
     assert out["stocks"][0]["series"], "채팅 코호트 종목에도 시계열"
     assert out["themes"] and out["themes"][0]["cohort"] == "report"
     assert all(c["stock"] != "삼성전자" or c["type"] == "supply" for c in rep["calls"])
+
+
+def test_krx_listing_downloads_once_per_build(monkeypatch):
+    """momentum 과 verify 가 KRX 목록을 공유한다 — 빌드당 다운로드 1회 (2026-09 진단)."""
+    import hublib.momentum as mom
+    calls = {"n": 0}
+
+    class _FakeFdr:
+        @staticmethod
+        def StockListing(_):
+            calls["n"] += 1
+            import pandas as pd
+            return pd.DataFrame([{"Name": "삼성전자", "Code": "005930", "Market": "KOSPI",
+                                  "Close": 70000, "Amount": 1.0, "Marcap": 1.0, "Volume": 1.0}])
+
+    mom._load_krx_listing.cache_clear()
+    monkeypatch.setattr(mom, "_ensure_finance_datareader", lambda: _FakeFdr)
+    try:
+        mom._load_krx_listing()
+        mom._load_krx_listing()
+        assert calls["n"] == 1
+    finally:
+        mom._load_krx_listing.cache_clear()   # 다른 테스트에 가짜 목록이 새지 않게

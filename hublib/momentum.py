@@ -89,6 +89,7 @@ def _ensure_finance_datareader():
         except Exception as install_error:
             raise RuntimeError(f"FinanceDataReader 준비 실패: {install_error}") from first_error
 
+@functools.lru_cache(maxsize=1)   # 한 빌드에서 KRX 목록은 한 번만 — momentum 과 verify 가 공유한다 (호출자는 읽기 전용)
 def _load_krx_listing():
     try:
         fdr = _ensure_finance_datareader()
@@ -118,7 +119,7 @@ def _load_krx_listing():
         print(f"ℹ️ KRX 종목 목록 조회 실패 — 시장 모멘텀 생략 ({repr(e)[:120]})")
         return []
 
-@functools.lru_cache(maxsize=1)      # 한 빌드에서 KRX 목록은 한 번만 — momentum 과 verify 가 공유한다
+@functools.lru_cache(maxsize=1)      # (_load_krx_listing 이 KRX 목록을 캐시한다)
 def _build_ticker_map():
     rows = _load_krx_listing()
     name_map = {}
