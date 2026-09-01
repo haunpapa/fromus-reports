@@ -53,6 +53,10 @@ def test_collect_then_render(tmp_path):
     for name in ("search", "glossary", "chat", "stockchat"):      # 픽스처엔 용어·채팅이 없을 수 있다 → 있는 것만 확인
         if name in man:
             assert (src / man[name]).exists(), f"{name} 청크 파일 없음"
+    app_files = list(src.glob("hub.app.*.js"))
+    assert len(app_files) == 1, "앱 JS 는 해시 파일로 분리 배출돼야 함"
+    assert app_files[0].name in shell, "셸이 앱 JS 해시 파일을 참조해야 함"
+    assert "/* ==== 00_util.js ==== */" not in shell, "앱 JS 가 셸에 인라인되면 안 됨"
     assert (src / "version.json").exists()
     assert json.loads((src / "version.json").read_text(encoding="utf-8"))["core"] == man["core"]
     # render 는 원본 kb 를 재기록하지 않는다 — ai_digest 는 kb.core 로만 나간다 (2026-09 진단 Task 4)

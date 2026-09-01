@@ -11,7 +11,7 @@
 **사전 조건:**
 - 작업 브랜치: `perf/followup-8` (main에서 분기)
 - 테스트: `python3 -m pytest tests/ generator/test_parse.py -q --ignore=tests/e2e` (= CI 유닛 스텝과 동일). 베이스라인 **167 passed**.
-- E2E 로컬: `python3 build_hub.py --phase render --json knowledge_base.json --out hub.html && mkdir -p _site && cp hub.html kb.*.json version.json sw.js manifest.webmanifest _site/; cp -r vendor icons _site/; E2E_SITE_DIR=_site python3 -m pytest tests/e2e -q` → 베이스라인 **28 passed, 2 skipped**. (chromium 설치됨)
+- E2E 로컬: `python3 build_hub.py --phase render --json knowledge_base.json --out hub.html && mkdir -p _site && cp hub.html kb.*.json version.json sw.js manifest.webmanifest _site/; cp hub.app.*.js _site/ 2>/dev/null; cp -r vendor icons _site/ 2>/dev/null; E2E_SITE_DIR=_site python3 -m pytest tests/e2e -q` → 베이스라인 **28 passed, 2 skipped**. (chromium 설치됨)
 - 생성물(`hub.html`, `kb.*.json`, `knowledge_base.json`, `version.json`, `feed.json`, `_site/`, `.omc/`) 절대 커밋 금지.
 - 커밋 메시지 한글, 태스크당 1커밋.
 

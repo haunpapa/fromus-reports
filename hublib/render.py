@@ -34,12 +34,28 @@ def concat_app_js(app_dir=APP_DIR):
     return "\n".join(parts)
 
 
-def inject_app_js(shell, app_js):
-    """/*APPJS*/ … /*ENDAPPJS*/ 사이에 앱 코드를 넣는다. 치환 함수를 써서 JS 의 백슬래시·$1 이 re 에 해석되지 않게 한다."""
-    if "/*APPJS*/" not in shell or "/*ENDAPPJS*/" not in shell:
-        raise ValueError("템플릿에 /*APPJS*/ … /*ENDAPPJS*/ 마커가 없습니다.")
-    return re.sub(r"/\*APPJS\*/.*?/\*ENDAPPJS\*/",
-                  lambda _m: "/*APPJS*/\n" + app_js + "\n/*ENDAPPJS*/", shell, count=1, flags=re.S)
+def emit_app_js(out_dir, app_js):
+    """앱 JS 를 내용 해시 파일로 배출하고 파일명을 돌려준다. 구 해시는 render() 서두의 kb.* 정리와 같은 방식으로 정리."""
+    import hashlib
+    h = hashlib.sha1(app_js.encode("utf-8")).hexdigest()[:10]
+    name = f"hub.app.{h}.js"
+    with open(os.path.join(out_dir, name), "w", encoding="utf-8") as f:
+        f.write(app_js)
+    return name
+
+
+def inject_app_src(shell, app_name):
+    """부트 스크립트의 /*APPSRC*/ 마커를 앱 JS 해시 경로로 치환. 치환 함수를 써서 백슬래시·$1 이 re 에 해석되지 않게 한다."""
+    if "/*APPSRC*/" not in shell or "/*ENDAPPSRC*/" not in shell:
+        raise ValueError("템플릿에 /*APPSRC*/ … /*ENDAPPSRC*/ 마커가 없습니다.")
+    return re.sub(r"/\*APPSRC\*/.*?/\*ENDAPPSRC\*/",
+                  lambda _m: f'/*APPSRC*/"./{app_name}"/*ENDAPPSRC*/', shell, count=1, flags=re.S)
+
+
+def inject_app_preload(shell, app_name):
+    """<head> 의 APPPRELOAD 마커를 앱 JS preload 링크로 치환. 마커 없으면(구 템플릿) 그대로."""
+    link = f'<link rel="preload" as="script" href="./{app_name}">'
+    return shell.replace("<!--APPPRELOAD-->", link)
 
 
 def inject_core_preload(shell, core_name):
@@ -290,6 +306,8 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
     out_dir = os.path.dirname(os.path.abspath(out)) or "."
     for old in glob.glob(os.path.join(out_dir, "kb.*.json")):   # 구 해시(구 형식 kb.<h>.json 포함) 정리
         os.remove(old)
+    for old in glob.glob(os.path.join(out_dir, "hub.app.*.js")):  # 앱 JS 구 해시 정리
+        os.remove(old)
 
     core, chunks = split_payload(data)
     manifest, sizes = {}, {}
@@ -310,8 +328,10 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
     if os.path.exists(tpl):                                        # 템플릿이 없어도 kb.*·version.json 은 이미 만들어졌다
         with open(tpl, encoding="utf-8") as f:
             shell = f.read()
-        shell = inject_app_js(shell, concat_app_js())
+        app_name = emit_app_js(out_dir, concat_app_js())
+        shell = inject_app_src(shell, app_name)
         shell = inject_core_preload(shell, manifest["core"])
+        shell = inject_app_preload(shell, app_name)
         if "/*KBURL*/" not in shell or "/*ENDKBURL*/" not in shell:
             sys.exit("템플릿에 /*KBURL*/ … /*ENDKBURL*/ 마커가 없습니다.")
         shell = re.sub(r"/\*KBURL\*/.*?/\*ENDKBURL\*/",

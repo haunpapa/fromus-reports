@@ -16,6 +16,7 @@
     document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
 <!--KBPRELOAD-->
+<!--APPPRELOAD-->
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#181410">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
@@ -769,14 +770,9 @@ a.sr{text-decoration:none;color:inherit;display:block;}
 window.KB_URL = /*KBURL*/"knowledge_base.json"/*ENDKBURL*/;
 </script>
 
-<script type="fu-app">
-/*APPJS*/
-/*ENDAPPJS*/
-</script>
-
 <script>
 /* 데이터 부트스트랩 — 유일하게 즉시 실행되는 스크립트.
-   KB(kb.<hash>.json)를 fetch 한 뒤 fu-app 블록들을 순서대로 실행한다. */
+   KB(kb.<hash>.json)를 fetch 한 뒤 앱 JS(hub.app.<hash>.js)를 로드한다. */
 function showUpdateToast(gen){
   if(document.getElementById('fu-toast')) return;
   var t = document.createElement('div'); t.id = 'fu-toast'; t.className = 'fu-toast'; t.setAttribute('role', 'status');
@@ -790,9 +786,16 @@ function showUpdateToast(gen){
     // KB_URL 은 이제 매니페스트 객체({core, chat, …}) — 구 셸(문자열)도 그대로 동작
     const coreUrl = (typeof window.KB_URL === 'string') ? window.KB_URL : (window.KB_URL && window.KB_URL.core);
     if(!coreUrl) throw new Error('KB 매니페스트에 core 없음');
+    const appSrc = /*APPSRC*/""/*ENDAPPSRC*/;   // 렌더가 "./hub.app.<h>.js" 로 치환 — 빈 문자열이면 구 빌드(인라인) 경로 없음 에러
     const r = await fetch(coreUrl);
     if(!r.ok) throw new Error('HTTP ' + r.status);
     window.DATA = await r.json();
+    // 앱 JS 는 해시 파일 — DATA 준비 후 로드해야 하는 순서 계약은 동일 (동적 삽입 classic script = 전역 실행)
+    await new Promise(function(res, rej){
+      var s = document.createElement('script');
+      s.src = appSrc; s.onload = res; s.onerror = function(){ rej(new Error('app js 로드 실패: ' + appSrc)); };
+      document.body.appendChild(s);
+    });
   }catch(e){
     console.error('KB 로딩 실패:', e);
     // 배포 직후엔 캐시된 구 셸이 사라진 kb.<구해시>를 가리켜 404 — 캐시버스터로 1회 자동 재로드
@@ -811,11 +814,6 @@ function showUpdateToast(gen){
     return;
   }
   try{ sessionStorage.removeItem('kbRetried'); }catch(_e){}
-  document.querySelectorAll('script[type="fu-app"]').forEach(function(s){
-    const n = document.createElement('script');
-    n.textContent = s.textContent;
-    document.body.appendChild(n);   // 동기 실행 — 원래 순서 보장
-  });
   // Chart.js 가 부트보다 늦게 도착하면 — 가드가 스킵해 둔 차트만 다시 그린다
   (function(){
     var s=document.getElementById('chartjs');

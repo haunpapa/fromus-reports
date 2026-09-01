@@ -22,13 +22,13 @@ def test_concat_app_js_is_in_filename_order_and_complete():
         pos = i
 
 
-def test_inject_app_js_replaces_marker_without_backslash_mangling():
-    from hublib.render import inject_app_js
-    shell = '<script type="fu-app">/*APPJS*/\n/*ENDAPPJS*/</script>'
-    js = r"const re=/\d+/; const s='$1 \\n';"        # 백슬래시·$1 이 re.sub 치환에서 깨지면 안 된다
-    out = inject_app_js(shell, js)
-    assert js in out
-    assert "/*APPJS*/" in out and "/*ENDAPPJS*/" in out
+def test_inject_app_src_replaces_marker_without_backslash_mangling():
+    from hublib.render import inject_app_src
+    shell = 'const appSrc = /*APPSRC*/""/*ENDAPPSRC*/;'
+    name = r"hub.app.\1$1abc.js"        # 백슬래시·$1 이 re.sub 치환에서 깨지면 안 된다 (치환 함수 패턴 확인)
+    out = inject_app_src(shell, name)
+    assert f'"./{name}"' in out
+    assert "/*APPSRC*/" in out and "/*ENDAPPSRC*/" in out
 
 
 def test_inject_core_preload_replaces_marker():
@@ -46,7 +46,7 @@ def test_inject_core_preload_is_noop_without_marker():
 
 def test_template_has_app_marker_and_no_inline_app_code():
     tpl = open(os.path.join(ROOT, "hub_template.html"), encoding="utf-8").read()
-    assert "/*APPJS*/" in tpl and "/*ENDAPPJS*/" in tpl
+    assert "/*APPSRC*/" in tpl and "/*ENDAPPSRC*/" in tpl
     assert "function renderHome(" not in tpl, "앱 코드가 아직 템플릿에 인라인돼 있음"
 
 

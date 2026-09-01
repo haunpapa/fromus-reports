@@ -126,6 +126,7 @@ jobs:
           cp ai_digest.json _site/ 2>/dev/null || true
           cp feed.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
+          cp hub.app.*.js _site/ 2>/dev/null || true   # 앱 JS 해시 파일 (C2 분리 이후 생성됨)
           cp version.json _site/
           cp -r reports icons vendor _site/
 

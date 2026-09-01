@@ -10,6 +10,8 @@ const REPORTS_MAX = 30;                       // FIFO 상한 — 리포트는 �
 const PRECACHE = ['./hub.html', './vendor/chart.umd.min.js'];
 // kb.core.<h>.json · kb.chat.<h>.json … | 구 형식 kb.<h>.json 도 인식(청크명 'legacy')
 const KB_RE = /\/kb\.(?:([a-z]+)\.)?[0-9a-f]{6,}\.json$/;
+// hub.app.<h>.js — 앱 JS 해시 파일. kb 청크와 동일한 cache-first + 구해시 정리(청크명 'app')
+const APP_RE = /\/hub\.app\.[0-9a-f]{6,}\.js$/;
 
 self.addEventListener('install', e => {
   // cache:'reload' — HTTP 캐시를 우회해 항상 네트워크의 최신 셸을 프리캐시
@@ -28,7 +30,8 @@ self.addEventListener('activate', e => {
 
 function chunkOf(pathname) {
   const m = KB_RE.exec(pathname);
-  return m ? (m[1] || 'legacy') : null;
+  if (m) return m[1] || 'legacy';
+  return APP_RE.test(pathname) ? 'app' : null;   // 해시 앱 JS 도 청크 취급 — cache-first + 같은 청크 구해시만 삭제
 }
 
 self.addEventListener('fetch', e => {

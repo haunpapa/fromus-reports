@@ -16,6 +16,7 @@ hub.html
 knowledge_base.json
 ai_digest.json
 kb.*.json
+hub.app.*.js
 version.json
 feed.json
 build/report.md
