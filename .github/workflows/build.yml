@@ -66,7 +66,7 @@ jobs:
       # 가격은 매일 자라므로 내용 해시를 키로 쓸 수 없다 —
       # 매 실행마다 새로 저장하고 가장 최근 것을 복원한다. v1 은 CACHE_VERSION 과 함께 올린다.
       - name: Restore price cache (검증 레이어)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: build/price_cache.json
           key: price-cache-v1-${{ github.run_id }}
@@ -74,7 +74,7 @@ jobs:
 
       # what's new 는 '전일 빌드의 요약'과 비교한다 — 가격 캐시와 같은 이유로 run_id 키 + 최근 복원.
       - name: Restore kb summary (what's new 전일 기준)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: build/kb_summary.json
           key: kb-summary-${{ github.run_id }}
@@ -91,7 +91,7 @@ jobs:
 
       # 같은 입력은 다시 묻지 않는다 — 캐시가 없으면 그날 전량 재요약(비용만 늘고 결과는 같다).
       - name: Restore AI cache (증분 요약)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: build/ai_cache.json
           key: ai-cache-v1-${{ github.run_id }}
@@ -143,6 +143,29 @@ jobs:
             python -m playwright install --with-deps chromium
           fi
           E2E_SITE_DIR=_site python -m pytest tests/e2e -q
+
+      # 테스트가 깨진 날에도 그날 수집분은 저장한다 — 다음 빌드의 증분 구간이 늘지 않게 (restore 와 짝).
+      # hashFiles 가드: Collect 이전에 job 이 죽으면 파일이 없다 — 빈 경로 save 에러(로그 노이즈) 방지.
+      - name: Save price cache
+        if: always() && hashFiles('build/price_cache.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: build/price_cache.json
+          key: price-cache-v1-${{ github.run_id }}
+
+      - name: Save kb summary
+        if: always() && hashFiles('build/kb_summary.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: build/kb_summary.json
+          key: kb-summary-${{ github.run_id }}
+
+      - name: Save AI cache
+        if: always() && hashFiles('build/ai_cache.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: build/ai_cache.json
+          key: ai-cache-v1-${{ github.run_id }}
 
       - name: Job Summary (kb 크기·예산·E2E 타이밍)
         if: always()
