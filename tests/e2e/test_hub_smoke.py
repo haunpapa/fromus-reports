@@ -121,14 +121,9 @@ def test_core_is_small(page, site_url):
 
 
 def test_update_toast_when_version_differs(page, site_url):
-    site = os.environ["E2E_SITE_DIR"]
-    vpath = os.path.join(site, "version.json")
-    orig = open(vpath, encoding="utf-8").read()
-    try:
-        with open(vpath, "w", encoding="utf-8") as f:
-            f.write('{"core":"kb.core.0000000000.json","generated":"2099-01-01 00:00"}')
-        _boot(page, site_url)
-        page.wait_for_selector("#fu-toast", timeout=10000)
-    finally:
-        with open(vpath, "w", encoding="utf-8") as f:
-            f.write(orig)
+    """새 배포 감지 토스트 — version.json 응답만 가로챈다(파일 무변경·병렬 안전)."""
+    page.route("**/version.json*", lambda r: r.fulfill(
+        status=200, content_type="application/json",
+        body='{"core":"kb.core.0000000000.json","generated":"2099-01-01 00:00"}'))
+    _boot(page, site_url)
+    page.wait_for_selector("#fu-toast", timeout=10000)
