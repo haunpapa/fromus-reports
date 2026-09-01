@@ -31,6 +31,19 @@ def test_inject_app_js_replaces_marker_without_backslash_mangling():
     assert "/*APPJS*/" in out and "/*ENDAPPJS*/" in out
 
 
+def test_inject_core_preload_replaces_marker():
+    from hublib.render import inject_core_preload
+    shell = "<head>\n<!--KBPRELOAD-->\n</head>"
+    out = inject_core_preload(shell, "kb.core.abc123.json")
+    assert '<link rel="preload" as="fetch" type="application/json" href="./kb.core.abc123.json" crossorigin>' in out
+    assert "<!--KBPRELOAD-->" not in out
+
+
+def test_inject_core_preload_is_noop_without_marker():
+    from hublib.render import inject_core_preload
+    assert inject_core_preload("<head></head>", "kb.core.x.json") == "<head></head>"
+
+
 def test_template_has_app_marker_and_no_inline_app_code():
     tpl = open(os.path.join(ROOT, "hub_template.html"), encoding="utf-8").read()
     assert "/*APPJS*/" in tpl and "/*ENDAPPJS*/" in tpl

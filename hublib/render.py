@@ -42,6 +42,12 @@ def inject_app_js(shell, app_js):
                   lambda _m: "/*APPJS*/\n" + app_js + "\n/*ENDAPPJS*/", shell, count=1, flags=re.S)
 
 
+def inject_core_preload(shell, core_name):
+    """<head> 의 KBPRELOAD 마커를 core 청크 preload 링크로 치환. 마커 없으면(구 템플릿) 그대로."""
+    link = f'<link rel="preload" as="fetch" type="application/json" href="./{core_name}" crossorigin>'
+    return shell.replace("<!--KBPRELOAD-->", link)
+
+
 def inject_hub_button(index_path):
     if not os.path.exists(index_path):
         print(f"ℹ️ index.html 없음({index_path}) — 허브 버튼 주입 생략")
@@ -305,6 +311,7 @@ def render(json_in="knowledge_base.json", out="hub.html", template=None, index_p
         with open(tpl, encoding="utf-8") as f:
             shell = f.read()
         shell = inject_app_js(shell, concat_app_js())
+        shell = inject_core_preload(shell, manifest["core"])
         if "/*KBURL*/" not in shell or "/*ENDKBURL*/" not in shell:
             sys.exit("템플릿에 /*KBURL*/ … /*ENDKBURL*/ 마커가 없습니다.")
         shell = re.sub(r"/\*KBURL\*/.*?/\*ENDKBURL\*/",

@@ -48,6 +48,7 @@ def test_collect_then_render(tmp_path):
     import re as _re
     man = json.loads(_re.search(r"/\*KBURL\*/(.*?)/\*ENDKBURL\*/", shell, _re.S).group(1))
     assert man["core"] == core_files[0].name
+    assert f'href="./{man["core"]}"' in shell and 'rel="preload"' in shell, "core preload 링크가 셸에 주입돼야 함"
     assert "search" in man, "검색 청크는 리포트만 있어도 만들어져야 함"
     for name in ("search", "glossary", "chat", "stockchat"):      # 픽스처엔 용어·채팅이 없을 수 있다 → 있는 것만 확인
         if name in man:
