@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1787416960032,
+  "lastScanned": 1788279315523,
   "projectRoot": "/Users/haunpapa/Documents/GitHub/fromus-reports",
   "techStack": {
     "languages": [],
@@ -39,7 +39,7 @@
       "path": "__pycache__",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1787416960016,
+      "lastAccessed": 1788279315516,
       "keyFiles": [
         "build_hub.cpython-311.pyc",
         "merge_hub.cpython-311.pyc"
@@ -48,28 +48,28 @@
     "build": {
       "path": "build",
       "purpose": "Build output",
-      "fileCount": 5,
-      "lastAccessed": 1787416960018,
+      "fileCount": 8,
+      "lastAccessed": 1788279315516,
       "keyFiles": [
         "_probe_dartlab.py",
         "_probe_schema.json",
-        "parse_cache.json",
-        "price_cache.json",
-        "test_merge_hub.py"
+        "e2e_timing.json",
+        "kb_summary.json",
+        "parse_cache.json"
       ]
     },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1787416960018,
+      "lastAccessed": 1788279315516,
       "keyFiles": []
     },
     "generator": {
       "path": "generator",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1787416960018,
+      "lastAccessed": 1788279315516,
       "keyFiles": [
         "README.md",
         "chat_to_kb.py",
@@ -78,24 +78,37 @@
         "resolve_cache.json"
       ]
     },
+    "hub": {
+      "path": "hub",
+      "purpose": null,
+      "fileCount": 19,
+      "lastAccessed": 1788279315516,
+      "keyFiles": [
+        "00_util.js",
+        "10_tabs.js",
+        "20_home.js",
+        "21_sectors.js",
+        "22_stocks.js"
+      ]
+    },
     "hublib": {
       "path": "hublib",
       "purpose": null,
-      "fileCount": 8,
-      "lastAccessed": 1787416960018,
+      "fileCount": 15,
+      "lastAccessed": 1788279315516,
       "keyFiles": [
         "__init__.py",
         "aggregate.py",
-        "cache.py",
-        "config.py",
-        "momentum.py"
+        "ai_prompts.py",
+        "ai_summary.py",
+        "cache.py"
       ]
     },
     "icons": {
       "path": "icons",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1787416960018,
+      "lastAccessed": 1788279315517,
       "keyFiles": [
         "icon-192.png",
         "icon-512.png"
@@ -105,27 +118,36 @@
       "path": "reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1787416960019,
+      "lastAccessed": 1788279315517,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 7,
-      "lastAccessed": 1787416960019,
+      "fileCount": 15,
+      "lastAccessed": 1788279315517,
       "keyFiles": [
         "__init__.py",
+        "test_ai_summary.py",
         "test_baseline.py",
-        "test_cache.py",
-        "test_market_labels.py",
-        "test_mention_ranking.py"
+        "test_budget.py",
+        "test_cache.py"
+      ]
+    },
+    "vendor": {
+      "path": "vendor",
+      "purpose": "Third-party code",
+      "fileCount": 1,
+      "lastAccessed": 1788279315517,
+      "keyFiles": [
+        "chart.umd.min.js"
       ]
     },
     "tests/fixtures": {
       "path": "tests/fixtures",
       "purpose": "Test fixtures",
       "fileCount": 1,
-      "lastAccessed": 1787416960021,
+      "lastAccessed": 1788279315517,
       "keyFiles": [
         "chat_kb_mini.json"
       ]
@@ -133,27 +155,255 @@
   },
   "hotPaths": [
     {
-      "path": "docs/superpowers/plans/2026-08-23-hub-improvement-00-foundation.md",
-      "accessCount": 34,
-      "lastAccessed": 1787421407466,
+      "path": "docs/superpowers/plans/2026-09-02-perf-followup-8.md",
+      "accessCount": 31,
+      "lastAccessed": 1788305317388,
       "type": "file"
     },
     {
-      "path": "docs/superpowers/plans/2026-08-23-hub-improvement-B-ui.md",
-      "accessCount": 30,
-      "lastAccessed": 1787421740930,
+      "path": "hublib/ai_summary.py",
+      "accessCount": 28,
+      "lastAccessed": 1788305614898,
       "type": "file"
     },
     {
-      "path": "docs/superpowers/plans/2026-08-23-hub-improvement-A-data.md",
-      "accessCount": 20,
-      "lastAccessed": 1787421736139,
+      "path": "hub_template.html",
+      "accessCount": 26,
+      "lastAccessed": 1788305329754,
       "type": "file"
     },
     {
-      "path": "docs/superpowers/specs/2026-08-23-hub-improvement-design.md",
-      "accessCount": 10,
-      "lastAccessed": 1787420522318,
+      "path": "hublib/momentum.py",
+      "accessCount": 25,
+      "lastAccessed": 1788305547621,
+      "type": "file"
+    },
+    {
+      "path": "hublib/render.py",
+      "accessCount": 21,
+      "lastAccessed": 1788305389592,
+      "type": "file"
+    },
+    {
+      "path": "generator/update_archive.py",
+      "accessCount": 17,
+      "lastAccessed": 1788302563504,
+      "type": "file"
+    },
+    {
+      "path": "generator/chat_to_kb.py",
+      "accessCount": 14,
+      "lastAccessed": 1788302451092,
+      "type": "file"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-09-02-perf-bottleneck-fixes.md",
+      "accessCount": 13,
+      "lastAccessed": 1788286353399,
+      "type": "file"
+    },
+    {
+      "path": "hublib/verify.py",
+      "accessCount": 13,
+      "lastAccessed": 1788286368807,
+      "type": "file"
+    },
+    {
+      "path": "sw.js",
+      "accessCount": 13,
+      "lastAccessed": 1788305321824,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_ai_summary.py",
+      "accessCount": 12,
+      "lastAccessed": 1788305154991,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_phases.py",
+      "accessCount": 11,
+      "lastAccessed": 1788304026567,
+      "type": "file"
+    },
+    {
+      "path": "tests/e2e/test_hub_smoke.py",
+      "accessCount": 11,
+      "lastAccessed": 1788304027935,
+      "type": "file"
+    },
+    {
+      "path": "hublib/search.py",
+      "accessCount": 9,
+      "lastAccessed": 1788286369597,
+      "type": "file"
+    },
+    {
+      "path": "generator/fromus_taxonomy.py",
+      "accessCount": 9,
+      "lastAccessed": 1788302563152,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_search.py",
+      "accessCount": 8,
+      "lastAccessed": 1788286379289,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_verify.py",
+      "accessCount": 8,
+      "lastAccessed": 1788286380574,
+      "type": "file"
+    },
+    {
+      "path": "hub/20_home.js",
+      "accessCount": 8,
+      "lastAccessed": 1788304017747,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_split.py",
+      "accessCount": 8,
+      "lastAccessed": 1788304027284,
+      "type": "file"
+    },
+    {
+      "path": "requirements.txt",
+      "accessCount": 7,
+      "lastAccessed": 1788304772465,
+      "type": "file"
+    },
+    {
+      "path": "requirements-dev.txt",
+      "accessCount": 6,
+      "lastAccessed": 1788303076042,
+      "type": "file"
+    },
+    {
+      "path": "hub/80_analytics.js",
+      "accessCount": 6,
+      "lastAccessed": 1788304449918,
+      "type": "file"
+    },
+    {
+      "path": "ai_digest.py",
+      "accessCount": 6,
+      "lastAccessed": 1788304772517,
+      "type": "file"
+    },
+    {
+      "path": "hub/40_state.js",
+      "accessCount": 5,
+      "lastAccessed": 1788305344426,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_budget.py",
+      "accessCount": 4,
+      "lastAccessed": 1788286378659,
+      "type": "file"
+    },
+    {
+      "path": "generator/test_parse.py",
+      "accessCount": 4,
+      "lastAccessed": 1788302262486,
+      "type": "file"
+    },
+    {
+      "path": "tests/e2e/conftest.py",
+      "accessCount": 3,
+      "lastAccessed": 1788303075339,
+      "type": "file"
+    },
+    {
+      "path": "hub/10_tabs.js",
+      "accessCount": 2,
+      "lastAccessed": 1788286027268,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_momentum.py",
+      "accessCount": 2,
+      "lastAccessed": 1788302779741,
+      "type": "file"
+    },
+    {
+      "path": "hublib/parse.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280489146,
+      "type": "file"
+    },
+    {
+      "path": "hublib/aggregate.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280489885,
+      "type": "file"
+    },
+    {
+      "path": "hublib/cache.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280490692,
+      "type": "file"
+    },
+    {
+      "path": "hublib/split.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280498627,
+      "type": "file"
+    },
+    {
+      "path": "hublib/whatsnew.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280498679,
+      "type": "file"
+    },
+    {
+      "path": "hublib/feed.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280499397,
+      "type": "file"
+    },
+    {
+      "path": "merge_hub.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280500235,
+      "type": "file"
+    },
+    {
+      "path": "generator/refresh.sh",
+      "accessCount": 1,
+      "lastAccessed": 1788280505067,
+      "type": "file"
+    },
+    {
+      "path": "hublib/config.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280505901,
+      "type": "file"
+    },
+    {
+      "path": "tests/e2e/test_hub_features.py",
+      "accessCount": 1,
+      "lastAccessed": 1788280509105,
+      "type": "file"
+    },
+    {
+      "path": "hub/30_search.js",
+      "accessCount": 1,
+      "lastAccessed": 1788280515517,
+      "type": "file"
+    },
+    {
+      "path": "hub/90_init.js",
+      "accessCount": 1,
+      "lastAccessed": 1788285881800,
+      "type": "file"
+    },
+    {
+      "path": "hub/00_util.js",
+      "accessCount": 1,
+      "lastAccessed": 1788305449112,
       "type": "file"
     }
   ],

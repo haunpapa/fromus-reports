@@ -4,6 +4,9 @@
 
 로직은 hublib/ai_summary.py 에 있고 여기서는 키 확인·HTTP 호출·파일 IO 만 한다.
 키가 없거나 실패해도 exit 0 — 빌드를 막지 않는다.
+
+뉴스 neutral 분류만 Batches API 2단계 배치(비용 50%↓, 플래그 최대 하루 지연 수용) —
+weekly/daily/종목 이유는 당일성이 필요해 동기 call(urllib) 유지. SDK 미설치 시 뉴스도 동기 폴백.
 """
 import json
 import os
@@ -38,6 +41,34 @@ def make_call(key):
     return call
 
 
+def make_batch_ops(key, model):
+    """Batches API — SDK 가 없으면 None(동기 폴백)."""
+    try:
+        import anthropic
+    except ImportError:
+        return None
+    client = anthropic.Anthropic(api_key=key)
+
+    def submit(reqs):
+        b = client.messages.batches.create(requests=reqs)
+        return b.id
+
+    def retrieve(bid):
+        return client.messages.batches.retrieve(bid).processing_status
+
+    def results(bid):
+        # errored/expired 요청은 succeeded 가 아니라 결과에서 빠진다 → 그 청크 url 들은
+        # 캐시되지 않고 다음날 자동 재제출(자기 치유, 비용은 재시도 1회분).
+        out = []
+        for r in client.messages.batches.results(bid):
+            if r.result.type == "succeeded":
+                text = next((blk.text for blk in r.result.message.content if blk.type == "text"), "")
+                out.append({"custom_id": r.custom_id, "text": text})
+        return out
+
+    return {"submit": submit, "retrieve": retrieve, "results": results, "model": model}
+
+
 def main():
     key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
@@ -53,7 +84,7 @@ def main():
         bail("기준일 없음")
 
     cache = AiCache()
-    out = run(kb, cache, make_call(key), model=MODEL)
+    out = run(kb, cache, make_call(key), model=MODEL, batch=make_batch_ops(key, MODEL))
     cache.save()
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)

@@ -30,7 +30,9 @@ def test_boot_renders_home_without_errors(page, site_url):
     ext = page.evaluate(
         "[...document.scripts].filter(s=>s.src && new URL(s.src, location.href).origin !== location.origin).length")
     assert ext == 0, "외부 호스트 스크립트가 남아 있음"
-    assert page.evaluate("typeof window.Chart") == "function"
+    # Chart.js 부재가 계약 (C3) — 지수 3칸이 전부 SVG 스파크라인 또는 빈 데이터 폴백으로 렌더돼야 한다
+    assert page.evaluate(
+        "document.querySelectorAll('#view-home .idx-chart svg.fu-spark, #view-home .idx-chart .empty').length") == 3
 
 
 @pytest.mark.parametrize("tab", ["analytics", "sectors", "stocks", "strategy", "glossary", "graph", "chat"])
@@ -87,10 +89,10 @@ def test_boot_timing_recorded(page, site_url):
     _boot(page, site_url)
     nav = page.evaluate("performance.getEntriesByType('navigation')[0].domContentLoadedEventEnd")
     dom = page.evaluate("document.getElementsByTagName('*').length")
-    canvases = page.evaluate("document.querySelectorAll('canvas').length")
+    svgs = page.evaluate("document.querySelectorAll('svg.fu-spark, svg.fu-bars').length")
     os.makedirs("build", exist_ok=True)
     with open("build/e2e_timing.json", "w", encoding="utf-8") as f:
-        json.dump({"dcl_ms": nav, "dom_nodes": dom, "canvases": canvases}, f)
+        json.dump({"dcl_ms": nav, "dom_nodes": dom, "svgs": svgs}, f)
     assert nav < 15000
 
 
@@ -98,7 +100,8 @@ def test_boot_renders_only_home(page, site_url):
     """부트 직후에는 홈만 그려져 있어야 한다(P3). 다른 탭은 첫 진입 시 렌더."""
     _boot(page, site_url)
     assert page.evaluate("document.querySelector('#view-stocks').innerHTML.length") == 0
-    assert page.evaluate("document.querySelectorAll('canvas').length") < 15
+    # canvas==0 은 단언하지 않는다 — drawSpark(종목 스파크)는 Chart.js 없이 canvas 를 직접 그린다
+    assert page.evaluate("document.querySelectorAll('svg.fu-spark, svg.fu-bars').length") < 15
     page.click('#tabs .tab[data-tab="stocks"]')
     page.wait_for_selector("#stockList .strow", timeout=15000)
     assert page.evaluate("document.querySelector('#view-stocks').innerHTML.length") > 200
@@ -121,14 +124,9 @@ def test_core_is_small(page, site_url):
 
 
 def test_update_toast_when_version_differs(page, site_url):
-    site = os.environ["E2E_SITE_DIR"]
-    vpath = os.path.join(site, "version.json")
-    orig = open(vpath, encoding="utf-8").read()
-    try:
-        with open(vpath, "w", encoding="utf-8") as f:
-            f.write('{"core":"kb.core.0000000000.json","generated":"2099-01-01 00:00"}')
-        _boot(page, site_url)
-        page.wait_for_selector("#fu-toast", timeout=10000)
-    finally:
-        with open(vpath, "w", encoding="utf-8") as f:
-            f.write(orig)
+    """새 배포 감지 토스트 — version.json 응답만 가로챈다(파일 무변경·병렬 안전)."""
+    page.route("**/version.json*", lambda r: r.fulfill(
+        status=200, content_type="application/json",
+        body='{"core":"kb.core.0000000000.json","generated":"2099-01-01 00:00"}'))
+    _boot(page, site_url)
+    page.wait_for_selector("#fu-toast", timeout=10000)

@@ -175,22 +175,27 @@ function drawTrend(){
   miniChart('cKOSDAQ', S['코스닥'], '#2563eb');
   miniChart('cNAS', S['나스닥'], '#7c3aed');
 }
+/* 인라인 SVG 스파크라인 (C3 — Chart.js 대체). 축 눈금·라벨은 스파크라인 목적상 생략 — 마지막 값은 aria/타이틀로 보존. */
 function miniChart(id, data, color){
   const el=document.getElementById(id); if(!el) return;
-  if(!window.Chart || !data || data.length<2){
-    const wrap=el.closest('.idx-chart');
+  const wrap=el.closest('.idx-chart');
+  if(!data || data.length<2){
     const last=(data&&data.length)?data[data.length-1].value.toLocaleString():null;
     if(wrap) wrap.innerHTML=`<div class="empty" style="padding:28px 8px;font-size:12px">데이터 부족<br><span style="font-size:10.5px;color:var(--text-4)">${last?('최근값 '+last):'리포트에 종가 미기재일 多'}</span></div>`;
     return;
   }
-  const _cs=getComputedStyle(document.documentElement);
-  const _grid=_cs.getPropertyValue('--grid').trim()||'#f0ece5';
-  const _tx=_cs.getPropertyValue('--text-3').trim()||'#8a847a';
-  const _ch=new Chart(el,{type:'line',
-    data:{labels:data.map(p=>fmtDate(p.date)),datasets:[{data:data.map(p=>p.value),borderColor:color,backgroundColor:color+'22',tension:.3,fill:true,pointRadius:2,borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{grid:{color:_grid},ticks:{font:{family:'JetBrains Mono',size:9},color:color}},
-              x:{grid:{display:false},ticks:{font:{family:'JetBrains Mono',size:9},color:_tx,maxRotation:0,autoSkip:true,maxTicksLimit:5}}}}});
-  (window.__charts=window.__charts||[]).push(_ch);
+  const W=260, H=80, P=6;
+  const vs=data.map(p=>p.value), lo=Math.min(...vs), hi=Math.max(...vs), span=(hi-lo)||1;
+  const x=i=>P+(W-2*P)*i/(data.length-1), y=v=>H-P-(H-2*P)*(v-lo)/span;
+  const pts=data.map((p,i)=>`${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
+  const area=`${P},${H-P} ${pts} ${(W-P).toFixed(1)},${H-P}`;
+  const first=data[0], last=data[data.length-1];
+  wrap.innerHTML=`<svg class="fu-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
+      aria-label="${fmtDate(first.date)}~${fmtDate(last.date)} 종가 추이, 최근 ${last.value.toLocaleString()}">
+    <title>${fmtDate(first.date)} ${first.value.toLocaleString()} → ${fmtDate(last.date)} ${last.value.toLocaleString()}</title>
+    <polygon points="${area}" fill="${color}22"/>
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${x(data.length-1).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="2.5" fill="${color}"/>
+  </svg>`;
 }
 

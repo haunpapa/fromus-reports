@@ -19,7 +19,6 @@ on:
       - 'sw.js'
       - 'hublib/**'
       - 'hub/**'
-      - 'vendor/**'
       - 'tests/e2e/**'
       - '.github/workflows/build.yml'   # 워크플로 수정도 빌드로 검증 — CI 핫픽스가 트리거를 못 타는 사각지대 방지
       - 'requirements*.txt'
@@ -89,6 +88,7 @@ jobs:
       - name: Collect (파싱·집계·시세 — 1회만)
         env:
           MARKET_MOMENTUM_AUTO_INSTALL: "0"   # CI 는 requirements 로만 설치 — 런타임 pip 금지(누락 시 조용한 6초 설치 대신 즉시 에러 → 모멘텀 생략)
+          MARKET_MOMENTUM_HISTORY_STOCKS: "40"   # 정밀 보강 복원 — SIGALRM 제거·8워커 병렬화로 이제 ~10초 (2026-09 후속 A2)
           PYTHONUNBUFFERED: "1"               # 로그 실시간 flush — 스텝 내부 구간 프로파일링 가능하게
         run: python build_hub.py --phase collect --src . --json knowledge_base.json
 
@@ -125,8 +125,9 @@ jobs:
           cp ai_digest.json _site/ 2>/dev/null || true
           cp feed.json _site/ 2>/dev/null || true
           cp kb.*.json _site/ 2>/dev/null || true   # 데이터/셸 분리 이후 생성됨
+          cp hub.app.*.js _site/ 2>/dev/null || true   # 앱 JS 해시 파일 (C2 분리 이후 생성됨)
           cp version.json _site/
-          cp -r reports icons vendor _site/
+          cp -r reports icons _site/
 
       - name: Playwright version
         id: pw
@@ -147,7 +148,7 @@ jobs:
           else
             python -m playwright install --with-deps chromium
           fi
-          E2E_SITE_DIR=_site python -m pytest tests/e2e -q
+          E2E_SITE_DIR=_site python -m pytest tests/e2e -q -n 4
 
       # 테스트가 깨진 날에도 그날 수집분은 저장한다 — 다음 빌드의 증분 구간이 늘지 않게 (restore 와 짝).
       # hashFiles 가드: Collect 이전에 job 이 죽으면 파일이 없다 — 빈 경로 save 에러(로그 노이즈) 방지.

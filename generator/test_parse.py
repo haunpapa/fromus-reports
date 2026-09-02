@@ -404,5 +404,109 @@ class TestTxtHeaderless(unittest.TestCase):
         self.assertEqual(kb["build"]["to"], "2026-01-02")
 
 
+class TestEntityMapConsolidation(unittest.TestCase):
+    """aggregate/ontology 의 mention 3중 계산 → entity_map 1회 공유 (2026-09 후속 A3) 등가성."""
+
+    def test_mention_counter_equals_naive_scan(self):
+        from collections import Counter
+        alias = U.ENTITIES[list(U.ENTITIES)[0]]["al"][0]
+        alias2 = U.ENTITIES[list(U.ENTITIES)[1]]["al"][0]
+        msgs = [
+            {"idx": 0, "body": f"{alias} 어떻게 보세요"},
+            {"idx": 1, "body": "짧"},                                   # strategy 게이트 대상(len<6) — 맵에는 포함
+            {"idx": 2, "body": f"https://x.co/{alias}/뉴스"},            # URL 안 별칭도 카운트(원본 body 기준)
+            {"idx": 3, "body": f"{alias} {alias2} 둘 다"},
+        ]
+        got = U._mention_counter(U.entity_map(msgs))
+        naive = Counter()
+        for m in msgs:                                                  # 기존 aggregate/ontology 루프 그대로
+            b = m["body"]
+            for c, info in U.ENTITIES.items():
+                if any(a in b for a in info["al"]): naive[c] += 1
+        self.assertEqual(got, naive)
+        self.assertGreaterEqual(sum(naive.values()), 3)                 # 빈 카운터 동치가 아님을 보장
+
+    def test_strategy_same_with_and_without_shared_map(self):
+        alias = U.ENTITIES[list(U.ENTITIES)[0]]["al"][0]
+        base = {"date": "2026-03-20", "time": "09:00", "weekday": "금요일", "sender": "ㄱ 이혜나"}
+        msgs = [{**base, "idx": 0, "body": f"{alias} {U.BULL[0]} 라고 봅니다", "lines": ["x"]},
+                {**base, "idx": 1, "body": "짧", "lines": ["짧"]}]
+        self.assertEqual(U.strategy(msgs), U.strategy(msgs, U.entity_map(msgs)))
+
+
+class TestAliasPrefilterInvariant(unittest.TestCase):
+    def test_alias_substring_pairs_share_canon(self):
+        """프리필터 안전 불변식: 표면형 A⊂B 이면 canon(A)==canon(B). 깨지면 프리필터가 조용히 누락시킨다."""
+        from fromus_taxonomy import _ALIAS_SURFACE
+        surfs = list(_ALIAS_SURFACE)
+        for a in surfs:
+            for b in surfs:
+                if a != b and a in b:
+                    self.assertEqual(_ALIAS_SURFACE[a], _ALIAS_SURFACE[b],
+                                     f"{a!r}⊂{b!r} 인데 canon 이 다름 — 프리필터 누락 위험")
+
+
+class TestBuildGoldenMaster(unittest.TestCase):
+    def test_build_golden_master(self):
+        """리팩토링(단일 패스·프리필터) 전후 build() 출력 완전 동일 보장.
+
+        기대값은 리팩토링 전(2026-09-02) 실제 출력의 전체 덤프 — placeholder 아님.
+        """
+        msgs = [
+            {"idx": 0, "date": "2026-09-01", "sender": "ㄱ 이혜나", "room": "a",
+             "body": "SK하이닉스 HBM 수요 강합니다. 반도체 사이클 주목하세요. 목표가 30만원"},
+            {"idx": 1, "date": "2026-09-01", "sender": "회원1", "room": "a",
+             "body": "하닉 지금 사도 될까요?"},
+            {"idx": 2, "date": "2026-09-01", "sender": "ㄱ 이혜나", "room": "a",
+             "body": "분할 매수로 접근하세요. 한 번에 몰빵은 금지입니다. 리스크 관리가 원칙."},
+        ]
+        links = [{"date": "2026-09-01", "sharer": "회원1", "url": "https://n.example/1",
+                  "title": "삼성전자 파운드리 수주", "category": "news", "outlet": "테스트"}]
+        signals = [{"date": "2026-09-01", "sharer": "ㄱ 이혜나", "type": "view", "snippet": "하이닉스 강세",
+                    "full": "하이닉스 강세 지속", "stocks": [["SK하이닉스", "bullish"]], "themes": []}]
+        out = C.build(msgs, links, signals)
+        target = {"stock": "SK하이닉스", "value": "30", "unit": "만원", "raw": "목표가 30만원",
+                  "date": "2026-09-01", "sharer": "ㄱ 이혜나"}
+        expected = {
+            "build": {"generated_from": "kakao_chat", "messages": 3, "members": 2,
+                      "from": "2026-09-01", "to": "2026-09-01", "stocks": 2, "themes": 1, "news": 1},
+            "stocks": {
+                "SK하이닉스": {"name": "SK하이닉스", "market": "KR", "ticker": "000660", "sector": "반도체",
+                            "count": 1, "themes": ["반도체·메모리"],
+                            "mentions": [{"date": "2026-09-01", "sharer": "ㄱ 이혜나", "source": "chat",
+                                          "stance": "bullish", "type": "view", "snippet": "하이닉스 강세",
+                                          "full": "하이닉스 강세 지속"}],
+                            "news": [], "targets": [target]},
+                "삼성전자": {"name": "삼성전자", "market": "KR", "ticker": "005930", "sector": "반도체",
+                          "count": 0, "themes": ["반도체·메모리"], "mentions": [],
+                          "news": [{"date": "2026-09-01", "title": "삼성전자 파운드리 수주",
+                                    "outlet": "테스트", "url": "https://n.example/1"}],
+                          "targets": []},
+            },
+            "themes": {"반도체·메모리": {"theme": "반도체·메모리", "count": 1,
+                                    "stocks": ["SK하이닉스"], "mentions": []}},
+            "news": [{"date": "2026-09-01", "sharer": "회원1", "outlet": "테스트",
+                      "title": "삼성전자 파운드리 수주", "url": "https://n.example/1",
+                      "stocks": ["삼성전자"], "themes": ["반도체·메모리"]}],
+            "targets": [target],
+            "readings": [], "glossary": [],
+            "actions": [
+                {"kind": "watch", "text": "SK하이닉스 HBM 수요 강합니다. 반도체 사이클 주목하세요. 목표가 30만원",
+                 "date": "2026-09-01", "sharer": "ㄱ 이혜나", "principle": ""},
+                {"kind": "dont", "text": "분할 매수로 접근하세요. 한 번에 몰빵은 금지입니다. 리스크 관리가 원칙.",
+                 "date": "2026-09-01", "sharer": "ㄱ 이혜나", "principle": "분할매수·적립 — 타이밍 대신 기계적 매수"}],
+            "strategy": [{"title": "분할매수·적립 — 타이밍 대신 기계적 매수", "emoji": "📈",
+                          "desc": "분할 매수로 접근하세요. 한 번에 몰빵은 금지입니다. 리스크 관리가 원칙.",
+                          "date": "2026-09-01", "sharer": "ㄱ 이혜나"}],
+            "qna": [{"q": "하닉 지금 사도 될까요?", "q_by": "회원1", "q_date": "2026-09-01",
+                     "a": "분할 매수로 접근하세요. 한 번에 몰빵은 금지입니다. 리스크 관리가 원칙.",
+                     "a_by": "ㄱ 이혜나", "a_date": "2026-09-01"}],
+        }
+        self.assertEqual(out, expected)
+        # 리팩토링의 임시 키(_clean/_teacher/_stocks)가 입력 msgs 를 오염시키지 않는다
+        for m in msgs:
+            self.assertFalse([k for k in m if k.startswith("_")], f"임시 키 잔류: {m}")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

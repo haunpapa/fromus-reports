@@ -273,8 +273,6 @@ def link_records(msgs):
                         if is_text(lines[k]) and not URLpat.search(lines[k]): title=lines[k].strip();break
                 recs.append({"msg_idx":m["idx"],"date":m["date"],"time":m["time"],"sharer":m["sender"],
                              "url":u,"title":tidy(title) if title else "","title_src":"line" if title else ""})
-    bym=defaultdict(list)
-    for m in msgs: bym  # placeholder
     idx={m["idx"]:m for m in msgs}
     for r in recs:
         if r["title"]: continue
@@ -435,12 +433,26 @@ def attribute_stocks(body, is_src):
         out.append((canon, stance))
     return out
 
-def strategy(msgs):
+def entity_map(msgs):
+    """전 메시지의 원본 body(URL 포함) 기준 {idx: find_ents(body)} — strategy/aggregate/ontology 가
+    공유해 엔티티 별칭 순회를 1회로 줄인다 (2026-09 후속 A3). 게이트(strategy 의 len<6 스킵)는
+    맵 계산이 아니라 각 소비 시점에 적용해야 mention 카운트 등가가 유지된다."""
+    return {m["idx"]: find_ents(m["body"]) for m in msgs}
+
+def _mention_counter(ent_map):
+    """{idx: ents} → 엔티티별 언급 메시지 수. aggregate/ontology 의 기존 이중 루프와 등가."""
+    mention=Counter()
+    for ents in ent_map.values():
+        for c in ents: mention[c]+=1
+    return mention
+
+def strategy(msgs, ent_map=None):
+    if ent_map is None: ent_map=entity_map(msgs)
     sig=[]
     for m in msgs:
         body=m["body"]; text=URLpat.sub("",body).strip()
-        if len(text)<6: continue
-        ents=find_ents(body); ths=find_ths(body)
+        if len(text)<6: continue                      # 게이트는 소비 시점 유지(맵은 전 메시지 계산)
+        ents=ent_map[m["idx"]]; ths=find_ths(body)
         if not(ents or ths): continue
         is_src=any(mk in body for mk in SRC_MARKERS)
         pos=hit(text,POS); view=hit(text,VIEWKW); watch=hit(text,WATCH); bull=hit(text,BULL); bear=hit(text,BEAR)
@@ -465,13 +477,9 @@ def strategy(msgs):
     return sig
 
 # ===== 집계 =====
-def aggregate(msgs, sig):
+def aggregate(msgs, sig, ent_map=None):
     personal=[s for s in sig if s["type"]!="research"]
-    mention=Counter()
-    for m in msgs:
-        b=m["body"]
-        for c,info in ENTITIES.items():
-            if any(a in b for a in info["al"]): mention[c]+=1
+    mention=_mention_counter(ent_map if ent_map is not None else entity_map(msgs))
     ent_sig=defaultdict(Counter); ent_sh=defaultdict(Counter); ent_dt=defaultdict(list)
     for s in personal:
         for e in s["entities"]:
@@ -525,7 +533,7 @@ SEC2THEME={"반도체":"반도체","반도체장비":"반도체","AI반도체":"
  "방산/철도":"방산","방산/우주":"우주/위성","로봇":"로봇/휴머노이드","2차전지":"2차전지","2차전지소재":"2차전지",
  "전기차/AI":"자율주행","SMR/원전":"원전/SMR","가상자산":"가상자산","바이오":"바이오/제약","엔터":"엔터",
  "원전연료":"원전/SMR","희토류":"희토류"}
-def ontology(msgs,sig,links,th_total):
+def ontology(msgs,sig,links,th_total,ent_map=None):
     personal=[s for s in sig if s["type"]!="research"]
     nodes=[];edges=[]
     mcount=Counter(m["sender"] for m in msgs); lcount=Counter(l["sharer"] for l in links)
@@ -539,11 +547,7 @@ def ontology(msgs,sig,links,th_total):
         node(f"M:{p}","Member",p,role=ROLE.get(p,"멤버"),is_teacher=p in TEACHERS,
              messages=mcount[p],links=lcount[p],signals=sum(m_st[p].values()))
     for t,n in th_total.items(): node(f"T:{t}","Theme",t,mentions=n)
-    mention=Counter()
-    for m in msgs:
-        b=m["body"]
-        for c,info in ENTITIES.items():
-            if any(a in b for a in info["al"]): mention[c]+=1
+    mention=_mention_counter(ent_map if ent_map is not None else entity_map(msgs))
     ent_st=defaultdict(Counter)
     for s in personal:
         for e in s["entities"]: ent_st[e][s["stance"]]+=1
@@ -654,9 +658,10 @@ def main():
     new=resolve_all(links,cache,do_net)
     json.dump(cache,open(cf,"w",encoding="utf-8"),ensure_ascii=False)
     print(f"▶ 네이버 해제: 신규 {new} · 캐시총 {len(cache)} · 적용 {sum(1 for l in links if l.get('resolved_url'))}")
-    sig=strategy(msgs)
-    ent_rows,pe_rows,prof,th_rows,th_total=aggregate(msgs,sig)
-    nodes,edges=ontology(msgs,sig,links,th_total)
+    ent_map=entity_map(msgs)                     # 엔티티 별칭 순회 1회 — 세 소비자가 공유 (2026-09 후속 A3)
+    sig=strategy(msgs, ent_map)
+    ent_rows,pe_rows,prof,th_rows,th_total=aggregate(msgs,sig,ent_map)
+    nodes,edges=ontology(msgs,sig,links,th_total,ent_map)
     uniq=dedup(links)
     personal=[s for s in sig if s["type"]!="research"]; research=[s for s in sig if s["type"]=="research"]
     titled=sum(1 for l in links if l["clean_title"]); resolved=sum(1 for l in links if l.get("resolved_url"))

@@ -190,33 +190,114 @@ def _run_stock_reasons(kb, cache, call):
     return reasons
 
 
-def _run_news_flags(kb, cache, call):
-    def one(batch):                            # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
-        try:
-            d = parse_json(call(NEWS_PROMPT.format(ctx=_j(batch)), 1500))
-            return batch, d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
-        except Exception as e:
-            print(f"  ✗ AI news batch: {repr(e)[:80]}")
-            return batch, {}
+_PENDING_KEY = "__news_batch__"
 
-    with ThreadPoolExecutor(max_workers=AI_WORKERS) as ex:
-        results = list(ex.map(one, news_batches(kb, cache)))
-    for batch, got in results:                 # 캐시 기록은 메인 스레드에서만
-        for item in batch:
-            flag = got.get(item["url"])
-            if flag not in ("neutral", "relevant") and got:
-                flag = "relevant"          # 응답은 왔는데 이 url 만 빠짐 → 관련으로 보고 캐시 (매일 다시 묻지 않는다)
+
+def _news_batch_requests(todo, model, chunk_size=NEWS_BATCH):
+    """미분류 뉴스 → (Batches API 요청 목록, {custom_id: [url]} 청크 멤버십). custom_id 'b<i>' 는 40건 묶음 인덱스."""
+    chunks = [todo[i:i + chunk_size] for i in range(0, len(todo), chunk_size)]
+    reqs = [{"custom_id": f"b{i}",
+             "params": {"model": model, "max_tokens": 1500,
+                        "messages": [{"role": "user", "content": NEWS_PROMPT.format(ctx=_j(chunk))}]}}
+            for i, chunk in enumerate(chunks)]
+    return reqs, {f"b{i}": [it["url"] for it in chunk] for i, chunk in enumerate(chunks)}
+
+
+def _apply_news_results(cache, results, chunk_urls):
+    """배치 결과(각 항목 {'custom_id','text'}) → 항목별 news: 캐시 기록.
+
+    동기 경로(_run_news_flags 의 기존 규칙)와 동일하게: 응답은 왔는데 그 청크의 특정 url 만 빠졌으면
+    relevant 로 간주해 캐시한다 — 모델이 매일 같은 url 을 누락해 무한 재제출되는 것을 막는다.
+    chunk_urls: {custom_id: [url, ...]} — 제출 시점에 pending 에 함께 저장해 둔 청크 멤버십.
+    배치 내 개별 요청이 errored/expired 면 results 에 그 custom_id 가 없어 해당 청크 url 들이
+    캐시되지 않고 다음날 자동 재제출된다 — 의도된 자기 치유(비용은 재시도 1회분).
+    """
+    for r in results:
+        d = parse_json(r.get("text") or "")
+        flags = d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
+        urls = (chunk_urls or {}).get(r.get("custom_id") or "")
+        if urls is None:
+            urls = list(flags)      # 멤버십 유실(레거시 pending·캐시 롤백) 폴백 — 응답에 있는 url 만이라도 반영(자기 치유)
+        for url in urls:
+            flag = flags.get(url)
+            if flag not in ("neutral", "relevant") and flags:
+                flag = "relevant"
             if flag in ("neutral", "relevant"):
-                cache.put(f"news:{item['url']}", flag)
+                cache.put(f"news:{url}", flag)
+
+
+def _run_news_flags(kb, cache, call, batch=None):
+    if batch is None:
+        def one(chunk):                        # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
+            try:
+                d = parse_json(call(NEWS_PROMPT.format(ctx=_j(chunk)), 1500))
+                return chunk, d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
+            except Exception as e:
+                print(f"  ✗ AI news batch: {repr(e)[:80]}")
+                return chunk, {}
+
+        with ThreadPoolExecutor(max_workers=AI_WORKERS) as ex:
+            results = list(ex.map(one, news_batches(kb, cache)))
+        for chunk, got in results:             # 캐시 기록은 메인 스레드에서만
+            for item in chunk:
+                flag = got.get(item["url"])
+                if flag not in ("neutral", "relevant") and got:
+                    flag = "relevant"      # 응답은 왔는데 이 url 만 빠짐 → 관련으로 보고 캐시 (매일 다시 묻지 않는다)
+                if flag in ("neutral", "relevant"):
+                    cache.put(f"news:{item['url']}", flag)
+        return {n["url"]: "neutral" for n in ((kb.get("chat") or {}).get("news") or [])
+                if n.get("url") and cache.get(f"news:{n['url']}") == "neutral"}
+
+    # ── 배치 경로: ① 전일 배치 수거 ② 미분류분 새 배치 제출 ③ 캐시 기준 neutral 반환
+    pending = cache.get(_PENDING_KEY)
+    if isinstance(pending, dict) and pending.get("id"):
+        try:
+            if batch["retrieve"](pending["id"]) == "ended":
+                _apply_news_results(cache, batch["results"](pending["id"]), pending.get("chunks"))
+                cache.put(_PENDING_KEY, {})               # 수거 완료
+        except Exception as e:
+            print(f"  ✗ 뉴스 배치 수거 실패: {repr(e)[:80]}")
+        left = cache.get(_PENDING_KEY)                    # 수거 성공이면 위에서 {} 로 비워져 이 블록은 건너뛴다
+        if isinstance(left, dict) and left.get("id") and left.get("at"):
+            try:
+                age = (datetime.date.today() - datetime.date.fromisoformat(left["at"])).days
+                if age >= 2:   # Batches 는 24h 내 ended 보장 — 그 뒤로도 수거가 안 되면 잠김으로 보고 푼다
+                    print(f"  ⚠ 뉴스 배치 {left['id']} 미수거 {age}일 — pending 초기화(재제출 허용)")
+                    cache.put(_PENDING_KEY, {})
+            except ValueError:
+                pass           # at 파싱 실패 — 무시(다음 제출이 정상 형식으로 덮는다)
+    todo = [{"title": n.get("title") or "", "url": n.get("url") or ""}
+            for n in ((kb.get("chat") or {}).get("news") or [])
+            if n.get("url") and not cache.get(f"news:{n['url']}")]
+    still = cache.get(_PENDING_KEY)
+    if todo and not (isinstance(still, dict) and still.get("id")):   # 한 번에 한 배치만
+        try:
+            reqs, chunks = _news_batch_requests(todo[:NEWS_BATCH * NEWS_MAX_BATCHES], batch.get("model", ""))
+            bid = batch["submit"](reqs)
+            cache.put(_PENDING_KEY, {"id": bid, "at": datetime.date.today().isoformat(), "chunks": chunks})
+        except Exception as e:
+            print(f"  ✗ 뉴스 배치 제출 실패: {repr(e)[:80]}")
     return {n["url"]: "neutral" for n in ((kb.get("chat") or {}).get("news") or [])
             if n.get("url") and cache.get(f"news:{n['url']}") == "neutral"}
 
 
-def run(kb, cache, call, model=""):
-    """kb + 캐시 + call → ai_digest.json 내용. 어떤 단계가 실패해도 나머지는 진행한다."""
+def _stage(fn, *args):
+    """단계 격리 — 실패는 None 으로 흡수하고 로그만 남긴다."""
+    try:
+        return fn(*args)
+    except Exception as e:
+        print(f"  ✗ AI 단계 {fn.__name__} 실패: {repr(e)[:80]}")
+        return None
+
+
+def run(kb, cache, call, model="", batch=None):
+    """kb + 캐시 + call → ai_digest.json 내용. 어떤 단계가 실패해도 나머지는 진행한다.
+
+    batch(Batches API ops)가 주입되면 뉴스 플래그만 2단계 배치 경로로 — 나머지 단계는 동기 call.
+    """
     to, cutoff = _cutoff(kb)
     return {"generated": _fmt_kst(), "range": f"{cutoff}~{to}", "model": model,
-            "digest": _run_weekly(kb, cache, call, to, cutoff),
-            "daily": _run_daily(kb, cache, call, to),
-            "stock_reasons": _run_stock_reasons(kb, cache, call),
-            "news_flags": _run_news_flags(kb, cache, call)}
+            "digest": _stage(_run_weekly, kb, cache, call, to, cutoff),
+            "daily": _stage(_run_daily, kb, cache, call, to),
+            "stock_reasons": _stage(_run_stock_reasons, kb, cache, call) or {},
+            "news_flags": _stage(_run_news_flags, kb, cache, call, batch) or {}}

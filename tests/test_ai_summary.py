@@ -119,6 +119,17 @@ def test_corrupt_sentinel_is_ignored_and_retried():
     assert calls["n"] == 1                          # 예외 없이 재시도(호출 발생)
 
 
+def test_run_isolates_stage_failures(monkeypatch):
+    """한 단계가 터져도 나머지 단계는 진행한다 — docstring 의 계약을 실제로 지킨다."""
+    import hublib.ai_summary as A
+    cache = A.AiCache(path="/nonexistent/skip-load.json")
+    monkeypatch.setattr(A, "_run_weekly", lambda *a: (_ for _ in ()).throw(RuntimeError("weekly boom")))
+    kb = {"build": {"to": "2026-09-01"}, "stance": [], "sentiment": [], "stocks": [], "chat": {}}
+    out = A.run(kb, cache, lambda p, m: '{"lines": ["a"]}')
+    assert out["digest"] is None            # 터진 단계는 None
+    assert "stock_reasons" in out and "news_flags" in out   # 나머지는 실행됨
+
+
 def test_stock_jobs_retries_key_with_fail_sentinel():
     """실패 센티널은 '결과 있음'이 아니다 — stock_jobs 가 재시도 대상으로 취급해야 한다."""
     from hublib.ai_summary import AiCache, stock_jobs, _FAIL_KEY
@@ -127,3 +138,65 @@ def test_stock_jobs_retries_key_with_fail_sentinel():
                       "mentions": [{"date": "2026-09-01", "label": "l", "note": "n"}]}]}
     cache.put("stock:삼성전자:2026-09-01", {_FAIL_KEY: {"n": 1, "at": "2026-09-01"}})
     assert [j["name"] for j in stock_jobs(kb, cache)] == ["삼성전자"]
+
+
+def _news_kb(urls):
+    return {"build": {"to": "2026-09-01"},
+            "chat": {"news": [{"title": f"t{i}", "url": u} for i, u in enumerate(urls)]}}
+
+
+def test_news_batch_submits_and_records_pending():
+    """배치 경로: 미분류 뉴스를 제출하고 배치 id 를 캐시에 남긴다. 동기 호출은 하지 않는다."""
+    from hublib.ai_summary import AiCache, _run_news_flags, _PENDING_KEY
+    cache = AiCache(path="/nonexistent/x.json")
+    submitted = {}
+
+    def submit(reqs):
+        submitted["reqs"] = reqs
+        return "batch_abc"
+
+    batch = {"submit": submit, "retrieve": lambda i: "in_progress", "results": lambda i: []}
+    out = _run_news_flags(_news_kb(["https://a", "https://b"]), cache, call=None, batch=batch)
+    assert out == {}                                     # 아직 분류 결과 없음
+    assert cache.get(_PENDING_KEY)["id"] == "batch_abc"
+    assert submitted["reqs"], "미분류 뉴스가 배치 요청으로 제출돼야 함"
+
+
+def test_news_batch_collects_finished_results():
+    """전일 배치가 끝났으면 결과를 캐시에 반영하고 pending 을 지운 뒤 새 배치를 제출한다."""
+    import json as _j
+    from hublib.ai_summary import AiCache, _run_news_flags, _PENDING_KEY
+    cache = AiCache(path="/nonexistent/x.json")
+    cache.put(_PENDING_KEY, {"id": "batch_old", "at": "2026-08-31",
+                             "chunks": {"b0": ["https://a", "https://b"]}})
+    results = [{"custom_id": "b0", "text": _j.dumps({"flags": {"https://a": "neutral", "https://b": "relevant"}})}]
+    batch = {"submit": lambda reqs: "batch_new", "retrieve": lambda i: "ended",
+             "results": lambda i: results}
+    out = _run_news_flags(_news_kb(["https://a", "https://b", "https://c"]), cache, call=None, batch=batch)
+    assert out == {"https://a": "neutral"}
+    assert cache.get("news:https://a") == "neutral" and cache.get("news:https://b") == "relevant"
+    assert cache.get(_PENDING_KEY)["id"] == "batch_new"   # 남은 c 가 새 배치로
+
+
+def test_news_batch_stale_pending_reset_allows_resubmit():
+    """2일 이상 미수거 pending 은 잠김으로 보고 초기화 — 새 배치 제출을 허용한다."""
+    import datetime as _dt
+    from hublib.ai_summary import AiCache, _run_news_flags, _PENDING_KEY
+    cache = AiCache(path="/nonexistent/x.json")
+    stale_at = (_dt.date.today() - _dt.timedelta(days=2)).isoformat()
+    cache.put(_PENDING_KEY, {"id": "batch_stuck", "at": stale_at, "chunks": {"b0": ["https://a"]}})
+    batch = {"submit": lambda reqs: "batch_new", "retrieve": lambda i: "in_progress",
+             "results": lambda i: []}
+    out = _run_news_flags(_news_kb(["https://a"]), cache, call=None, batch=batch)
+    assert out == {}
+    assert cache.get(_PENDING_KEY)["id"] == "batch_new"   # stale 이 풀려 재제출됨
+
+
+def test_news_flags_sync_fallback_without_batch():
+    """batch 미주입(키 없음·SDK 없음) 시 기존 동기 경로 그대로."""
+    import json as _j
+    from hublib.ai_summary import AiCache, _run_news_flags
+    cache = AiCache(path="/nonexistent/x.json")
+    call = lambda p, m: _j.dumps({"flags": {"https://a": "neutral"}})
+    out = _run_news_flags(_news_kb(["https://a"]), cache, call)
+    assert out == {"https://a": "neutral"}

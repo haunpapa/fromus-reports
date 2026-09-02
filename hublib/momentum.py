@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """프롬어스 허브 빌더 — 지수 시계열·시장 모멘텀(yfinance/KRX)."""
-import datetime, functools, os, signal, subprocess, sys
+import datetime, functools, os, subprocess, sys
 from hublib.config import _fmt_kst, _today_kst
 
 
@@ -140,9 +140,6 @@ def _build_ticker_map():
             name_map.setdefault(alias, name_map[official])
     return name_map
 
-class _MarketDataTimeout(Exception):
-    pass
-
 def _snapshot_market_momentum(name, meta, index_series):
     """KRX 종목 목록이 제공하는 당일 가격·거래대금 스냅샷으로 빠르게 시장 분위기를 반영한다."""
     ret1 = (_safe_float(meta.get("change_1d"), 0) or 0) / 100.0
@@ -185,18 +182,15 @@ def _snapshot_market_momentum(name, meta, index_series):
     }
 
 def _stock_market_momentum(name, meta, index_series, start_date):
-    def _timeout_handler(_signum, _frame):
-        raise _MarketDataTimeout("timeout")
+    timeout = int(os.environ.get("MARKET_MOMENTUM_STOCK_TIMEOUT", "7") or 7)
     try:
         fdr = _ensure_finance_datareader()
-        import signal
-        old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(int(os.environ.get("MARKET_MOMENTUM_STOCK_TIMEOUT", "7") or 7))
+        from concurrent.futures import ThreadPoolExecutor
+        ex = ThreadPoolExecutor(max_workers=1)      # 데이터 소스 행 방어 — 시그널 없이 워커 스레드에서도 동작
         try:
-            df = fdr.DataReader(meta["code"], start_date)
+            df = ex.submit(fdr.DataReader, meta["code"], start_date).result(timeout=timeout)
         finally:
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
+            ex.shutdown(wait=False)                 # 타임아웃 시 내부 스레드를 기다리지 않는다 — 결과는 버려짐(SIGALRM 도 소켓을 못 죽였으므로 등가)
     except Exception as e:
         return None, f"가격 데이터 실패: {repr(e)[:80]}"
     if df is None or len(df) < 22:
@@ -268,6 +262,33 @@ def _stock_market_momentum(name, meta, index_series, start_date):
         "updated": _fmt_kst("%Y-%m-%d"),
     }, None
 
+def _enrich_history(pairs, index_series, start_date, workers=8):
+    """(stock, meta) 목록을 병렬 정밀 보강. 성공 수와 실패 메시지 목록을 돌려준다.
+    쓰기(s["market_momentum"])는 결과 수집 후 메인 스레드에서만 한다."""
+    from concurrent.futures import ThreadPoolExecutor
+    if not pairs:
+        return 0, []
+
+    def _one(pair):
+        s, meta = pair
+        name = s.get("name") or ""
+        try:
+            mm, err = _stock_market_momentum(name, meta, index_series, start_date)
+        except Exception as e:
+            return s, None, f"{name}: {repr(e)[:60]}"
+        return s, mm, (f"{name}: {err}" if err else None)
+
+    done, failures = 0, []
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
+        results = list(ex.map(_one, pairs))
+    for s, mm, err in results:
+        if mm:
+            s["market_momentum"] = mm
+            done += 1
+        elif err:
+            failures.append(err)
+    return done, failures
+
 def _aggregate_market_momentum(items, label="시장"):
     vals = [x.get("market_momentum") for x in items if x.get("market_momentum")]
     vals = [v for v in vals if isinstance(v, dict) and isinstance(v.get("score"), (int, float))]
@@ -335,15 +356,10 @@ def enrich_market_momentum(agg, index_series):
 
     # 2단계: 상위 일부는 5일·20일 가격/거래량 히스토리로 정밀 보강
     # 기본값은 0으로 두어 GitHub Actions 정기 빌드 지연을 막고, 필요 시 환경변수로 켠다.
-    for s, meta in historical_candidates[:history_n]:
-        name = s.get("name") or ""
-        mm, err = _stock_market_momentum(name, meta, index_series, start_date)
-        if mm:
-            s["market_momentum"] = mm
-            historical += 1
-            print(f"    · 시장 히스토리 {historical}/{history_n} {name} {mm['label']} ({mm['score']})")
-        elif err:
-            failures.append(f"{name}: {err}")
+    historical, hist_failures = _enrich_history(historical_candidates[:history_n], index_series, start_date)
+    failures.extend(hist_failures)
+    if history_n:
+        print(f"    · 시장 히스토리 {historical}/{min(history_n, len(historical_candidates))}종목 보강")
 
     for sec in sectors:
         members = [stock_by_name[n] for n in (sec.get("stocks") or []) if n in stock_by_name]
