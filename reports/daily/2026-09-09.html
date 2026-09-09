@@ -1,0 +1,1894 @@
+<!doctype html>
+<!--
+═══════════════════════════════════════════════════════════════════════════
+  프롬어스 Daily Report — 참조 템플릿 v3.0 "Pastel Editorial" (등재: 2026년 9월 5일)
+  (v3.0 = v2.3 "Ink & Ledger Interactive" CSS·컴포넌트 전량 유지 + 에디토리얼 레이어 3장
+   [editorial-edition → editorial-qa → pastel-editorial] 상위 적층. 2026-09-04 실발행본이 원형)
+═══════════════════════════════════════════════════════════════════════════
+
+  사용법:
+  1. 이 파일이 head(CSS 4블록)와 footer(+스크립트)의 단일 출처입니다. assemble.sh가
+     body 여는 태그까지를 head로, report-footer 블록부터 끝(main·publication 닫는 태그,
+     스크립트 포함)을 footer로 추출해 날짜를 교체합니다. 참조 날짜는 v1~v2와 동일하게 2026.09.09.
+     ※ 이 주석에 마커 리터럴(body 여는 태그, report-footer div 문자열)을 그대로 쓰면
+       추출이 오염되므로 서술형으로만 표기합니다.
+  2. body.html 프래그먼트 작성 범위 (v3.0 — v2.3과 다름):
+       skip-link → .publication 열기 → header.masthead → nav.snav(목차 + 읽기 도구)
+       → main 열기 → section.overview(cover + event-note + market-strip + brief + archive-note)
+       → .page(섹션 01~08 + daily-quote) → .page 닫기
+     ✕ main·.publication 닫는 태그 금지 — footer 프래그먼트가 닫습니다
+     ✕ footer 금지 — 템플릿이 공급   ✕ #pbar·#totop·live-status 금지 — 스크립트가 자동 생성
+     ✓ masthead·snav 블록은 이 템플릿의 것을 그대로 복사한 뒤 텍스트(날짜·메시지 수·섹션 수)만 교체.
+       읽기 도구의 id(font-less / font-more / print-report / reading-percent / reading-fill)는
+       스크립트와 짝이므로 변경 금지 (없어도 스크립트는 죽지 않지만 해당 기능이 빠집니다).
+     ✓ snav의 #overview 칩에만 초기 상태 클래스 on 허용 (무JS 기본 활성). 나머지 on은 JS 부여.
+  3. CSS(4블록 전부)·면책 문구는 절대 수정 금지.
+     클래스는 CLASS_CHEATSHEET.md(v3, 216개)에 있는 것만 사용 — lint W07 검출.
+  4. 조립+검사: bash assemble.sh --date YYYY-MM-DD --body body.html
+     [--images-meta meta.json]  → FAIL 0, WARN 0까지 보강.
+
+  비협상 요구사항 (모든 출력에 예외 없이 적용 · v2와 동일):
+  ✓ <meta name="color-scheme" content="light only">   ← <head>에 존재
+  ✓ :root { color-scheme: light only; }                ← CSS 변수 블록 안
+  ✓ @media (prefers-color-scheme: dark) { ... }        ← 다크모드 오버라이드
+  ✓ html, body { background-color: #faf8f5 !important; }  (1블록 · 에디토리얼 레이어가 #faf9f5로 재정의)
+  ✓ 푸터 면책 문구: "본 리포트는 ... 투자 권유가 아닙니다."
+  ✓ Google Fonts 링크에 Noto Sans KR → Playfair Display → JetBrains Mono 순서 유지
+    (Noto Serif KR은 그 뒤 — F06 정규식 순서)
+
+  v3.0 섹션 구성 (8섹션 표준 — 2026년 8월 19일 등재 구성을 v3.0 기본 템플릿으로 확정):
+  01 Market Temperature · 02 Today's Timeline · 03 Team Insights · 04 Key Moves
+  05 Key Reading · 06 Action Plan · 07 Checkpoints(watch-card) · 08 Review Quiz(5문항)
+  - 섹션 본문은 .section-header 다음 .section-body 래퍼 안에 씁니다.
+  - 섹션 07은 반드시 .watch-card 안의 .key-row — 지식허브 파서(hublib/parse.py)·aggregate_weekly v1.4와 짝.
+    섹션 제목에 "체크포인트"/"다음 주"/"Tomorrow" 중 하나를 포함해야 허브가 next로 분류합니다.
+  - 섹션 08 퀴즈: .quiz 5문항(SKILL.md "섹션 08 복습 퀴즈" 규칙), kicker에 "(섹션 NN)" 출처, data-ok는 정답 1개에만.
+    스크립트가 채점 요약(.quiz-summary)·피드백(.quiz-feedback)을 자동 생성 — 본문에 쓰지 않음.
+
+  v3.0 오버뷰(section.overview) 규약:
+  - cover: cover-label(날짜 한 줄) · h1.cover-title(em 1곳 = 형광 마커) · cover-sub · a.hero-cta(#s01)
+  - aside.event-note: 오늘의 핵심 일정 1건(event-time + h2 + dl.event-facts ≤3 + event-footnote + a.event-link)
+  - market-strip: market-stat 4개 고정(지수 2 + 환율/금리 2) — 실측치만, 하락은 market-stat-change.down
+    market-strip-note에 색 관례("상승·순매수는 빨강, 하락·순매도는 파랑") 리포트당 1회 명시.
+  - details.extra-market: 전체 지표·종목을 ticker-item으로 나열(접힘 기본) — v2 무한 티커의 대체.
+  - brief: brief-lines 정확히 3줄, 각 항목은 해당 섹션 앵커(#sNN)로 링크.
+  - archive-note: "보관 리포트 · '오늘'과 '다음 주'는 YYYY년 M월 D일 기준" 한 줄.
+
+  v3.0에서 달라진 컴포넌트 동작 (본문 작성 시 참고):
+  - 동작하지 않음(무해 · 남겨도 됨): .rv 스크롤 리빌, .cu 카운트업, 장중 흐름 재생(data-line).
+  - CSS로 숨김: callout-icon · top-bar · rec-ico · sector-icon · key-num · grain · dq-mark ·
+    .ticker(커버 무한 티커) · edu-card 스파인. 마크업에 남겨도 표시되지 않습니다.
+  - 새 기능(스크립트 자동): 글자 크기 15/17/19px(저장) · 인쇄 · 읽기 진행률 · 섹션 06 do 항목의
+    체크박스화+브라우저 저장(check-summary) · 퀴즈 채점 요약. 저장 키는 masthead의
+    time[datetime](없으면 title 날짜)으로 리포트별 분리.
+  - 색 관례(상승=빨강 --up / 하락=파랑 --dn)·타이포 2계층·호칭 규칙·key-message-box 섹션 03 전용(W08)은 v2와 동일.
+  - 인터랙티브(탭·타임라인 필터·아코디언)는 v2.1 규약 그대로. 무JS/인쇄 폴백 내장.
+
+  아래 본문 예시는 2026-09-04 리포트 전문(월러 발언·고용지표 전야)입니다.
+  조립 시 head/footer만 사용되고 본문 예시는 버려지므로, 컴포넌트 사용 예시로 참고하세요.
+  (본문 예시의 masthead·snav·overview 블록이 body 프래그먼트 보일러플레이트의 원본입니다.)
+═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#faf8f5">
+<meta name="description" content="프롬어스 Daily Report — 카카오톡 대화 분석 기반, 프로미를 위한 일일 시장 리포트">
+<title>프롬어스 Daily Report | 2026.09.09</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ TOKENS ═══════════ */
+:root {
+  color-scheme: light only;
+  /* paper & ink */
+  --bg: #faf8f5;
+  --paper: #fffdf9;
+  --ink: #171310;
+  --ink-2: #46403a;
+  --ink-3: #6e665c;
+  --ink-4: #b7ada0;
+  --line: #e6dfd3;
+  --line-soft: #f0eadf;
+  --card: #ffffff;
+  --wash: #f5f0e7;
+  /* brass (brand) */
+  --gold: #b8860b;
+  --gold-deep: #8a6508;
+  --gold-lift: #e2b13c;
+  --gold-soft: #efdfae;
+  --gold-bg: #fdf7e7;
+  /* KR market convention — 상승=빨강 · 하락=파랑 */
+  --up: #c73a3a;
+  --up-bg: #fdeeec;
+  --up-line: #f0c9c3;
+  --dn: #2b62d9;
+  --dn-bg: #edf3fe;
+  --dn-line: #cfdefa;
+  /* qualitative */
+  --red: #c73a3a;   --red-bg: #fdeeec;
+  --green: #178a4c; --green-bg: #eaf7ee; --green-line: #cfe9d6;
+  --blue: #2b62d9;  --blue-bg: #edf3fe;
+  --purple: #7a4fd8;--purple-bg: #f4effe; --purple-line: #ded1f7;
+  --amber: #b06a12; --amber-bg: #fdf3e3;
+  --gold-border: var(--gold-soft);
+  --blue-border: var(--dn-line);
+  --red-border: var(--up-line);
+  --green-border: var(--green-line);
+  --purple-border: var(--purple-line);
+  /* dark panel (cover / closing quote) */
+  --panel: #16110c;
+  --panel-2: #221a12;
+  --panel-ink: #f4edde;
+  --panel-dim: rgba(244,237,222,.58);
+  --panel-line: rgba(244,237,222,.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: light only; }
+  html, body { background-color: #faf8f5 !important; color: #171310 !important; }
+}
+
+/* ═══════════ BASE ═══════════ */
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+html, body { background-color: #faf8f5 !important; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  word-break: keep-all;
+}
+::selection { background: var(--gold); color: #fff; }
+b, strong { font-weight: 700; color: var(--ink); }
+svg { display:block; max-width:100%; height:auto; }
+.mono { font-family:'JetBrains Mono', monospace; font-feature-settings:'tnum' 1; }
+.serif { font-family:'Playfair Display','Noto Serif KR', serif; }
+.cu { font-variant-numeric: tabular-nums; }
+.subhead {
+  font-size:15.5px; font-weight:800; letter-spacing:-.2px;
+  margin:42px 0 16px; display:flex; align-items:center; gap:10px;
+}
+.subhead::after { content:''; flex:1; height:1px; background:var(--line); }
+
+/* ═══════════ PROGRESS BAR ═══════════ */
+#pbar {
+  position:fixed; top:0; left:0; right:0; height:3px; z-index:99;
+  background:linear-gradient(90deg, var(--gold-deep), var(--gold-lift));
+  transform-origin:0 50%; transform:scaleX(0);
+}
+
+/* ═══════════ COVER — dark ink panel ═══════════ */
+.cover {
+  position:relative; min-height:94vh;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  text-align:center; padding:88px 24px 0;
+  color:var(--panel-ink); overflow:hidden;
+  background:
+    radial-gradient(1100px 640px at 18% -12%, rgba(184,134,11,.26), transparent 62%),
+    radial-gradient(880px 560px at 86% 112%, rgba(199,58,58,.17), transparent 58%),
+    linear-gradient(178deg, #1b150f 0%, #14100b 68%, #100d09 100%);
+}
+.grain {
+  position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+}
+.cover-ghost {
+  position:absolute; right:-3%; bottom:9%; z-index:0;
+  font-family:'Playfair Display', serif; font-weight:800;
+  font-size:clamp(120px, 26vw, 290px); line-height:1; letter-spacing:-6px;
+  color:transparent; -webkit-text-stroke:1px rgba(226,177,60,.22);
+  user-select:none; pointer-events:none; white-space:nowrap;
+}
+.cover-content { position:relative; z-index:1; max-width:760px; }
+.cover-label {
+  display:inline-flex; align-items:center; gap:12px;
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:700;
+  letter-spacing:5px; text-transform:uppercase; color:var(--gold-lift);
+}
+.cover-label::before, .cover-label::after {
+  content:''; width:34px; height:1px; background:linear-gradient(90deg, transparent, rgba(226,177,60,.7));
+}
+.cover-label::after { background:linear-gradient(270deg, transparent, rgba(226,177,60,.7)); }
+.cover-title {
+  font-family:'Noto Serif KR','Playfair Display', serif; font-weight:900;
+  font-size:clamp(38px, 7.2vw, 72px); line-height:1.22; letter-spacing:-.025em;
+  margin:28px 0 18px; color:#f6efe0;
+  animation: coverUp .9s cubic-bezier(.2,.7,.2,1) both;
+}
+.cover-title em {
+  font-style:normal; color:transparent;
+  background:linear-gradient(98deg, #ecc35c 8%, #c9931b 54%, #f2d489 100%);
+  -webkit-background-clip:text; background-clip:text;
+}
+.cover-sub {
+  font-size:15.5px; color:var(--panel-dim); max-width:560px; margin:0 auto;
+  line-height:1.95; font-weight:400;
+  animation: coverUp .9s .12s cubic-bezier(.2,.7,.2,1) both;
+}
+.divider-gold {
+  width:56px; height:2px; border-radius:1px; margin:32px auto;
+  background:linear-gradient(90deg, transparent, var(--gold-lift), transparent);
+}
+.cover-meta {
+  display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+  animation: coverUp .9s .22s cubic-bezier(.2,.7,.2,1) both;
+}
+.cover-meta-item {
+  min-width:128px; padding:16px 20px 13px; border-radius:16px;
+  border:1px solid var(--panel-line); background:rgba(255,255,255,.035);
+  backdrop-filter: blur(4px);
+}
+.cover-meta-item .val {
+  font-family:'JetBrains Mono', monospace; font-size:25px; font-weight:700;
+  letter-spacing:-.5px; color:#ecc35c;
+}
+.cover-meta-item .lbl {
+  font-size:10.5px; letter-spacing:2.6px; text-transform:uppercase;
+  color:var(--panel-dim); margin-top:7px; font-weight:600;
+}
+.cover-scroll {
+  margin:46px auto 30px; font-family:'JetBrains Mono', monospace;
+  font-size:10.5px; font-weight:600; letter-spacing:3.5px; color:rgba(244,237,222,.42);
+}
+.cover-scroll-line {
+  display:block; width:1px; height:42px; margin:12px auto 0;
+  background:linear-gradient(rgba(236,195,92,.85), transparent);
+  animation: drip 2.2s ease-in-out infinite;
+}
+@keyframes coverUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
+@keyframes drip { 0% { transform:scaleY(0); transform-origin:top; } 55% { transform:scaleY(1); transform-origin:top; } 100% { transform:scaleY(0); transform-origin:bottom; } }
+
+/* ticker */
+.ticker {
+  position:relative; width:100%; overflow:hidden;
+  border-top:1px solid var(--panel-line); background:rgba(0,0,0,.28);
+}
+.ticker::before, .ticker::after {
+  content:''; position:absolute; top:0; bottom:0; width:60px; z-index:2; pointer-events:none;
+}
+.ticker::before { left:0; background:linear-gradient(90deg, #14100b, transparent); }
+.ticker::after { right:0; background:linear-gradient(270deg, #14100b, transparent); }
+.ticker-track {
+  display:inline-flex; white-space:nowrap; padding:13px 0;
+  animation: tick 38s linear infinite; will-change:transform;
+}
+.ticker-item {
+  font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:600;
+  letter-spacing:.5px; color:rgba(244,237,222,.78);
+  padding:0 26px; border-right:1px solid var(--panel-line);
+}
+.ticker-item b { color:#ecc35c; font-weight:700; }
+.tk-up { color:#ff8f85; }
+.tk-dn { color:#8fb3ff; }
+@keyframes tick { to { transform:translateX(-50%); } }
+
+/* ═══════════ STICKY NAV ═══════════ */
+.snav {
+  position:sticky; top:0; z-index:60;
+  background:rgba(250,248,245,.88);
+  -webkit-backdrop-filter:blur(10px) saturate(1.4); backdrop-filter:blur(10px) saturate(1.4);
+  border-bottom:1px solid var(--line);
+}
+.snav-in {
+  max-width:860px; margin:0 auto; display:flex; gap:6px; align-items:center;
+  padding:10px 16px; overflow-x:auto; scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+  mask-image:linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+}
+.snav-in::-webkit-scrollbar { display:none; }
+.nav-chip {
+  flex:0 0 auto; display:inline-flex; align-items:center; gap:7px;
+  padding:7px 13px; border-radius:999px; border:1px solid var(--line);
+  background:#fff; color:var(--ink-2); font-size:12px; font-weight:600;
+  text-decoration:none; transition:border-color .2s, color .2s, background .2s;
+}
+.nav-chip b { font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:700; color:var(--gold); letter-spacing:.5px; }
+.nav-chip:hover { border-color:var(--gold); color:var(--ink); }
+.nav-chip.on { background:var(--ink); border-color:var(--ink); color:#f4edde; }
+.nav-chip.on b { color:#ecc35c; }
+.nav-chip:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+/* ═══════════ LAYOUT ═══════════ */
+.page { max-width: 820px; margin: 0 auto; padding: 6px 24px 0; }
+.section { padding-top: 88px; scroll-margin-top: 54px; }
+.section-header {
+  border-top:2.5px solid var(--ink);
+  padding-top:18px; margin-bottom:36px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.section-num {
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700;
+  letter-spacing:2px; color:var(--gold-deep);
+  background:var(--gold-bg); border:1px solid var(--gold-soft);
+  padding:5px 11px; border-radius:999px;
+}
+.section-title {
+  font-family:'Noto Serif KR', serif; font-weight:900;
+  font-size:clamp(23px, 4.4vw, 31px); letter-spacing:-.02em; line-height:1.3;
+}
+.section-subtitle {
+  width:100%; font-family:'JetBrains Mono', monospace;
+  font-size:10.5px; font-weight:600; letter-spacing:2.2px; text-transform:uppercase;
+  color:var(--ink-3); margin-top:2px;
+}
+
+/* reveal on scroll */
+.rv { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.rv-init { opacity:0; transform:translateY(18px); }
+.rv.in { opacity:1; transform:none; }
+
+/* ═══════════ CALLOUT ═══════════ */
+.callout {
+  position:relative; padding:22px 24px 21px 56px; border-radius:16px;
+  font-size:14px; line-height:1.95; margin-bottom:22px;
+  background:var(--card); border:1px solid var(--line);
+}
+.callout-icon { position:absolute; left:19px; top:22px; font-size:19px; line-height:1.3; }
+.callout.red    { background:#fdf5f4; border-color:var(--up-line);    box-shadow:inset 3px 0 0 var(--up); }
+.callout.blue   { background:#f4f8fe; border-color:var(--dn-line);    box-shadow:inset 3px 0 0 var(--dn); }
+.callout.gold   { background:var(--gold-bg); border-color:var(--gold-soft); box-shadow:inset 3px 0 0 var(--gold); }
+.callout.green  { background:#f2faf4; border-color:var(--green-line);  box-shadow:inset 3px 0 0 var(--green); }
+.callout.purple { background:#f8f5fe; border-color:var(--purple-line); box-shadow:inset 3px 0 0 var(--purple); }
+
+/* ═══════════ 01. MARKET TEMP — bento ═══════════ */
+.temp-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:16px; margin:10px 0 8px; }
+.temp-card {
+  position:relative; grid-column:span 2; overflow:hidden;
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:22px 22px 18px;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.temp-card:hover { transform:translateY(-3px); box-shadow:0 16px 34px -22px rgba(23,19,16,.3); }
+.temp-card.wide { grid-column:span 4; }
+.temp-card.notes { grid-column:span 4; }
+.top-bar { position:absolute; top:0; left:0; right:0; height:3px; }
+.top-bar.up   { background:linear-gradient(90deg, var(--up), #e0705f); }
+.top-bar.down { background:linear-gradient(90deg, var(--dn), #6d94ea); }
+.top-bar.warn { background:linear-gradient(90deg, var(--amber), #d99a3f); }
+.temp-label {
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:1.8px; text-transform:uppercase; color:var(--ink-3);
+}
+.temp-val {
+  font-family:'JetBrains Mono', monospace; font-weight:700;
+  font-size:clamp(25px, 4.6vw, 31px); letter-spacing:-1.2px; margin:7px 0 3px;
+  font-variant-numeric:tabular-nums;
+}
+.temp-card.wide .temp-val { font-size:clamp(34px, 6vw, 44px); }
+.temp-chg {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:700;
+  padding:4px 10px; border-radius:8px; margin:3px 0 9px;
+}
+.temp-chg.up   { color:var(--up); background:var(--up-bg); }
+.temp-chg.down { color:var(--dn); background:var(--dn-bg); }
+.temp-chg.warn { color:var(--amber); background:var(--amber-bg); }
+.temp-explain { font-size:13.5px; color:var(--ink-3); line-height:1.75; }
+
+/* record card */
+.rec-list { margin-top:4px; }
+.rec-chip {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 2px; border-bottom:1px dashed var(--line);
+  font-size:13px; color:var(--ink-2);
+}
+.rec-chip:last-child { border-bottom:none; }
+.rec-ico {
+  width:30px; height:30px; flex:0 0 30px; border-radius:10px;
+  background:var(--wash); display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.rec-chip b { font-family:'JetBrains Mono', monospace; letter-spacing:-.3px; }
+
+/* intraday schematic chart */
+.chart-wrap { margin-top:18px; }
+.chart-cap { font-size:12px; color:var(--ink-3); line-height:1.7; margin-top:9px; }
+
+/* ═══════════ supply flow (diverging bars) ═══════════ */
+.flow {
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:24px 24px 18px; margin:8px 0 20px;
+}
+.flow-h {
+  display:flex; justify-content:space-between; gap:10px;
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-3); margin-bottom:12px;
+}
+.flow-h .tk-up, .flow-h .tk-dn { letter-spacing:.5px; }
+.flow-h .tk-up { color:var(--up); } .flow-h .tk-dn { color:var(--dn); }
+.flow-group {
+  font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--ink-4);
+  text-transform:uppercase; font-family:'JetBrains Mono', monospace;
+  margin:10px 0 2px; padding-top:8px; border-top:1px solid var(--line-soft);
+}
+.flow-h + .flow-group { border-top:none; padding-top:0; margin-top:2px; }
+.flow-row { display:grid; grid-template-columns:64px 1fr 96px; gap:12px; align-items:center; padding:9px 0; }
+.flow-name { font-size:13px; font-weight:600; color:var(--ink-2); }
+.flow-track { position:relative; height:22px; background:var(--wash); border-radius:6px; overflow:hidden; }
+.flow-track::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--line); }
+.flow-bar { position:absolute; top:3px; bottom:3px; border-radius:4px; max-width:50%; }
+.flow-bar.buy  { left:50%; background:linear-gradient(90deg, #d75a4a, var(--up)); border-radius:0 4px 4px 0; }
+.flow-bar.sell { right:50%; background:linear-gradient(270deg, #6d94ea, var(--dn)); border-radius:4px 0 0 4px; }
+.flow-val { font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:700; text-align:right; letter-spacing:-.3px; }
+.pos { color:var(--up); }
+.neg { color:var(--dn); }
+.flow-note {
+  font-size:12.5px; color:var(--ink-3); line-height:1.75;
+  margin-top:10px; padding-top:11px; border-top:1px dashed var(--line);
+}
+
+/* black days strip */
+.blackdays { display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin:10px 0 10px; }
+.bd-item {
+  position:relative; text-align:center; padding:15px 6px 13px;
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+}
+.bd-date { font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600; letter-spacing:.5px; color:var(--ink-3); }
+.bd-val  { font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:800; letter-spacing:-.4px; color:var(--dn); margin-top:3px; }
+.bd-item.cur { background:var(--ink); border-color:var(--ink); box-shadow:0 12px 24px -16px rgba(23,19,16,.55); }
+.bd-item.cur .bd-date { color:rgba(244,237,222,.55); }
+.bd-item.cur .bd-val  { color:#8fb3ff; }
+.bd-tag {
+  position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+  font-size:10px; font-weight:800; letter-spacing:1px; color:#fff;
+  background:var(--up); border-radius:999px; padding:2px 8px;
+}
+.bd-cap { font-size:12px; color:var(--ink-3); line-height:1.7; margin:10px 0 26px; }
+
+/* ═══════════ 02. TIMELINE ═══════════ */
+.timeline { position:relative; margin-top:10px; }
+.tl-item { position:relative; padding:0 0 40px 56px; }
+.tl-item::before {
+  content:''; position:absolute; left:17px; top:28px; bottom:-2px; width:2px;
+  background:linear-gradient(var(--line), var(--line-soft));
+}
+.tl-item:last-child { padding-bottom:8px; }
+.tl-item:last-child::before { display:none; }
+.tl-dot {
+  position:absolute; left:8px; top:5px; width:20px; height:20px; border-radius:50%;
+  border:3.5px solid #fff;
+}
+.tl-dot.crisis { background:var(--up);    box-shadow:0 0 0 2px var(--up-line),   0 0 0 7px rgba(199,58,58,.09); }
+.tl-dot.turn   { background:var(--amber); box-shadow:0 0 0 2px #ecd3ad,          0 0 0 7px rgba(176,106,18,.09); }
+.tl-dot.hope   { background:var(--green); box-shadow:0 0 0 2px var(--green-line),0 0 0 7px rgba(23,138,76,.09); }
+.tl-dot.info   { background:var(--dn);    box-shadow:0 0 0 2px var(--dn-line),   0 0 0 7px rgba(43,98,217,.09); }
+.tl-date {
+  display:inline-flex; font-family:'JetBrains Mono', monospace;
+  font-size:10.5px; font-weight:700; letter-spacing:1.2px; color:var(--ink-3);
+  background:var(--card); border:1px solid var(--line);
+  padding:4px 11px; border-radius:999px; margin-bottom:11px;
+}
+.tl-title {
+  font-family:'Noto Sans KR', sans-serif; font-weight:800;
+  font-size:16px; line-height:1.6; letter-spacing:-.3px; margin-bottom:8px;
+}
+.tl-desc { font-size:14px; color:var(--ink-2); line-height:1.9; }
+.tl-impact { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+.tl-tag {
+  font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; border:1px solid;
+  font-family:'JetBrains Mono', monospace; letter-spacing:-.2px;
+}
+.tl-tag.good    { color:var(--green); background:var(--green-bg); border-color:var(--green-line); }
+.tl-tag.bad     { color:var(--red);   background:var(--red-bg);   border-color:var(--up-line); }
+.tl-tag.neutral { color:var(--ink-3); background:var(--wash);     border-color:var(--line); }
+
+/* ═══════════ 03. INSIGHTS ═══════════ */
+.insight-card {
+  position:relative; background:var(--card); border:1px solid var(--line);
+  border-radius:20px; padding:30px; margin-bottom:24px;
+}
+.insight-card.lead {
+  border:1.5px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(140deg, #e8c467, var(--gold) 45%, #8a6508 100%) border-box;
+  box-shadow:0 24px 48px -34px rgba(184,134,11,.55);
+}
+.insight-top { display:flex; gap:14px; align-items:center; margin-bottom:16px; }
+.insight-avatar {
+  width:50px; height:50px; flex:0 0 50px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:19px;
+  box-shadow:0 10px 18px -10px rgba(0,0,0,.4);
+}
+.insight-name { font-weight:800; font-size:16.5px; letter-spacing:-.2px; }
+.insight-role {
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:500;
+  color:var(--ink-3); letter-spacing:.2px; margin-top:3px;
+}
+.insight-body { font-size:14px; color:var(--ink-2); line-height:1.95; }
+
+.key-message-box {
+  position:relative; margin:22px 0 10px; padding:24px 24px 10px;
+  background:linear-gradient(180deg, #fffdf6, #fcf5e1);
+  border:1px solid var(--gold-soft); border-radius:16px;
+}
+.key-message-box::before {
+  content:'💛 이혜나 대표님의 핵심 메시지';
+  display:block; font-family:'JetBrains Mono', monospace;
+  font-size:11px; font-weight:700; letter-spacing:1.2px;
+  color:var(--gold-deep); margin-bottom:6px;
+}
+.key-row { display:grid; grid-template-columns:38px 1fr; gap:14px; padding:16px 0; }
+.key-content { min-width:0; }
+.key-row + .key-row { border-top:1px dashed var(--gold-soft); }
+.key-num {
+  width:36px; height:36px; border-radius:12px;
+  background:var(--card); border:1px solid var(--gold-soft); color:var(--gold-deep);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display', serif; font-weight:800; font-size:16px;
+  box-shadow:0 5px 12px -7px rgba(184,134,11,.45);
+}
+.key-title { font-weight:800; font-size:14.5px; letter-spacing:-.2px; margin-bottom:4px; line-height:1.6; }
+.key-desc { font-size:13.5px; color:var(--ink-2); line-height:1.9; }
+
+/* speech-bubble quote — 카카오톡 오마주 */
+.insight-quote {
+  position:relative; margin:24px 4px 8px;
+  background:#fff6cf; border:1px solid #eedd9a;
+  border-radius:18px 18px 18px 5px;
+  padding:19px 22px 17px 50px;
+  font-family:'Noto Sans KR', sans-serif; font-weight:600;
+  font-size:14.5px; line-height:1.9; color:#5d4a10;
+}
+.insight-quote::before {
+  content:'“'; position:absolute; left:16px; top:7px;
+  font-family:'Playfair Display', serif; font-weight:800; font-size:34px; line-height:1;
+  color:#d3ab35;
+}
+.insight-quote::after {
+  content:''; position:absolute; left:-9px; bottom:13px;
+  border:9px solid transparent; border-right-color:#fff6cf; border-left:0;
+}
+
+.insight-bullets { list-style:none; margin:16px 0 4px; }
+.insight-bullets li {
+  position:relative; padding:13px 0 13px 33px;
+  font-size:13.5px; color:var(--ink-2); line-height:1.85;
+}
+.insight-bullets li + li { border-top:1px dashed var(--line); }
+.insight-bullets li::before { position:absolute; left:2px; top:13px; font-size:15px; }
+.insight-bullets li.news::before  { content:'📰'; }
+.insight-bullets li.chart::before { content:'📊'; }
+.insight-bullets li.edu::before   { content:'📚'; }
+.insight-bullets li.tip::before   { content:'💡'; }
+.insight-bullets li.robot::before { content:'🤖'; }
+.insight-bullets li.money::before { content:'💰'; }
+.insight-bullets li.eye::before   { content:'👁️'; }
+.insight-bullets li.warn::before  { content:'⚠️'; }
+
+/* ═══════════ 04. KEY MOVES ═══════════ */
+.sector-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px; }
+.sector-card {
+  background:var(--card); border:1px solid var(--line); border-radius:18px; padding:24px;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.sector-card:hover { transform:translateY(-3px); box-shadow:0 16px 34px -22px rgba(23,19,16,.3); }
+.sector-head { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
+.sector-icon {
+  width:42px; height:42px; flex:0 0 42px; border-radius:13px;
+  background:var(--wash); display:flex; align-items:center; justify-content:center; font-size:20px;
+}
+.sector-name { font-weight:800; font-size:14.5px; letter-spacing:-.2px; }
+.sector-name-sub {
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:500;
+  color:var(--ink-3); letter-spacing:.4px; margin-top:2px;
+}
+.sector-stocks { display:flex; flex-wrap:wrap; gap:7px; margin:4px 0 14px; }
+.sector-stocks span {
+  font-size:12px; font-weight:600; color:var(--ink-2);
+  background:var(--wash); border:1px solid var(--line);
+  padding:5px 10px; border-radius:8px; letter-spacing:-.2px;
+}
+.sector-note {
+  font-size:13.5px; color:var(--ink-3); line-height:1.8;
+  border-top:1px dashed var(--line); padding-top:11px;
+}
+
+/* ═══════════ 05. KEY READING ═══════════ */
+.edu-card {
+  position:relative; background:var(--card); border:1px solid var(--line);
+  border-radius:18px; padding:28px 26px 24px 32px; margin-bottom:22px; overflow:hidden;
+}
+.edu-card::before {
+  content:''; position:absolute; left:0; top:18px; bottom:18px; width:4px;
+  border-radius:0 4px 4px 0; background:var(--spine, var(--gold));
+}
+.edu-tag {
+  display:inline-flex; font-size:11px; font-weight:700; letter-spacing:.3px;
+  padding:5px 11px; border-radius:999px; margin-bottom:11px; border:1px solid;
+}
+.edu-tag.gold   { color:var(--gold-deep); background:var(--gold-bg);   border-color:var(--gold-soft); }
+.edu-tag.purple { color:var(--purple);    background:var(--purple-bg); border-color:var(--purple-line); }
+.edu-tag.blue   { color:var(--dn);        background:var(--dn-bg);     border-color:var(--dn-line); }
+.edu-tag.green  { color:var(--green);     background:var(--green-bg);  border-color:var(--green-line); }
+.edu-title {
+  font-family:'Noto Sans KR', sans-serif; font-weight:800;
+  font-size:16.5px; line-height:1.65; letter-spacing:-.3px; margin-bottom:12px;
+}
+.edu-body { font-size:13.5px; color:var(--ink-2); line-height:1.95; }
+.edu-box { border-radius:14px; padding:17px 19px; margin:18px 0; font-size:13px; line-height:1.9; border:1px solid; }
+.edu-box.formula { background:#f4f7fe; border-color:var(--dn-line); }
+.edu-box.tip     { background:#fffaea; border-color:#f0e2ab; }
+.edu-box.example { background:#f3faf5; border-color:var(--green-line); }
+.edu-box.warning { background:#fdf3f1; border-color:var(--up-line); }
+
+/* ═══════════ 06. ACTION PLAN ═══════════ */
+.checklist { display:flex; flex-direction:column; gap:12px; margin-top:8px; }
+.check-item {
+  display:grid; grid-template-columns:32px 1fr; gap:14px; align-items:start;
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px; font-size:13.5px; line-height:1.85; color:var(--ink-2);
+  transition:transform .2s ease, border-color .2s ease;
+}
+.check-item:hover { transform:translateX(4px); border-color:var(--ink-4); }
+.check-icon {
+  width:30px; height:30px; border-radius:10px; margin-top:2px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:14px; border:1px solid;
+}
+.check-icon.do    { color:var(--green); background:var(--green-bg); border-color:var(--green-line); }
+.check-icon.dont  { color:var(--red);   background:var(--red-bg);   border-color:var(--up-line); }
+.check-icon.watch { color:var(--dn);    background:var(--dn-bg);    border-color:var(--dn-line); }
+
+/* ═══════════ 07. TOMORROW ═══════════ */
+.watch-card {
+  background:var(--card); border:1.5px solid var(--dn-line); border-radius:20px;
+  padding:14px 28px; box-shadow:0 20px 44px -34px rgba(43,98,217,.55);
+}
+.watch-card .key-row + .key-row { border-top:1px dashed var(--line); }
+.watch-card .key-num { border-color:var(--line); box-shadow:none; font-size:15px; }
+
+/* ═══════════ DAILY QUOTE — dark bookend ═══════════ */
+.daily-quote {
+  position:relative; margin:84px 0 64px; overflow:hidden;
+  border-radius:26px; padding:64px 30px 54px; text-align:center;
+  color:#f0e8d5;
+  background:
+    radial-gradient(720px 340px at 82% -24%, rgba(236,195,92,.2), transparent 62%),
+    radial-gradient(520px 300px at 8% 118%, rgba(199,58,58,.14), transparent 58%),
+    linear-gradient(158deg, #1b150f, #13100b);
+}
+.daily-quote blockquote {
+  position:relative; z-index:1;
+  font-family:'Noto Serif KR', serif; font-weight:800;
+  font-size:clamp(20px, 4vw, 27px); line-height:1.75; letter-spacing:-.02em;
+  color:#eec25f; max-width:580px; margin:0 auto 16px;
+}
+.daily-quote cite {
+  position:relative; z-index:1; font-style:normal;
+  font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500;
+  letter-spacing:.5px; color:rgba(240,232,213,.55);
+}
+.dq-mark {
+  position:absolute; left:6%; top:-2%; z-index:0;
+  font-family:'Playfair Display', serif; font-weight:800; font-size:190px; line-height:1;
+  color:rgba(236,195,92,.09); user-select:none; pointer-events:none;
+}
+.dq-bubble {
+  position:relative; z-index:1; max-width:400px; margin:30px auto 0;
+  background:#ffe462; color:#413306;
+  border-radius:20px 20px 20px 6px; padding:18px 22px;
+  font-size:14px; font-weight:600; line-height:1.95; text-align:left;
+  box-shadow:0 18px 36px -20px rgba(0,0,0,.6);
+}
+.dq-bubble::after {
+  content:''; position:absolute; left:-9px; bottom:15px;
+  border:10px solid transparent; border-right-color:#ffe462; border-left:0;
+}
+.dq-bubble small { display:block; margin-top:8px; font-size:11.5px; font-weight:500; color:#7a6410; }
+
+/* ═══════════ FOOTER ═══════════ */
+.report-footer {
+  max-width:820px; margin:0 auto; padding:40px 20px 72px;
+  text-align:center; color:var(--ink-3); font-size:12.5px; line-height:1.9;
+  border-top:1px solid var(--line);
+}
+.report-footer .logo {
+  font-family:'Playfair Display', serif; font-size:22px; letter-spacing:.5px;
+  color:var(--gold); margin-bottom:10px;
+}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 720px) {
+  .cover { min-height:88vh; padding-top:76px; }
+  .cover-meta-item { min-width:100px; padding:13px 14px 11px; }
+  .cover-meta-item .val { font-size:21px; }
+  .temp-grid { grid-template-columns:1fr 1fr; gap:13px; }
+  .temp-card { grid-column:span 1; }
+  .temp-card.wide, .temp-card.notes { grid-column:span 2; }
+  .sector-grid { grid-template-columns:1fr; }
+  .flow-row { grid-template-columns:52px 1fr 82px; gap:9px; }
+  .blackdays { gap:8px; }
+  .bd-val { font-size:13px; }
+  .bd-date { font-size:10px; }
+  .tl-item { padding-left:48px; }
+  .tl-dot { left:5px; }
+  .tl-item::before { left:14px; }
+  .insight-card, .edu-card { padding:24px 20px; }
+  .edu-card { padding-left:25px; }
+  .key-message-box { padding:20px 18px 8px; }
+  .section { padding-top:64px; }
+  .daily-quote { padding:52px 22px 46px; }
+  .tl-desc, .insight-body { font-size:14.5px; }
+  .temp-explain, .key-desc, .insight-bullets li, .edu-body { font-size:14px; }
+}
+@media (max-width: 400px) {
+  .blackdays { grid-template-columns:repeat(5, 1fr); }
+  .bd-item { padding:10px 3px 9px; border-radius:11px; }
+}
+
+/* ═══════════ MOTION SAFETY & PRINT ═══════════ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  .ticker-track, .cover-scroll-line, .cover-title, .cover-sub, .cover-meta { animation:none !important; }
+  .rv, .temp-card, .sector-card, .check-item { transition:none !important; }
+  .rv-init { opacity:1 !important; transform:none !important; }
+}
+
+/* ═══════════ v2.1 INTERACTIVE ═══════════ */
+/* tabs — JS가 .itabs-live 부여 전에는 모든 패널 노출(무JS 폴백) */
+.itabs { margin:8px 0 20px; }
+.itab-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.itab-btn {
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-3); font-family:'Noto Sans KR', sans-serif; font-size:12.5px; font-weight:700;
+  letter-spacing:-.2px; padding:9px 16px; border-radius:999px; cursor:pointer;
+  transition:border-color .18s ease, background .18s ease, color .18s ease;
+}
+.itab-btn:hover { border-color:var(--gold-soft); color:var(--ink-2); }
+.itab-btn.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+.itabs-live .itab-panel { display:none; }
+.itabs-live .itab-panel.on { display:block; }
+
+/* timeline filter */
+.tl-filter { display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 24px; }
+.tlf-chip {
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-3); font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:600;
+  letter-spacing:.4px; padding:7px 13px; border-radius:999px; cursor:pointer;
+  transition:border-color .18s ease, background .18s ease, color .18s ease;
+}
+.tlf-chip:hover { border-color:var(--gold-soft); color:var(--ink-2); }
+.tlf-chip.on { background:var(--gold); border-color:var(--gold); color:#fff; }
+.tl-item.tl-hide { display:none; }
+
+/* accordion (native details — JS 불필요) */
+.acc { border:1px solid var(--line); border-radius:14px; background:var(--card); margin:14px 0 6px; overflow:hidden; }
+.acc-head {
+  list-style:none; cursor:pointer; padding:14px 18px; font-size:13.5px; font-weight:700;
+  color:var(--ink-2); display:flex; align-items:center; justify-content:space-between; gap:10px;
+  -webkit-user-select:none; user-select:none;
+}
+.acc-head::-webkit-details-marker { display:none; }
+.acc-head::after {
+  content:'+'; font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--gold);
+  font-size:17px; line-height:1; transition:transform .2s ease; flex:0 0 auto;
+}
+.acc[open] > .acc-head::after { transform:rotate(45deg); }
+.acc[open] > .acc-head { border-bottom:1px dashed var(--line); }
+.acc-body { padding:6px 18px 16px; }
+.acc-body .edu-box { margin:8px 0 2px; }
+
+/* pop quiz */
+.quiz {
+  background:var(--card); border:1px solid var(--gold-soft); border-radius:18px;
+  padding:24px 24px 20px; margin:22px 0 8px;
+}
+.quiz-kicker {
+  font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-deep); margin-bottom:10px;
+}
+.quiz-q { font-size:15px; font-weight:800; color:var(--ink); letter-spacing:-.3px; line-height:1.55; margin-bottom:14px; }
+.quiz-opt {
+  display:block; width:100%; text-align:left; appearance:none; -webkit-appearance:none; cursor:pointer;
+  background:var(--wash); border:1px solid var(--line); border-radius:12px;
+  font-family:'Noto Sans KR', sans-serif; font-size:13.5px; font-weight:500; color:var(--ink-2);
+  padding:12px 15px; margin:8px 0; line-height:1.6;
+  transition:border-color .18s ease, background .18s ease;
+}
+.quiz-opt:hover:not(:disabled) { border-color:var(--gold-soft); background:var(--gold-bg); }
+.quiz-opt:disabled { cursor:default; opacity:.72; }
+.quiz-opt.q-ok { background:var(--green-bg); border-color:var(--green-line); color:var(--green); font-weight:700; opacity:1; }
+.quiz-opt.q-no { background:var(--up-bg); border-color:var(--up-line); color:var(--up); opacity:1; }
+.quiz-exp {
+  font-size:13px; color:var(--ink-2); line-height:1.8; margin-top:12px;
+  padding-top:13px; border-top:1px dashed var(--line);
+}
+.quiz-live .quiz-exp { display:none; }
+.quiz-live.quiz-open .quiz-exp { display:block; }
+
+/* chart replay button (스크립트 자동 생성 — 본문 작성 금지) */
+.chart-btn {
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-3); font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.6px; padding:6px 12px; border-radius:999px; cursor:pointer; margin-top:10px;
+  transition:border-color .18s ease, color .18s ease;
+}
+.chart-btn:hover { border-color:var(--gold-soft); color:var(--gold-deep); }
+
+/* back to top (스크립트 자동 생성) */
+#totop {
+  position:fixed; right:18px; bottom:20px; z-index:60; width:42px; height:42px;
+  border-radius:50%; border:1px solid var(--panel-line); background:var(--panel); color:var(--panel-ink);
+  font-family:'JetBrains Mono', monospace; font-size:16px; line-height:1; cursor:pointer;
+  opacity:0; visibility:hidden; transform:translateY(8px);
+  transition:opacity .25s ease, visibility .25s ease, transform .25s ease;
+  box-shadow:0 6px 18px rgba(23,19,16,.22);
+}
+#totop.on { opacity:.92; visibility:visible; transform:translateY(0); }
+
+/* flow bar grow-in — rv 리빌 연동(CSS 전용, reduced-motion 자동 대응) */
+.rv-init .flow-bar.buy  { transform:scaleX(0); transform-origin:left center; }
+.rv-init .flow-bar.sell { transform:scaleX(0); transform-origin:right center; }
+.rv.in .flow-bar { transform:scaleX(1); transition:transform .9s cubic-bezier(.25,.8,.35,1) .15s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .itab-btn, .tlf-chip, .quiz-opt, .chart-btn, #totop, .acc-head::after, .flow-bar { transition:none !important; }
+}
+@media (max-width: 620px) {
+  .quiz { padding:20px 18px 16px; }
+  .itab-btn { font-size:12px; padding:8px 14px; }
+  #totop { right:14px; bottom:16px; width:40px; height:40px; }
+}
+@media print {
+  #totop, .chart-btn, .tl-filter, .itab-bar { display:none !important; }
+  .tl-item.tl-hide { display:block !important; }
+  .itabs-live .itab-panel { display:block !important; }
+  .quiz-live .quiz-exp { display:block !important; }
+}
+
+@media print {
+  #pbar, .snav, .ticker, .cover-scroll { display:none !important; }
+  .cover, .daily-quote { min-height:auto; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+
+<style id="editorial-edition">
+/* From Us, Editorial edition. A reading surface rather than a dashboard. */
+:root{color-scheme:light only;--bg:#faf9f5;--paper:#faf9f5;--card:#faf9f5;--ink:#262722;--ink-2:#474841;--ink-3:#77786e;--ink-4:#76776c;--line:#d7d7cd;--line-soft:#e6e5dc;--wash:#f0efe7;--accent:#8b493a;--accent-soft:#f0e8df;--gold:#8b493a;--gold-deep:#783e31;--gold-bg:#f2eee4;--gold-soft:#dcd6c5;--up:#ad3e30;--up-bg:#f6ede7;--up-line:#dbc0b5;--dn:#365b86;--dn-bg:#eaf0f4;--dn-line:#c2d0dc;--green:#496453;--green-bg:#edf1e9;--green-line:#d0dacb;--blue:#365b86;--purple:#685e73;--purple-bg:#eeeaf0;--amber:#856334;--amber-bg:#f3eee2;--reading-size:15px}
+*{box-sizing:border-box}html,body{background:#faf9f5!important;color:var(--ink)!important}html{scroll-behavior:smooth;scroll-padding-top:62px}body{font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.85;word-break:keep-all}b,strong{font-weight:650}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default}a,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}a{color:inherit}::selection{background:#e2d4bd;color:#262722}:focus-visible{outline:2px solid var(--accent);outline-offset:5px}.section:focus:not(:focus-visible),.overview:focus:not(:focus-visible){outline:none}.skip-link{position:fixed;left:16px;top:-100px;z-index:300;background:var(--ink);color:white;padding:10px 18px}.skip-link:focus{top:10px}.js-only{display:none!important}.enhanced .js-only{display:flex!important}#pbar{height:2px;background:var(--accent);z-index:250}#totop{border:1px solid var(--line);border-radius:0;background:var(--bg);color:var(--ink);box-shadow:none;width:40px;height:40px;right:22px;bottom:22px;font-size:18px}.live-status{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:240;background:var(--ink);color:var(--bg);font-size:12px;padding:10px 18px;max-width:90%;text-align:center}.live-status:empty{display:none}
+.publication{max-width:1240px;margin:auto;padding:0 48px}.masthead{padding-top:23px}.mast-topline{display:flex;justify-content:space-between;align-items:center;color:var(--ink-3);font-size:11px;line-height:1.4}.mast-topline .issue-label{color:var(--accent);font-weight:600;letter-spacing:.4px}.mast-center{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:35px;margin:21px 0 26px}.mast-motto{font-size:12px;line-height:1.9;color:var(--ink-3)}.wordmark{font-family:'Playfair Display',Georgia,serif;font-size:64px;line-height:1.05;letter-spacing:-3px;font-weight:700;text-decoration:none;color:var(--ink)}.mast-edition{text-align:right;font-size:11px;color:var(--ink-3);line-height:1.9}.mast-edition b{display:block;font-size:12px;letter-spacing:.3px;color:var(--ink-2);font-weight:500}.mast-rule{height:5px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.snav{position:sticky;top:0;z-index:110;background:rgba(250,249,245,.98);backdrop-filter:none;border:0;border-bottom:1px solid var(--line);margin:0;padding:0}.nav-row{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:54px}.snav-in{max-width:none;display:flex;gap:25px;padding:0;margin:0;mask-image:none;-webkit-mask-image:none;align-items:center;overflow-x:auto;scrollbar-width:none}.snav-in::-webkit-scrollbar{display:none}.nav-chip{background:none;border:0;border-radius:0;padding:16px 0 14px;color:var(--ink-3);font-size:11px;line-height:1.6;white-space:nowrap;display:inline-flex;gap:6px;position:relative;font-weight:500;flex-shrink:0;transition:color .15s}.nav-chip b{font-family:'Noto Sans KR',sans-serif;font-size:9px;color:#9a9a8c;font-weight:400;letter-spacing:0}.nav-chip:hover{color:var(--ink)}.nav-chip.on{background:none;color:var(--ink);border:0}.nav-chip.on:after{content:'';height:2px;position:absolute;left:0;right:0;bottom:0;background:var(--accent)}.nav-chip.on b{color:var(--accent)}.reading-tools{display:flex;align-items:center;gap:0;flex-shrink:0}.tool-btn{border:0;border-radius:0;background:none;color:var(--ink-2);height:33px;padding:0 8px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:500}.tool-btn:hover{color:var(--accent);background:var(--wash)}.tool-btn:disabled{opacity:.3}.print-tool{margin-left:8px;padding-left:16px;border-left:1px solid var(--line)}.reading-progress{width:30px;margin-left:16px;position:relative;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-size:9px}.read-track{position:absolute;left:0;right:0;bottom:-3px;height:1px;background:var(--line)}#reading-fill{display:block;height:1px;background:var(--accent);width:0}.font-controls{display:flex}
+.overview{scroll-margin-top:65px}.cover{position:relative;min-height:0;background:none;color:var(--ink);border:0;border-radius:0;overflow:visible;padding:43px 0 39px;display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:72px;text-align:left;align-items:end}.cover-content{max-width:none}.cover-label{display:block;font-family:'Noto Sans KR',sans-serif;font-size:11px;letter-spacing:.6px;color:var(--accent);font-weight:600;line-height:1.5}.cover-label:before,.cover-label:after{display:none}.cover-title{font-family:'Noto Serif KR',serif;font-size:46px;font-weight:600;line-height:1.55;letter-spacing:-2.4px;margin:17px 0 20px;color:var(--ink);animation:none;word-break:keep-all}.cover-title em{color:var(--accent);font-style:normal;background:none;-webkit-text-fill-color:initial;font-weight:600}.cover-sub{font-size:13px;line-height:1.95;color:#737469;margin:0;max-width:610px;animation:none;font-weight:400}.cover-sub br{display:none}.hero-cta{display:inline-flex;gap:22px;font-size:11px;color:var(--ink);text-decoration:none;border-bottom:1px solid #b4b4a5;padding-bottom:3px;margin-top:20px}.hero-cta:hover{color:var(--accent);border-color:var(--accent)}.event-note{border-top:1px solid var(--ink);padding-top:17px;padding-bottom:2px;margin:0 0 5px}.event-note .note-label{font-size:10px;font-weight:500;letter-spacing:.4px;color:var(--accent)}.event-time{font-family:'Playfair Display',Georgia,serif;font-size:52px;font-weight:400;line-height:1.15;letter-spacing:-1.5px;margin:9px 0 6px}.event-time small{font:400 10px 'Noto Sans KR',sans-serif;letter-spacing:0;color:var(--ink-3);margin-left:9px;vertical-align:baseline}.event-note h2{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;letter-spacing:-.4px;line-height:1.6;margin-bottom:16px}.event-facts{margin:0 0 9px;padding:0}.event-facts div{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:8px 0;font-size:11px}.event-facts dt{color:var(--ink-3)}.event-facts dd{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:400;margin:0}.event-facts dd small{font-size:9px;color:var(--ink-3)}.event-footnote{font-size:10px;color:var(--ink-3);line-height:1.8}.event-link{display:flex;justify-content:space-between;text-decoration:none;color:var(--ink);font-size:11px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.market-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--line);padding:20px 0 18px}.market-stat{padding:0 28px;border-left:1px solid var(--line)}.market-stat:first-child{padding-left:0;border-left:0}.market-stat:last-child{padding-right:0}.market-stat-label{display:flex;gap:9px;align-items:baseline;font-size:10px;color:var(--ink-3);line-height:1.5}.market-stat-label span{font-family:'Noto Sans KR',sans-serif;color:#77786e;font-size:9px}.market-stat-value{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:400;letter-spacing:-1px;line-height:1.5;margin:5px 0 1px}.market-stat-change{font:400 10px 'JetBrains Mono',monospace;color:var(--up);line-height:1.7}.market-stat-change.down{color:var(--dn)}.market-stat-change span{margin-left:9px}.market-note-row{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-top:9px}.market-strip-note{font-size:9px;line-height:1.7;color:var(--ink-3)}.extra-market{font-size:10px;color:var(--ink-3)}.extra-market summary{cursor:pointer;min-height:32px;display:list-item;list-style-position:inside}.extra-market-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:4px 0 18px}.extra-market .ticker-item{font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:400;line-height:1.8;letter-spacing:0;padding:11px 12px;color:var(--ink-2);white-space:normal;border-right:1px solid var(--line)}.extra-market .ticker-item:nth-child(3n){border-right:0}.extra-market .ticker-item b{font-weight:500;color:var(--ink)}.extra-market .tk-up{color:var(--up)}.extra-market .tk-dn{color:var(--dn)}
+.brief{display:grid;grid-template-columns:154px minmax(0,1fr);gap:42px;margin:25px 0 23px;padding:0}.brief-heading h2{font-family:'Noto Serif KR',serif;font-size:21px;font-weight:500;letter-spacing:-.6px;line-height:1.7}.brief-heading p{font-size:10px;color:var(--ink-3);line-height:1.8;margin-top:7px}.brief-lines{list-style:none;padding:0;margin:0;counter-reset:brief}.brief-lines li{counter-increment:brief;position:relative;border-bottom:1px solid var(--line-soft);padding:9px 26px 9px 30px;line-height:1.7;font-size:12px;color:var(--ink-2)}.brief-lines li:first-child{padding-top:2px}.brief-lines li:last-child{border:0;padding-bottom:0}.brief-lines li:before{content:'0' counter(brief);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:400;color:var(--accent);position:absolute;left:0;top:12px}.brief-lines li:first-child:before{top:5px}.brief-lines a{display:block;color:inherit;text-decoration:none}.brief-lines b{font-size:12px;font-weight:600;margin-right:13px;color:var(--ink)}.brief-lines a:after{content:'↗';position:absolute;right:0;top:10px;font-size:12px;color:#999a8e}.brief-lines li:first-child a:after{top:3px}.brief-lines a:hover b{color:var(--accent)}.archive-note{font-size:10px;color:var(--ink-3);line-height:1.8;padding:12px 0 0;border-top:1px solid var(--line);margin-bottom:8px}
+.page{max-width:none;margin:0;padding:0}.section{display:grid;grid-template-columns:155px minmax(0,1fr);gap:45px;border-top:1px solid var(--ink);padding:35px 0 0;margin-top:62px;scroll-margin-top:65px}.section-header{position:sticky;top:84px;align-self:start;display:block;border:0;padding:0;margin:0}.section-num{background:none;border:0;padding:0;border-radius:0;color:var(--accent);font:400 22px 'Playfair Display',Georgia,serif;letter-spacing:-.5px;margin-bottom:16px;line-height:1}.section-title{font-family:'Noto Serif KR',serif;font-weight:600;font-size:23px;line-height:1.65;letter-spacing:-.8px;word-break:keep-all}.section-subtitle{font-family:'Noto Sans KR',sans-serif;font-size:10px;font-weight:400;line-height:1.9;letter-spacing:0;color:var(--ink-3);margin-top:15px;text-transform:none}.section-body{min-width:0}.subhead{font-size:14px;font-weight:600;margin:34px 0 16px;letter-spacing:-.2px}.subhead:after{background:var(--line)}.rv,.rv-init,.rv.in{opacity:1!important;transform:none!important;transition:none!important}.callout{border:0;border-left:2px solid #a4a18f;border-radius:0!important;padding:2px 0 2px 21px;margin-bottom:28px;font-size:var(--reading-size);line-height:2;box-shadow:none!important;background:transparent!important;color:var(--ink-2)}.callout.green,.callout.blue,.callout.gold,.callout.red,.callout.purple{border-color:#b7b3a2;box-shadow:none;background:none}.callout b{color:var(--ink);font-weight:650}.callout-icon,.top-bar,.rec-ico,.sector-icon,.key-num,.grain,.dq-mark{display:none!important}.temp-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin:28px 0 10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.temp-card{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:24px 22px;grid-column:span 2;box-shadow:none;transition:none;overflow:visible}.temp-card.wide{grid-column:span 4;border-right:1px solid var(--line);padding-left:0}.temp-card.notes{grid-column:span 4;padding-left:22px}.temp-card:hover{transform:none;box-shadow:none}.temp-card:nth-child(3){padding-left:0;border-right:1px solid var(--line)}.temp-card:nth-child(4){border-right:1px solid var(--line)}.temp-card:nth-child(6){padding-left:0;border-right:1px solid var(--line);border-bottom:0}.temp-card:nth-child(7){border-bottom:0}.temp-label{font:400 10px 'Noto Sans KR',sans-serif;color:var(--ink-3);letter-spacing:.2px;line-height:1.6}.temp-val{font:400 26px 'JetBrains Mono',monospace;letter-spacing:-1.3px;margin:9px 0 5px;line-height:1.5}.temp-card.wide .temp-val{font-size:38px}.temp-chg{font:400 11px 'JetBrains Mono',monospace;background:none!important;padding:0;border-radius:0;margin:0 0 12px;color:var(--up)}.temp-explain{font-size:calc(var(--reading-size) - 2px);line-height:1.9;color:var(--ink-3)}.chart-wrap{margin-top:18px}.chart-cap{font-size:11px;line-height:1.85;color:var(--ink-3);margin-top:5px}.chart-cap b{font-weight:500}.chart-btn{display:none}.rec-chip{padding:13px 0;font-size:12px;gap:0;border-bottom:1px solid var(--line-soft)}.rec-chip b{font-family:'Noto Sans KR',sans-serif;letter-spacing:0;font-weight:600}.flow{border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:none;border-radius:0;padding:18px 0;margin:12px 0 25px}.flow-h{font-size:10px;letter-spacing:0}.flow-group{font-size:10px;color:var(--ink-3);letter-spacing:.5px;margin-top:14px;padding-top:12px}.flow-track{height:18px;border-radius:0;background:#efeee5}.flow-bar{border-radius:0;top:4px;height:10px}.flow-name{font-size:12px}.flow-val{font-size:12px;font-weight:500}.flow-note{font-size:11px;margin-top:14px}.flow-row{grid-template-columns:58px minmax(0,1fr) 78px;gap:12px;padding:9px 0}
+.tl-filter,.itab-bar{display:flex;gap:22px;margin:4px 0 15px;border-bottom:1px solid var(--line);flex-wrap:wrap}.tlf-chip,.itab-btn{background:none;border:0;border-bottom:2px solid transparent;border-radius:0;font:400 12px 'Noto Sans KR',sans-serif;padding:7px 0 10px;min-height:40px;color:var(--ink-3);letter-spacing:0}.tlf-chip:hover,.itab-btn:hover{color:var(--ink);border-color:var(--line)}.tlf-chip.on,.itab-btn.on{background:none;border-color:var(--accent);color:var(--ink);font-weight:600}.source-note{font-size:10px;color:var(--ink-3);margin:0 0 22px}.tl-item{padding:0 0 30px 26px}.tl-item:before{left:3px;background:var(--line);width:1px}.tl-dot{width:7px;height:7px;left:0;top:9px;border:0;background:#8c8d80!important;box-shadow:0 0 0 5px var(--bg)!important}.tl-date{font:400 11px 'Noto Sans KR',sans-serif;color:var(--accent);letter-spacing:0;margin-bottom:8px}.tl-title{font-size:17px;font-weight:600;letter-spacing:-.4px;line-height:1.75;margin-bottom:10px}.tl-desc{font-size:var(--reading-size);line-height:2;color:var(--ink-2)}.tl-impact{gap:0;margin-top:12px}.tl-tag{border:0!important;border-radius:0;background:none!important;color:var(--ink-3)!important;padding:0 12px 0 0;margin:0 12px 4px 0;font-size:10px;font-weight:400;border-right:1px solid var(--line)!important;line-height:1.5}.tl-tag:last-child{border-right:0!important}.acc{border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0;background:none;margin:20px 0}.acc-head{background:none;padding:16px 0;font-size:13px;font-weight:600;line-height:1.8}.acc-head:after{font-family:Georgia,serif;font-weight:400}.acc-body{padding:0 0 20px;font-size:var(--reading-size);line-height:2}.acc-body b{font-weight:600}
+.insight-card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:29px 0 0;margin-bottom:38px;box-shadow:none!important}.insight-card.lead{background:none;border:0;border-top:1px solid var(--ink);box-shadow:none}.insight-top{gap:12px;margin-bottom:17px}.insight-avatar{background:none!important;color:var(--accent)!important;border:1px solid #beb9a8;border-radius:50%;width:38px;height:38px;flex-basis:38px;font-family:'Noto Serif KR',serif;font-weight:500;font-size:16px;box-shadow:none}.insight-name{font-size:14px;font-weight:600}.insight-role{font:400 10px 'Noto Sans KR',sans-serif;color:var(--ink-3);margin-top:2px}.insight-body{font-size:var(--reading-size);line-height:2;color:var(--ink-2)}.key-message-box{background:#f1efe5;border:0;border-radius:0;margin:25px 0 20px;padding:20px 24px 7px}.key-message-box:before{content:'이혜나 대표님의 핵심 메시지';font:500 11px 'Noto Sans KR',sans-serif;letter-spacing:0;color:var(--accent);margin-bottom:8px}.key-row{display:block;padding:16px 0}.key-row+.key-row{border-top:1px solid var(--line)}.key-title{font-size:15px;font-weight:600;line-height:1.8;margin-bottom:7px;letter-spacing:-.2px}.key-desc{font-size:var(--reading-size);line-height:2;color:var(--ink-2)}.insight-quote{border:0;border-left:1px solid var(--accent);border-radius:0;background:none;color:var(--ink);padding:2px 0 2px 22px;margin:25px 0;font-family:'Noto Serif KR',serif;font-size:17px;font-weight:500;line-height:2}.insight-quote:before,.insight-quote:after{display:none}.insight-bullets{margin:20px 0 0}.insight-bullets li{font-size:var(--reading-size);line-height:2;padding:13px 0 13px 17px}.insight-bullets li+li{border-top:1px solid var(--line-soft)}.insight-bullets li:before{content:''!important;position:absolute;left:0;top:26px;width:3px;height:3px;background:var(--accent);border-radius:0}
+.sector-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px 32px;margin-top:27px}.sector-card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:21px 0 0;box-shadow:none;transition:none}.sector-card:hover{transform:none;box-shadow:none}.sector-head{gap:0;margin-bottom:14px}.sector-name{font-family:'Noto Serif KR',serif;font-size:19px;font-weight:600;line-height:1.6;letter-spacing:-.4px}.sector-name-sub{font:400 10px 'Noto Sans KR',sans-serif;line-height:1.8;margin-top:5px;color:var(--ink-3)}.sector-stocks{gap:7px 14px;margin:10px 0 15px}.sector-stocks span{background:none;border:0;border-radius:0;padding:0;font-size:11px;font-weight:500;line-height:1.8}.sector-note{border-top:1px solid var(--line-soft);padding-top:13px;font-size:var(--reading-size);line-height:2;color:var(--ink-2)}.edu-card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:25px 0 4px;margin:0 0 33px;overflow:visible}.edu-card:before{display:none}.edu-tag{background:none!important;color:var(--accent)!important;border:0;border-radius:0;padding:0;font-size:10px;font-weight:500;margin-bottom:10px;letter-spacing:0}.edu-title{font-family:'Noto Serif KR',serif;font-size:21px;font-weight:600;line-height:1.8;letter-spacing:-.5px;margin-bottom:17px}.edu-body{font-size:var(--reading-size);line-height:2}.edu-box{border:0;border-radius:0;padding:18px 23px;margin:22px 0;font-size:var(--reading-size);line-height:2}.edu-box.formula,.edu-box.tip,.edu-box.example,.edu-box.warning{background:#f0eee4;border:0}.edu-box b{font-weight:600}.edu-footnote{font-size:11px;color:var(--ink-3)}
+.check-summary,.quiz-summary{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:4px 0 15px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:11px;color:var(--ink-2)}.check-summary b,.quiz-summary b{font-weight:500}.check-summary small{display:block;font-size:10px;color:var(--ink-3);margin-top:3px}.quiet-btn{border:0;border-bottom:1px solid #aaa899;border-radius:0;background:none;padding:3px 0;color:var(--ink-3);font-size:10px;min-height:32px;white-space:nowrap}.quiet-btn:hover{color:var(--ink);border-color:var(--ink)}.checklist{display:flex;flex-direction:column;gap:0;margin:0}.check-item{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;display:grid;grid-template-columns:22px minmax(0,1fr);gap:15px;padding:21px 0;font-size:var(--reading-size);line-height:2;transition:none;color:var(--ink-2)}.check-item:hover{transform:none;border-color:var(--line)}.check-item input{appearance:auto;width:17px;height:17px;accent-color:var(--accent);margin-top:7px;cursor:pointer}.check-item.done{background:none}.check-item.done b{color:#858579;text-decoration:line-through;text-decoration-thickness:1px}.check-icon{height:20px;width:20px;margin-top:5px;border:0;border-radius:0;background:none!important;font-size:12px;font-weight:400}.check-icon.watch{font-size:0;color:var(--dn)}.check-icon.watch:after{content:'·';font-size:28px;line-height:20px}.check-icon.dont{color:var(--accent)}.watch-card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:0;box-shadow:none}.watch-card .key-row{padding:23px 0}.watch-card .key-row+.key-row{border-top:1px solid var(--line)}.watch-card .key-title{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;letter-spacing:-.3px}.quiz{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:27px 0 9px;margin:25px 0 34px;box-shadow:none}.quiz-kicker{font:400 10px 'Noto Sans KR',sans-serif;letter-spacing:.2px;color:var(--accent)}.quiz-q{font-family:'Noto Serif KR',serif;font-size:20px;font-weight:600;line-height:1.9;letter-spacing:-.4px;margin:12px 0 20px}.quiz-opt{background:none;border:1px solid var(--line);border-radius:0;color:var(--ink-2);padding:12px 16px;margin-top:9px;font-size:var(--reading-size);line-height:1.9;font-weight:400}.quiz-opt:hover:not(:disabled){background:var(--wash);border-color:#8b8b79}.quiz-opt:disabled{opacity:1;cursor:default}.quiz-opt.q-ok{background:#edf1e8;color:#3c5946;border-color:#8fa188}.quiz-opt.q-no{background:#f4eae3;color:#8b493a;border-color:#b98d78}.quiz-exp{font-size:var(--reading-size);line-height:2;border:0;border-top:1px solid var(--line);border-radius:0;background:none;padding:18px 0 0;margin-top:16px;color:var(--ink-2)}.quiz-feedback{font-size:12px;color:#3e6049;font-weight:500;margin-top:18px}.quiz-feedback.wrong{color:var(--accent)}.daily-quote{margin:75px 0 55px;padding:40px 0 44px;border:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);border-radius:0;background:none;overflow:visible;text-align:center}.daily-quote blockquote{font-family:'Noto Serif KR',serif;font-size:25px;line-height:1.95;font-weight:500;letter-spacing:-.8px;color:var(--ink);max-width:800px;margin-bottom:21px}.daily-quote cite{font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:400;letter-spacing:0;color:var(--ink-3)}.report-footer{max-width:none;border:0;text-align:left;padding:0 0 55px;font-size:11px;line-height:1.9;position:relative}.report-footer .logo{font-family:'Playfair Display',Georgia,serif;font-size:28px;letter-spacing:-1px;color:var(--ink);margin-bottom:20px}.ticker{display:none}
+@media(max-width:1100px){.publication{padding:0 32px}.snav-in{gap:20px}.reading-progress{display:none}.nav-row{gap:14px}.cover{gap:40px;grid-template-columns:minmax(0,1fr) 238px}.cover-title{font-size:40px;letter-spacing:-2px}.section{grid-template-columns:145px minmax(0,1fr);gap:30px}.section-title{font-size:21px}.brief{grid-template-columns:145px minmax(0,1fr);gap:30px}.market-stat{padding:0 20px}.market-stat-value{font-size:24px}}
+@media(max-width:900px){.publication{padding:0 28px}.wordmark{font-size:58px}.mast-center{gap:22px;margin:24px 0}.mast-motto{font-size:11px}.cover{grid-template-columns:minmax(0,1fr) 210px;gap:30px}.cover-title{font-size:34px;letter-spacing:-1.7px;line-height:1.65}.cover-sub{font-size:12px}.event-time{font-size:44px}.event-note h2{font-size:16px}.event-facts div{font-size:10px}.event-facts dd{font-size:11px}.snav-in{gap:22px;flex:1;min-width:0}.reading-tools{border-left:1px solid var(--line);padding-left:9px}.print-tool{display:none!important}.nav-chip{font-size:11px}.section{display:block;margin-top:48px;padding-top:24px}.section-header{position:static;display:flex;align-items:baseline;gap:16px;margin-bottom:27px}.section-header>div:last-child{flex:1}.section-num{margin:0;font-size:20px}.section-title{font-size:25px;line-height:1.6}.section-subtitle{font-size:10px;margin-top:7px}.brief{grid-template-columns:120px minmax(0,1fr);gap:24px}.brief-heading h2{font-size:20px}.brief-lines li{font-size:11px}.brief-lines b{font-size:11px;margin-right:8px}.market-stat{padding:0 18px}.market-stat-value{font-size:22px}.market-stat-label span{display:none}.market-stat-change{font-size:9px}.market-stat-change span{margin-left:4px}.market-note-row{gap:10px}.market-strip-note{font-size:8px}.daily-quote blockquote{font-size:23px}}
+@media(max-width:600px){.publication{padding:0 21px}.masthead{padding-top:19px}.mast-topline{font-size:9px}.mast-topline .issue-label{letter-spacing:0}.mast-center{display:block;text-align:center;margin:23px 0}.mast-motto,.mast-edition{display:none}.wordmark{font-size:56px;letter-spacing:-2.5px}.mast-rule{height:4px}.nav-row{min-height:49px;gap:12px}.snav-in{gap:23px}.nav-chip{padding:14px 0 12px;font-size:10px}.nav-chip b{display:none}.reading-tools{padding-left:5px}.tool-btn{font-size:10px;padding:0 6px;height:29px}.cover{display:block;padding:30px 0 25px}.cover-label{font-size:10px}.cover-title{font-size:31px;letter-spacing:-1.8px;line-height:1.65;margin:15px 0 19px;font-weight:600}.cover-title em{font-weight:600}.cover-sub{font-size:12px;line-height:1.95;max-width:none}.hero-cta{font-size:10px;margin-top:16px;gap:20px}.event-note{display:grid;grid-template-columns:90px minmax(0,1fr);gap:4px 20px;border-top:1px solid var(--line);padding-top:17px;margin:26px 0 0}.event-note .note-label{grid-column:1/-1;font-size:9px;margin-bottom:4px}.event-time{font-size:30px;margin:0;grid-column:1;grid-row:2;line-height:1.5;letter-spacing:-.8px}.event-time small{display:block;font-size:9px;margin:0;line-height:1.6}.event-note h2{grid-column:2;grid-row:2;font-size:15px;align-self:center;margin:0;letter-spacing:-.5px}.event-facts{display:none}.event-footnote{grid-column:1/-1;font-size:9px;margin-top:6px}.event-link{grid-column:1/-1;margin-top:7px;font-size:10px;padding-top:9px;border:0}.market-strip{grid-template-columns:repeat(2,minmax(0,1fr));padding:0}.market-stat{padding:16px 16px 14px;border-left:1px solid var(--line);margin:0}.market-stat:first-child{padding:16px 16px 14px 0}.market-stat:nth-child(3){border-left:0;padding-left:0}.market-stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.market-stat:last-child{padding-right:0}.market-stat-label{font-size:9px;gap:8px}.market-stat-label span{display:inline;font-size:8px}.market-stat-value{font-size:23px;letter-spacing:-1px;margin:5px 0 1px}.market-stat-change{font-size:9px;line-height:1.8}.market-stat-change span{margin-left:7px}.market-note-row{display:block;margin-top:10px}.market-strip-note{font-size:8px;line-height:1.8;margin-bottom:7px}.extra-market summary{font-size:9px;min-height:27px}.extra-market-grid{grid-template-columns:1fr 1fr}.extra-market .ticker-item{font-size:10px;padding:9px 0;line-height:2;border-right:0!important}.brief{display:block;margin:23px 0 20px}.brief-heading{display:flex;align-items:baseline;gap:10px;margin-bottom:17px}.brief-heading h2{font-size:20px}.brief-heading p{font-size:9px;margin:0}.brief-lines li{font-size:12px;line-height:1.95;padding:12px 21px 12px 25px}.brief-lines b{display:block;font-size:12px;margin:0 0 3px}.brief-lines li:before{top:16px;font-size:9px}.brief-lines li:first-child:before{top:6px}.brief-lines a:after{top:15px}.brief-lines li:first-child a:after{top:5px}.archive-note{font-size:9px;padding-top:11px}.section{padding-top:24px;margin-top:42px;scroll-margin-top:56px}.section-header{gap:13px;margin-bottom:25px}.section-num{font-size:18px}.section-title{font-size:22px;letter-spacing:-.8px}.section-subtitle{font-size:9px;line-height:1.8;margin-top:4px}.callout{padding:0 0 0 16px;border-left-width:1px;font-size:var(--reading-size)!important;line-height:2;margin-bottom:24px}.temp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:23px}.temp-card{grid-column:span 1;padding:18px 14px;min-width:0}.temp-card.wide{grid-column:1/-1;border-right:0;padding:21px 0 18px}.temp-card.notes{grid-column:1/-1;padding:18px 0 5px}.temp-card:nth-child(2){padding-left:0;border-right:1px solid var(--line)}.temp-card:nth-child(3){padding-left:14px;border-right:0}.temp-card:nth-child(4){padding-left:0;border-right:1px solid var(--line)}.temp-card:nth-child(5){padding-right:0}.temp-card:nth-child(6){border-right:0;border-bottom:0;padding-left:0}.temp-label{font-size:9px}.temp-val{font-size:23px;margin:8px 0 5px}.temp-card.wide .temp-val{font-size:34px}.temp-chg{font-size:9px;line-height:1.9;white-space:normal}.temp-explain{font-size:calc(var(--reading-size) - 2px);line-height:1.9}.chart-cap{font-size:10px;line-height:1.9}.rec-chip{font-size:11px;line-height:1.9}.flow-h{font-size:8px;gap:6px}.flow-row{grid-template-columns:38px minmax(0,1fr) 49px;gap:8px}.flow-name{font-size:11px}.flow-val{font-size:11px}.flow-note{font-size:10px;line-height:1.9}.subhead{font-size:13px;line-height:1.9;margin-top:30px}.tl-filter,.itab-bar{gap:15px}.tlf-chip,.itab-btn{font-size:10px;min-height:37px;padding:7px 0 9px}.source-note{font-size:9px;margin-bottom:21px}.tl-item{padding-left:19px;padding-bottom:28px}.tl-item:before{left:3px}.tl-dot{left:0;top:8px}.tl-date{font-size:10px;margin-bottom:8px;line-height:1.8}.tl-title{font-size:16px;line-height:1.85}.tl-desc{font-size:var(--reading-size)!important;line-height:2}.tl-tag{font-size:9px;margin-right:8px;padding-right:8px}.acc-head{font-size:12px;padding:15px 0}.acc-body{font-size:var(--reading-size)}.insight-card{padding:24px 0 0;margin-bottom:30px}.insight-name{font-size:13px}.insight-role{font-size:9px}.insight-avatar{width:33px;height:33px;flex-basis:33px;font-size:14px}.insight-body,.key-desc,.edu-body{font-size:var(--reading-size)!important}.key-message-box{padding:17px 17px 3px;margin:23px 0}.key-message-box:before{font-size:10px}.key-row{padding:14px 0}.key-title{font-size:14px;line-height:1.9}.insight-quote{font-size:16px;line-height:2;padding-left:17px;margin:22px 0}.insight-bullets li{font-size:var(--reading-size)!important;line-height:2;padding-left:15px}.sector-grid{grid-template-columns:1fr;gap:28px;margin-top:23px}.sector-card{padding-top:19px}.sector-name{font-size:19px}.sector-stocks{gap:8px 14px}.sector-stocks span{font-size:11px}.sector-note{font-size:var(--reading-size);line-height:2}.edu-card{padding:23px 0 0;margin-bottom:29px}.edu-title{font-size:19px;line-height:1.9}.edu-tag{font-size:9px}.edu-box{padding:16px 17px;font-size:var(--reading-size);line-height:2}.check-summary,.quiz-summary{font-size:10px;gap:12px}.check-summary small{font-size:9px;line-height:1.8}.quiet-btn{font-size:9px}.check-item{grid-template-columns:19px minmax(0,1fr);gap:12px;padding:19px 0;font-size:var(--reading-size)}.watch-card .key-title{font-size:17px;line-height:1.85}.watch-card .key-row{padding:21px 0}.quiz{padding:24px 0 0;margin-top:23px}.quiz-kicker{font-size:9px}.quiz-q{font-size:18px;line-height:1.95;margin-bottom:18px}.quiz-opt{padding:12px 13px;font-size:var(--reading-size);line-height:1.95}.quiz-exp{font-size:var(--reading-size);line-height:2}.quiz-feedback{font-size:11px;line-height:1.9}.daily-quote{padding:29px 0 31px;margin:49px 0 35px}.daily-quote blockquote{font-size:19px;line-height:2;letter-spacing:-.6px}.daily-quote blockquote br{display:none}.daily-quote cite{font-size:10px;line-height:1.9;display:block}.report-footer{padding-bottom:70px;font-size:10px}.report-footer .logo{font-size:27px}#totop{width:34px;height:34px;right:13px;bottom:13px}.live-status{font-size:11px;padding:9px 15px}}
+@media(max-width:360px){.publication{padding:0 18px}.cover-title{font-size:27px;letter-spacing:-1.5px}.market-stat-value{font-size:21px}.market-stat-label span{display:none}.reading-tools{padding-left:3px}.tool-btn{padding:0 4px}.nav-row{gap:8px}.event-note{grid-template-columns:80px minmax(0,1fr);gap:4px 14px}.event-note h2{font-size:14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+@media print{html,body{background:white!important}.publication{padding:0;max-width:none}.skip-link,.snav,#pbar,#totop,.js-only,.hero-cta,.event-link,.live-status,.check-summary,.quiz-summary,.archive-note,.quiz-feedback{display:none!important}.masthead{padding-top:0}.mast-center{margin:16px 0 20px}.wordmark{font-size:48px}.cover{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:35px;padding:28px 0}.cover-title{font-size:30px;line-height:1.6}.cover-label{font-size:10px}.cover-sub{font-size:11px}.event-time{font-size:34px}.event-note h2{font-size:14px}.event-note{display:block;border-top:1px solid #333;margin:0}.event-facts{display:block}.event-footnote{font-size:9px}.market-strip{grid-template-columns:repeat(4,1fr);padding:15px 0}.market-stat{padding:0 16px!important;border-bottom:0!important;border-left:1px solid var(--line)!important}.market-stat:first-child{padding-left:0!important;border-left:0!important}.market-stat-value{font-size:22px}.extra-market-grid{grid-template-columns:repeat(3,1fr)}.extra-market summary{font-size:0}.extra-market summary:after{content:'전체 지표·종목';font-size:9px}.brief{display:grid;grid-template-columns:125px 1fr;gap:25px}.brief-heading h2{font-size:19px}.brief-heading p{font-size:9px}.brief-lines b{display:inline}.section{display:block;break-before:page;margin-top:0;padding-top:20px;border-top:1px solid #333}.section-header{position:static;display:flex;gap:14px;margin-bottom:26px;break-after:avoid-page}.section-title{font-size:24px}.section-num{font-size:20px}.section-subtitle{font-size:10px;margin-top:5px}.temp-grid{grid-template-columns:repeat(6,1fr)}.temp-card{grid-column:span 2;break-inside:avoid}.temp-card.wide,.temp-card.notes{grid-column:span 4}.tl-item,.check-item,.quiz{break-inside:avoid}.tl-item.tl-hide,.itabs-live .itab-panel,.quiz-live .quiz-exp{display:block!important}.tl-filter,.itab-bar{display:none!important}.sector-grid{grid-template-columns:1fr 1fr}.sector-card{break-inside:avoid}.callout,.insight-card,.sector-card,.edu-card,.watch-card{box-shadow:none!important}.daily-quote{break-inside:avoid}.report-footer{break-inside:avoid;padding:0 0 20px}.report-footer .logo{font-size:25px}}
+
+</style><style id="editorial-qa">@media(max-width:900px){.enhanced .print-tool{display:none!important}}@media(max-width:600px){.tool-btn{min-width:30px;height:34px}}</style><style id="pastel-editorial">
+/* Pastel editorial: colour marks significance, not every component. */
+:root{--pastel-mint:#e5eee5;--pastel-lilac:#eee7f4;--pastel-peach:#f7e7d9;--pastel-butter:#f5edce;--pastel-blue:#e8eef5;--marker:#eada99;--accent:#885344}
+.cover{gap:22px;grid-template-columns:minmax(0,1fr) 278px;padding:32px 0 28px;align-items:stretch}.cover-content{background:var(--pastel-mint);padding:29px 33px 28px;border-radius:3px;position:relative}.cover-label{color:#526e59;font-weight:600;letter-spacing:.4px}.cover-title{font-size:42px;line-height:1.55;letter-spacing:-2.2px;margin:15px 0 17px}.cover-title em{color:#354e41;background:linear-gradient(transparent 59%,#eddb9c 59%,#eddb9c 92%,transparent 92%);padding:0 .06em;-webkit-box-decoration-break:clone;box-decoration-break:clone}.cover-sub{color:#647364;font-size:12px;line-height:1.95;max-width:590px}.hero-cta{color:#425b48;border-color:#98aa92;margin-top:18px;font-size:10px}.hero-cta:hover{color:#254735;border-color:#54785d}.event-note{background:var(--pastel-lilac);border:0;border-radius:3px;padding:24px 23px 22px;margin:0;display:flex;flex-direction:column;justify-content:center}.event-note .note-label{color:#756083;font-weight:600}.event-time{color:#4f3f60;font-size:48px;margin-top:10px}.event-time small{font-size:9px;color:#82748c}.event-note h2{color:#403748;font-size:17px;letter-spacing:-.5px;margin-bottom:15px}.event-facts div{border-color:#d9cfe2}.event-facts dt{color:#776880}.event-facts dd{color:#4f405d}.event-footnote{color:#82738a;font-size:9px}.event-link{color:#5a4667;border-color:#d9cfe2;margin-top:15px;font-size:10px}.market-strip{background:#f2f1e9;padding:19px 22px 17px;border-top:1px solid #898b7c;border-bottom:1px solid #dfdfd2}.market-stat{border-color:#d7d9c9;padding:0 25px}.market-stat-value{font-size:25px}.market-note-row{margin-top:10px}.brief{background:var(--pastel-peach);padding:22px 25px 23px;margin-top:20px;border-radius:3px;grid-template-columns:150px minmax(0,1fr);gap:27px;border-left:3px solid #c69c7e}.brief-heading h2{color:#674c37;font-size:21px}.brief-heading p{color:#94775f;font-size:10px}.brief-lines li{border-color:#e9d6c5;color:#7d6553}.brief-lines b{color:#584536;font-weight:650}.brief-lines li:before,.brief-lines a:after{color:#aa8062}.brief-lines a:hover b{color:#884f2b}.archive-note{border-top:0;padding-top:0;color:#858477;margin-bottom:5px}
+#s01{--section-tint:var(--pastel-mint);--section-tone:#566e56}#s02{--section-tint:var(--pastel-blue);--section-tone:#5e6e84}#s03{--section-tint:var(--pastel-butter);--section-tone:#8c7645}#s04{--section-tint:var(--pastel-peach);--section-tone:#916b53}#s05{--section-tint:var(--pastel-blue);--section-tone:#62778e}#s06{--section-tint:var(--pastel-mint);--section-tone:#5a745d}#s07{--section-tint:var(--pastel-lilac);--section-tone:#846d95}#s08{--section-tint:var(--pastel-peach);--section-tone:#9a795f}
+.section-num{width:38px;height:38px;display:grid;place-items:center;background:var(--section-tint);color:var(--section-tone);font-size:19px;border-radius:2px;line-height:1;margin-bottom:14px}.section-body>.callout:first-child{background:var(--section-tint)!important;border-left:3px solid var(--section-tone)!important;border-radius:2px!important;padding:20px 24px;margin-bottom:28px;color:var(--ink-2)}.section-body>.callout:first-child b{background:linear-gradient(transparent 56%,rgba(255,255,255,.8) 56%);padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}.callout.gold:not(:first-child) b{background:linear-gradient(transparent 52%,#f0e2aa 52%);-webkit-box-decoration-break:clone;box-decoration-break:clone}.callout.blue:not(:first-child) b{background:linear-gradient(transparent 52%,#dfe9f1 52%);-webkit-box-decoration-break:clone;box-decoration-break:clone}.temp-card.notes{background:#f2f3e9;padding:21px 22px}.rec-chip{border-color:#dde1d0}.flow-track{background:#eeeee5}.flow-bar.buy{background:#bc7263}.flow-bar.sell{background:#809cb7}.tlf-chip.on,.itab-btn.on{background:linear-gradient(transparent 34%,var(--section-tint) 34%,var(--section-tint) 80%,transparent 80%);border-color:var(--section-tone);color:var(--ink)}.tl-dot{background:#8ca1b6!important}.tl-tag.good{background:#ebf0e7!important;color:#64765b!important;padding:3px 7px;border:0!important;border-radius:2px}.tl-tag.bad{background:#f4e8e1!important;color:#956d58!important;padding:3px 7px;border:0!important;border-radius:2px}.tl-tag.neutral{padding:3px 0 3px 0}.insight-card.lead{background:#f7f1db;border:0;border-top:3px solid #c9b776;border-radius:2px;padding:27px 27px 14px;margin-bottom:38px}.insight-card.lead .insight-avatar{background:#e9dfb5!important;color:#7a6b3e!important;border-color:#d5c893}.insight-card.lead .insight-name{font-weight:650}.key-message-box{background:rgba(255,255,255,.6);border-left:2px solid #c8b875;padding:20px 22px 7px}.key-message-box:before{color:#8d7442;font-weight:600}.key-message-box .key-row+.key-row{border-color:#e0d8bc}.key-message-box .key-title{color:#68532b}.insight-quote{background:var(--pastel-mint);border-left:2px solid #a0b29a;padding:16px 21px;color:#435846;font-size:16px}.insight-card.lead .insight-quote{background:#e8eddb;border-color:#b6c4a3}.insight-bullets li:before{background:#b0a174}.edu-tag{background:var(--pastel-blue)!important;color:#586d82!important;padding:3px 7px;border-radius:2px}.edu-tag.gold{background:var(--pastel-butter)!important;color:#8d7641!important}.edu-tag.purple{background:var(--pastel-lilac)!important;color:#7d668c!important}.edu-tag.green{background:var(--pastel-mint)!important;color:#5c765f!important}.edu-box.formula{background:var(--pastel-blue);border-left:2px solid #a6bbcd}.edu-box.tip{background:var(--pastel-butter);border-left:2px solid #cdbd79}.edu-box.example{background:var(--pastel-mint);border-left:2px solid #a6b9a0}.edu-box.warning{background:var(--pastel-peach);border-left:2px solid #c9a083}.check-summary{background:var(--pastel-mint);padding:13px 16px;border:0;border-radius:2px;margin-bottom:6px}.check-summary b{color:#4b6951;font-weight:600}.check-summary small{color:#738773}.check-item.done{background:#f0f4eb}.check-item.done b{color:#779072}.watch-card{border-top:0}.watch-card .key-row:first-child{background:var(--pastel-lilac);padding:20px 23px;border-left:3px solid #aa96bb;border-radius:2px;margin-bottom:9px}.watch-card .key-row:first-child .key-title{color:#675176}.watch-card .key-row:first-child+.key-row{border-top:0}.quiz-summary{background:var(--pastel-peach);padding:12px 16px;border:0;border-radius:2px;margin-bottom:15px}.quiz-summary b{color:#856148;font-weight:600}.quiz-opt:hover:not(:disabled){background:#f6f0df;border-color:#c7b88e}.quiz-opt.q-ok{background:#e5eddf;border-color:#9daf91;color:#47613c}.quiz-opt.q-no{background:#f5e3d8;border-color:#ca9b7b;color:#915837}.daily-quote{background:#eaeaf3;border:0;border-top:2px solid #b3aec6;border-radius:2px;padding:35px 32px 37px;margin-top:66px}.daily-quote blockquote{color:#514c64}.daily-quote cite{color:#89839b}.report-footer .logo{color:#685447}
+@media(max-width:1100px){.cover{grid-template-columns:minmax(0,1fr) 242px;gap:18px}.cover-content{padding:25px 26px}.cover-title{font-size:36px;letter-spacing:-1.8px}.event-note{padding:22px 20px}.event-time{font-size:43px}.event-note h2{font-size:16px}.market-stat{padding:0 18px}.market-stat-value{font-size:23px}.brief{grid-template-columns:130px minmax(0,1fr);gap:24px;padding:20px 22px}}
+@media(max-width:900px){.cover{grid-template-columns:minmax(0,1fr) 214px;gap:15px}.cover-content{padding:24px}.cover-title{font-size:31px;letter-spacing:-1.6px;line-height:1.65}.cover-sub{font-size:11px}.event-note{padding:20px 18px}.event-time{font-size:39px}.event-time small{display:block;margin:6px 0 0;font-size:9px}.event-note h2{font-size:15px;margin-bottom:11px}.event-facts div{font-size:10px}.event-footnote{font-size:9px}.market-strip{padding:17px 17px 15px}.market-stat{padding:0 15px}.market-stat-value{font-size:21px}.market-stat-change{font-size:9px}.section-num{width:33px;height:33px;flex-shrink:0;margin:0;font-size:18px}.section-header{align-items:center}.brief{grid-template-columns:110px minmax(0,1fr);gap:20px;padding:19px 20px}.brief-heading h2{font-size:19px}.brief-heading p{font-size:9px}.brief-lines b{font-size:11px}.brief-lines li{font-size:11px}.insight-card.lead{padding:25px 25px 12px}}
+@media(max-width:600px){.cover{display:block;padding:24px 0 20px}.cover-content{padding:24px 22px 23px}.cover-title{font-size:28px;letter-spacing:-1.65px;line-height:1.65;margin:14px 0 17px}.cover-label{font-size:9px}.cover-sub{font-size:11px;line-height:1.95}.hero-cta{font-size:10px;margin-top:16px}.event-note{display:grid;grid-template-columns:84px minmax(0,1fr);gap:3px 17px;padding:17px 20px;margin:13px 0 0;border:0;border-radius:3px}.event-note .note-label{font-size:9px;grid-column:1/-1;margin:0 0 4px}.event-time{font-size:30px;line-height:1.4;margin:0;grid-column:1;grid-row:2}.event-time small{font-size:8px;line-height:1.6;margin:2px 0 0}.event-note h2{font-size:14px;grid-column:2;grid-row:2;margin:0;align-self:center}.event-footnote{grid-column:1/-1;font-size:9px;margin:7px 0 0}.event-footnote br{display:none}.event-link{grid-column:1/-1;margin:6px 0 0;padding-top:8px;font-size:9px;border-top:1px solid #d9cfe2}.market-strip{padding:0 17px;background:#f3f2e9}.market-stat{padding:14px 13px}.market-stat:first-child{padding:14px 13px 14px 0}.market-stat:nth-child(3){padding:14px 13px 14px 0}.market-stat:last-child{padding:14px 0 14px 13px}.market-stat-value{font-size:22px}.market-stat-label{font-size:9px}.market-stat-label span{font-size:8px}.market-stat-change{font-size:8px}.market-stat-change span{margin-left:5px}.market-stat:nth-child(-n+2){border-color:#d7d9c9}.brief{display:block;margin:20px 0;padding:20px 19px 21px;border-left-width:2px}.brief-heading{gap:10px;margin-bottom:17px}.brief-heading h2{font-size:20px}.brief-heading p{font-size:9px}.brief-lines li{font-size:12px;padding:12px 19px 12px 23px}.brief-lines b{font-size:12px;line-height:1.8}.section-num{width:31px;height:31px;font-size:17px}.section-body>.callout:first-child{padding:18px 18px;border-left-width:2px!important}.temp-card.notes{padding:16px 17px 5px}.insight-card.lead{padding:22px 19px 9px}.key-message-box{padding:17px 16px 3px;margin:22px 0}.key-message-box .key-title{font-size:14px}.insight-quote{padding:15px 17px;font-size:15px}.edu-tag{padding:3px 6px;font-size:9px}.check-summary,.quiz-summary{padding:12px 13px}.watch-card .key-row:first-child{padding:18px 18px;border-left-width:2px}.daily-quote{padding:28px 22px 30px;margin-top:49px}.daily-quote blockquote{font-size:18px;line-height:2}}
+@media(max-width:360px){.cover-content{padding:21px 18px}.cover-title{font-size:25px;letter-spacing:-1.4px}.event-note{padding:16px 17px;grid-template-columns:78px minmax(0,1fr);gap:3px 12px}.event-note h2{font-size:13px}.market-strip{padding:0 14px}.market-stat-value{font-size:20px}.market-stat-label span{display:none}.market-stat-change span{margin-left:3px}.brief{padding:18px 16px}}
+@media print{.cover{grid-template-columns:minmax(0,1fr) 205px;gap:18px;padding:22px 0}.cover-content{padding:22px 24px}.cover-title{font-size:29px;line-height:1.6}.event-note{display:block;padding:18px;margin:0}.event-time{font-size:33px}.event-time small{font-size:8px;display:block;margin:4px 0}.event-note h2{font-size:14px}.cover-sub{font-size:10px}.brief{grid-template-columns:120px 1fr;padding:17px 20px;gap:20px}.section-num{display:grid;flex-shrink:0;margin:0}.market-strip{grid-template-columns:repeat(4,1fr);padding:14px 17px}.market-stat-value{font-size:21px}.market-stat{background:none}.cover-content,.event-note,.brief,.section-num,.section-body>.callout:first-child,.insight-card.lead,.edu-box,.watch-card .key-row:first-child,.daily-quote{-webkit-print-color-adjust:exact;print-color-adjust:exact}.insight-card.lead{padding:24px 22px 10px}.daily-quote{padding:30px 25px}}
+
+</style></head><body>
+<a class="skip-link" href="#s01">본문으로 바로 가기</a>
+<div class="publication">
+<header class="masthead">
+<div class="mast-topline"><span class="issue-label">프롬어스 · 데일리 리포트</span><time datetime="2026-09-09">2026년 9월 9일 수요일</time></div>
+<div class="mast-center"><p class="mast-motto">매일의 시장을,<br>나의 판단으로.</p><a class="wordmark" href="#overview" aria-label="From Us 리포트 요약">From Us</a><p class="mast-edition"><b>마감 이후의 기록</b>274개 메시지 분석 · 8개 섹션</p></div>
+<div class="mast-rule" aria-hidden="true"></div>
+</header>
+<nav class="snav" aria-label="리포트 목차"><div class="nav-row"><div class="snav-in">
+<a class="nav-chip on" href="#overview">개요</a>
+<a class="nav-chip" href="#s01"><b>01</b>시장 온도</a>
+<a class="nav-chip" href="#s02"><b>02</b>타임라인</a>
+<a class="nav-chip" href="#s03"><b>03</b>인사이트</a>
+<a class="nav-chip" href="#s04"><b>04</b>수급</a>
+<a class="nav-chip" href="#s05"><b>05</b>리딩</a>
+<a class="nav-chip" href="#s06"><b>06</b>액션 플랜</a>
+<a class="nav-chip" href="#s07"><b>07</b>다음 주</a>
+<a class="nav-chip" href="#s08"><b>08</b>퀴즈</a>
+</div><div class="reading-tools"><div class="font-controls js-only" role="group" aria-label="본문 글자 크기"><button class="tool-btn" type="button" id="font-less" aria-label="본문 글자 작게">가−</button><button class="tool-btn" type="button" id="font-more" aria-label="본문 글자 크게">가+</button></div><button class="tool-btn print-tool js-only" type="button" id="print-report" aria-label="리포트 인쇄 또는 PDF 저장">인쇄</button><div class="reading-progress" aria-label="읽은 위치"><span id="reading-percent">0%</span><span class="read-track" aria-hidden="true"><span id="reading-fill"></span></span></div></div></div></nav>
+<main>
+<section class="overview" id="overview" tabindex="-1" aria-label="리포트 개요">
+<div class="cover"><div class="cover-content"><p class="cover-label">9월 9일의 시장</p>
+<h1 class="cover-title">48일 만에 되찾은 7,000선,<br>그런데 유가는<br><em>100달러를 넘었습니다</em></h1>
+<p class="cover-sub">
+      뉴욕은 중동 확전에 밀렸는데 코스피는 반도체·2차전지를 앞세워 7,051로 올라섰어요.<br>
+      기관이 9,417억을 받아낸 하루, 그리고 내일부터 시작되는 물가 지표 3연전.
+    </p>
+<a class="hero-cta" href="#s01">시장 해설 읽기 <span aria-hidden="true">↓</span></a>
+</div><aside class="event-note" aria-label="9월 10일 주요 일정"><p class="note-label">내일, 확인할 숫자</p><div class="event-time">21:30<small>9월 10일 · 한국시간</small></div><h2>미국 8월 생산자물가(PPI)</h2><dl class="event-facts"><div><dt>다음 날</dt><dd>8월 CPI <small>9/11</small></dd></div><div><dt>같은 날 국내</dt><dd>선물·옵션 동시만기</dd></div><div><dt>일주일 뒤</dt><dd>FOMC <small>9/16</small></dd></div></dl><p class="event-footnote">유가가 물가를 밀어 올렸는지, 숫자로 확인되는 순서.<br>오늘 상승의 전제가 시험대에 오릅니다.</p><a class="event-link" href="#s07">일정과 관전 포인트 <span aria-hidden="true">↗</span></a></aside></div>
+<div class="market-strip" aria-label="주요 시장 지표">
+<div class="market-stat"><div class="market-stat-label">KOSPI <span>코스피</span></div><div class="market-stat-value">7,051.64</div><div class="market-stat-change">+1.40% <span>+97.12p</span></div></div>
+<div class="market-stat"><div class="market-stat-label">KOSDAQ <span>코스닥</span></div><div class="market-stat-value">830.37</div><div class="market-stat-change">+2.28% <span>+18.49p</span></div></div>
+<div class="market-stat"><div class="market-stat-label">USD/KRW <span>원·달러</span></div><div class="market-stat-value">1,336.4</div><div class="market-stat-change down">−0.48% <span>−6.4원</span></div></div>
+<div class="market-stat"><div class="market-stat-label">US 10Y <span>미 국채 10년</span></div><div class="market-stat-value">4.790%</div><div class="market-stat-change">+0.5bp <span>고금리 지속</span></div></div>
+</div>
+<div class="market-note-row"><p class="market-strip-note">9월 9일 KRX 증시 Brief(15:45 기준) 원문 기준 · 상승·순매수는 빨강, 하락·순매도는 파랑 · 실시간 시세 아님</p></div>
+<details class="extra-market"><summary>전체 지표·종목 16개</summary><div class="extra-market-grid"><span class="ticker-item">KOSPI <b>7,051.64</b> <span class="tk-up">▲1.40%</span></span>
+<span class="ticker-item">KOSDAQ <b>830.37</b> <span class="tk-up">▲2.28%</span></span>
+<span class="ticker-item">KRX300 <b>4,836.25</b> <span class="tk-up">▲1.40%</span></span>
+<span class="ticker-item">USD/KRW <b>1,336.4</b> <span class="tk-dn">▼6.4원</span></span>
+<span class="ticker-item">달러지수 <b>98.9</b> <span class="tk-dn">▼0.1%</span></span>
+<span class="ticker-item">국고채 3년 <b>3.910%</b></span>
+<span class="ticker-item">국고채 10년 <b>4.401%</b></span>
+<span class="ticker-item">US 10Y <b>4.790%</b></span>
+<span class="ticker-item">WTI <b>$94.27</b> <span class="tk-up">▲1.33%</span></span>
+<span class="ticker-item">Brent <b>$97.92</b> <span class="tk-up">▲0.92%</span></span>
+<span class="ticker-item">SK하이닉스 <span class="tk-up">▲3.51%</span></span>
+<span class="ticker-item">삼성전자 <b>0.00%</b></span>
+<span class="ticker-item">LG에너지솔루션 <span class="tk-up">▲6.46%</span></span>
+<span class="ticker-item">에코프로비엠 <span class="tk-up">▲9.64%</span></span>
+<span class="ticker-item">롯데케미칼 <span class="tk-up">▲18.12%</span></span>
+<span class="ticker-item">심텍 <span class="tk-up">▲8.87%</span></span></div></details>
+<div class="brief"><div class="brief-heading"><h2>오늘의 관점</h2><p>세 줄로 짚는 핵심</p></div><ol class="brief-lines"><li><a href="#s01"><b>7월 23일 이후 첫 7,000선 종가</b>뉴욕 3대 지수가 모두 밀린 다음 날, 코스피는 반도체 주도로 홀로 올라섰습니다.</a></li><li><a href="#s04"><b>기관 +9,417억이 받아낸 개인 −2.29조</b>외국인은 코스피에서 팔고 코스닥에서 샀어요. 주체별로 방향이 갈린 하루입니다.</a></li><li><a href="#s07"><b>상승의 전제는 아직 검증 전</b>PPI·CPI·동시만기가 내일부터 줄줄이 놓여 있습니다.</a></li></ol></div>
+<p class="archive-note">보관 리포트 · ‘오늘’과 ‘다음 주’는 2026년 9월 9일 기준입니다. 본문의 수치와 해석은 첨부 원문을 따릅니다.</p>
+</section>
+<div class="page">
+
+<!-- 01. MARKET TEMPERATURE -->
+<div class="section" id="s01">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-title">오늘의 시장 온도</div>
+      <div class="section-subtitle">Market Temperature · 9월 9일 마감 기준</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="callout green">
+    <span class="callout-icon">📈</span>
+    "뉴욕이 밀린 다음 날, <b>코스피가 혼자 올라갔습니다.</b>" 코스피는 +1.40%(+97.12p) 오른 7,051.64로 마감하며 7,000선을 되찾았어요. 종가 기준으로 7,000을 넘긴 건 7월 23일 이후 <b>48일 만</b>입니다. 코스닥은 더 셌습니다 — +2.28%(+18.49p) 오른 830.37. 간밤 뉴욕은 다우 −1.18%, S&amp;P500 −0.58%, 나스닥 −0.31%로 일제히 밀렸는데도, 국내는 필라델피아 반도체지수 +1.30%라는 한 줄에 기대어 반도체·2차전지를 앞세워 올라섰어요.
+  </div>
+
+  <div class="temp-grid">
+    <div class="temp-card wide">
+      <div class="top-bar up"></div>
+      <div class="temp-label">KOSPI · 코스피</div>
+      <div class="temp-val">7,051.64</div>
+      <div class="temp-chg up">▲ 97.12p (+1.40%)</div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 660 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="9월 9일 코스피 장중 흐름 모식도">
+          <defs>
+            <linearGradient id="kospiFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c0392b" stop-opacity="0.16"/>
+              <stop offset="100%" stop-color="#c0392b" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="44" y1="168" x2="636" y2="168" stroke="#c9c0b2" stroke-width="1" stroke-dasharray="4 5"/>
+          <text x="634" y="161" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#8a8177">전일 종가 6,954.52</text>
+          <path d="M 60 122 C 96 112, 130 98, 168 84 C 206 70, 244 60, 282 54 C 318 48, 352 50, 386 60 C 420 70, 452 88, 486 96 C 520 104, 556 98, 592 104 L 630 108 L 630 216 L 60 216 Z" fill="url(#kospiFill)"/>
+          <path d="M 60 122 C 96 112, 130 98, 168 84 C 206 70, 244 60, 282 54 C 318 48, 352 50, 386 60 C 420 70, 452 88, 486 96 C 520 104, 556 98, 592 104 L 630 108" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="60" cy="122" r="4" fill="#c0392b"/>
+          <text x="60" y="110" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#8a8177">시가 6,972.87</text>
+          <circle cx="282" cy="54" r="4.5" fill="#c0392b"/>
+          <text x="282" y="42" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#8a8177">장중 고가 7,112.48</text>
+          <circle cx="630" cy="108" r="4.5" fill="#c0392b"/>
+          <text x="628" y="128" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#8a8177">종가 7,051.64</text>
+          <text x="330" y="240" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="10" fill="#8a8177">※ 실측 3개 지점(시가·장중 고가·종가)만 표시한 모식도입니다</text>
+        </svg>
+      </div>
+      <div class="chart-cap">
+        시가 6,972.87로 출발해 장중 <b>7,112.48</b>까지 올랐다가 오후 들어 상승분 일부를 반납하며 7,051.64로 마쳤어요. 오수진쌤이 마감 시황에서 "오늘도 2시 이후 지수 큰 변동성"이라고 짚은 구간이 이 지점입니다. 거래대금은 22.3조원으로 전일 대비 3.9조원 줄었어요.
+      </div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar up"></div>
+      <div class="temp-label">KOSDAQ · 코스닥</div>
+      <div class="temp-val">830.37</div>
+      <div class="temp-chg up">▲ 18.49p (+2.28%)</div>
+      <div class="temp-explain">전기·전자 +4.7%, 금융 +4.4%, 기계·장비 +3.5%. 외국인이 +2,269억 순매수하며 800선 위에 안착했어요.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar warn"></div>
+      <div class="temp-label">WTI · 서부텍사스유</div>
+      <div class="temp-val">$94.27</div>
+      <div class="temp-chg warn">▲ 1.33% · 7일 연속 상승</div>
+      <div class="temp-explain">브렌트유는 장중 100달러를 넘었습니다. 오늘 상승장의 가장 큰 반대편 변수예요.</div>
+    </div>
+    <div class="temp-card">
+      <div class="top-bar down"></div>
+      <div class="temp-label">USD/KRW · 원·달러</div>
+      <div class="temp-val">1,336.4</div>
+      <div class="temp-chg down">▼ 6.4원 · 6일 연속 강세</div>
+      <div class="temp-explain">두 달 새 200원 가까이 내려온 흐름. 수입 물가를 낮춰 오늘 지수에는 우호적으로 작동했어요.</div>
+    </div>
+  </div>
+
+  <div class="callout gold">
+    <span class="callout-icon">🔍</span>
+    오늘 지수만 보면 기분 좋은 하루지만, 시장이 실제로 보고 있는 건 <b>서로 반대 방향으로 당기는 두 개의 힘</b>이었어요. 한쪽에는 오픈AI 아스트라 공개 이후 되살아난 AI·반도체 내러티브와 6일 연속 원화 강세가 있고, 반대쪽에는 중동 확전에 따른 유가 100달러와 4.79%까지 올라온 미 10년물 금리가 있습니다. 양대 시장 모두 지수는 올랐는데 <b>하락 종목 수가 더 많았던</b> 이유가 여기 있어요 — 지수를 끌어올린 건 소수의 주도주였고, 나머지는 금리와 유가를 보고 있었습니다.
+  </div>
+
+</div>
+</div>
+
+<!-- 02. TIMELINE -->
+<div class="section" id="s02">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-title">오늘 무슨 일이 있었나요?</div>
+      <div class="section-subtitle">Today's Timeline · 시간별 흐름</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="callout purple">
+    <span class="callout-icon">🎢</span>
+    오늘은 "새벽 유가 경보 → 아침 CPU 병목 회수 → 오전 섹터 흐름 수업 → 점심 대표님의 본업 고백 → 오후 2차전지 급등 → <b>마감 7,000 회복</b>" 순으로 흘렀어요. 274개 메시지가 오간 하루였고, 그 절반은 시세가 아니라 교육이었습니다. 그리고 마지막에 "오늘 밤 9시에 만나요"로 닫혔어요.
+  </div>
+
+  <div class="tl-filter" role="group" aria-label="타임라인 필터">
+    <button class="tlf-chip" type="button" data-f="all">전체</button>
+    <button class="tlf-chip" type="button" data-f="market">시장 흐름</button>
+    <button class="tlf-chip" type="button" data-f="stock">종목·테마</button>
+    <button class="tlf-chip" type="button" data-f="edu">교육·리서치</button>
+    <button class="tlf-chip" type="button" data-f="lead">대표님</button>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item" data-cat="market">
+      <div class="tl-dot crisis"></div>
+      <div class="tl-date">새벽 06:35 — 美증시 마감 브리핑</div>
+      <div class="tl-title">"유가가 지수를 눌렀다" — 3대 지수 하락, VIX는 +8.19% 급등</div>
+      <div class="tl-desc">
+        김병철쌤의 4부작 브리핑으로 하루가 열렸어요. 다우 −1.18%로 낙폭이 가장 컸고 나스닥은 −0.31%로 선방. 그 와중에 필라델피아 반도체지수만 +1.30%로 4거래일 연속 올랐습니다. WTI +3.03%, 브렌트 +3.15%로 유가가 뛴 하루였어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag bad">VIX +8.19%</span>
+        <span class="tl-tag good">필라반도체 +1.30%</span>
+        <span class="tl-tag bad">WTI +3.03%</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="market edu">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">06:56~07:38 — 밝쌤·오수진쌤의 새벽 정리</div>
+      <div class="tl-title">"지금 시장의 가장 큰 변수는 유가 → 물가 → 금리입니다"</div>
+      <div class="tl-desc">
+        밝쌤이 오늘 하루를 관통할 인과 사슬을 한 줄로 정리했어요. 오수진쌤은 그 위에 데이터를 얹었습니다 — 중동 리스크가 커졌는데도 금은 오히려 빠졌고, 캐나다의 200억 달러 맞불 관세로 구리는 사상 최고치를 경신했다는 내용이었어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag bad">9월 인상 확률 60%대</span>
+        <span class="tl-tag neutral">구리 사상 최고</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="lead stock">
+      <div class="tl-dot turn"></div>
+      <div class="tl-date">07:46 — 대표님의 회수</div>
+      <div class="tl-title">"CPU 병목도 주목해야 한다고 한참 말씀드렸었는데"</div>
+      <div class="tl-desc">
+        이혜나 대표님이 인텔 +9.05%, AMD +5.90% 소식에 <b>이전에 짚어둔 CPU 병목 논리를 직접 회수</b>했어요. 인텔의 10월 PC용 CPU 10% 추가 인상 계획이 오히려 호재로 읽힌 이유, 그리고 미국 정부가 지분을 확보하며 키우는 구조라는 점을 함께 언급했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">인텔 +9.05%</span>
+        <span class="tl-tag good">AMD +5.90%</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="edu stock">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">08:37~08:48 — 탱이쌤의 아침 공부</div>
+      <div class="tl-title">데이터센터 750억 달러 → "다음은 전력과 광통신입니다"</div>
+      <div class="tl-desc">
+        탱이쌤이 미국 AI 데이터센터 건설비용이 750억 달러까지 치솟았다는 자료로 문을 열었어요. 반도체 부족은 당분간 걱정할 필요가 없고, <b>뒤따라 오는 전력·광통신 수요를 미리 챙겨야 한다</b>는 결론이었습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">데이터센터 $750억</span>
+        <span class="tl-tag neutral">로보티즈 블록딜 1,000억</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="lead edu">
+      <div class="tl-dot turn"></div>
+      <div class="tl-date">09:20~09:59 — 오늘의 메인 수업</div>
+      <div class="tl-title">이혜나 대표님 "2027년 대표 키워드는 전 력 이라고 확신합니다"</div>
+      <div class="tl-desc">
+        빅테크 자본지출 → 데이터센터 건설 → 반도체 → 건설 수주 → 그리고 <b>전기와 석유</b>로 이어지는 섹터 흐름을 단계별로 짚었어요. 자세한 내용은 섹션 03에 정리했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">2027 = 전력</span>
+        <span class="tl-tag neutral">운용용량 1/5</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="edu">
+      <div class="tl-dot info"></div>
+      <div class="tl-date">09:32~14:07 — 밝쌤·문지영쌤의 저축 릴레이</div>
+      <div class="tl-title">발행어음 4.75%, 그리고 상호금융 세제우대 3,000만원</div>
+      <div class="tl-desc">
+        밝쌤이 본인의 적립식 포트폴리오를 공개하며 증권사 발행어음(4.75%)을 소개했고, 오후에는 문지영쌤이 상호금융 세제우대(이자소득세 15.4% → 1.4%)를 이어받았어요. "마이크 뺏기" 농담이 오갈 만큼 서로 하나라도 더 주려던 시간이었습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">발행어음 4.75%</span>
+        <span class="tl-tag good">세제우대 1.4%</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="lead">
+      <div class="tl-dot hope"></div>
+      <div class="tl-date">11:55~12:15 — 처음 공개한 본업</div>
+      <div class="tl-title">"기초반을 끝으로 1년의 여정을 마칩니다" — 그리고 재무설계 이야기</div>
+      <div class="tl-desc">
+        대표님이 기초반 아카데미 종료를 알리며, 그동안 꺼내지 않았던 본업을 처음 공개했어요. AFPK 공인재무설계 자격과 증권·보험사 소속, 1인당 평균 10개 내외의 자격증. 그리고 <b>은퇴를 5년 내 앞둔 분들을 위한 예상 연금현금흐름표</b>를 실제 자료로 공개했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag neutral">입구전략 vs 출구전략</span>
+        <span class="tl-tag good">연금현금흐름표 공개</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="stock market">
+      <div class="tl-dot turn"></div>
+      <div class="tl-date">14:20~17:27 — 오늘 시장을 움직인 뉴스</div>
+      <div class="tl-title">美 교통부, 포드에 "CATL·지리·BYD와 관계 끊어라"</div>
+      <div class="tl-desc">
+        숀 더피 교통장관이 포드 CEO에게 중국 배터리 3사와의 관계 단절을 촉구하는 서한을 보냈다는 뉴스예요. 오후 장 2차전지 급등의 직접 재료였고, 저녁에는 <b>EU 의회에서도 '메이드 인 유럽' 강화론이 대두</b>됐다는 후속 기사가 이어졌어요.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">LG엔솔 +6.46%</span>
+        <span class="tl-tag good">에코프로비엠 +9.64%</span>
+        <span class="tl-tag neutral">법적 구속력 없는 압박</span>
+      </div>
+    </div>
+
+    <div class="tl-item" data-cat="market">
+      <div class="tl-dot hope"></div>
+      <div class="tl-date">15:44~16:15 — 마감 정리</div>
+      <div class="tl-title">"초여름에 깨진 7,000p, 늦여름에 회복"</div>
+      <div class="tl-desc">
+        오수진쌤의 마감 시황 첫 문장이 오늘을 그대로 요약했어요. 다만 같은 글에서 <b>"양시장 지수 상승에도 하락 종목 수가 많은 이유"</b>로 유가와 금리를 지목하고, 내일부터 이어지는 변동성 구간 진입을 예고했습니다.
+      </div>
+      <div class="tl-impact">
+        <span class="tl-tag good">48일 만의 7,000</span>
+        <span class="tl-tag bad">변동성 구간 진입</span>
+      </div>
+    </div>
+  </div>
+
+  <details class="acc">
+    <summary class="acc-head">그 밖의 흐름 — 눌러서 펼쳐보기</summary>
+    <div class="acc-body">
+      <div class="edu-box example">
+        <b>06:53</b> 밝쌤, OpenAI가 차세대 모델로 나비에-스토크스 밀레니엄 난제를 풀었다는 발표 공유 — 약 1만 개 AI 에이전트가 88시간 만에 도달했다는 내용.<br><br>
+        <b>06:56</b> 이혜나 대표님, 중국산 HBM 수율 부진(4개 중 3개 불량) 기사 공유 — "얘넨 아직 멀었음".<br><br>
+        <b>10:11</b> 나현석썜, 한국전력 중장기 재무관리계획 — 5년간 61조원 투자(송변전 33조·배전 22조). "전력망 투자 계획 자체가 계속 상향 조정되고 있다".<br><br>
+        <b>18:05</b> 김은지쌤, 한국경제 초판 신문 7장 배달 — 1면 용산 오염부지 개발, A3면 원·달러 3대 변수, A18면 "48일 만에 7천피 탈환".
+      </div>
+    </div>
+  </details>
+
+</div>
+</div>
+
+<!-- 03. INSIGHTS -->
+<div class="section" id="s03">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-title">프벤져스 핵심 한마디</div>
+      <div class="section-subtitle">Team Insights · 오늘 우리 리더들이 전한 메시지</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="insight-card lead">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#d4a84b,#b8922f)">혜</div>
+      <div><div class="insight-name">이혜나 대표님</div><div class="insight-role">리드 전략가 · 오늘 96건 발언 · 전략 총괄</div></div>
+    </div>
+    <div class="insight-body">
+      274개 메시지 중 96개가 대표님 발언이었어요. 축은 두 개였습니다 — 오전엔 <b>2027년을 내다보는 섹터 흐름 수업</b>, 점심 이후엔 <b>1년의 여정을 닫으며 처음 꺼낸 본업 이야기</b>. 시세보다 구조를 말한 하루였어요.
+    </div>
+
+    <div class="key-message-box">
+      <div class="key-row">
+        <div class="key-num">1</div>
+        <div class="key-content">
+          <div class="key-title">2026년은 반도체였다면, 2027년은 전력이다</div>
+          <div class="key-desc">빅테크 자본지출 → 데이터센터 건설 → 반도체 → 건설 수주 → 그리고 그 데이터센터를 <b>돌리기 위한 전기와 석유</b>. 근거는 두 가지였어요 — 전력 운용용량이 계획 용량의 1/5 수준이라는 점, 그리고 에너지원별 리드타임에서 태양광과 ESS가 가장 짧다는 점. "이제 전력은 <b>AI 시대 필수 + 미래산업</b>으로 봐주셔야 합니다."</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">2</div>
+        <div class="key-content">
+          <div class="key-title">CPU 병목 — 미리 심어둔 관점의 회수</div>
+          <div class="key-desc">인텔 +9.05%, AMD +5.90% 소식에 대표님이 남긴 첫 문장은 예측이 아니라 <b>회수</b>였어요. "CPU 병목도 주목해야 한다고 한참 말씀드렸었는데, 반도체에 수급이 들어오기 시작하면서 CPU로 다시 집중." 같은 날 공유한 하나증권 자료도 AMD 서버 CPU 매출이 하반기 전년비 80% 이상 성장한다는 전망이었습니다.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">3</div>
+        <div class="key-content">
+          <div class="key-title">"전 고점 오른다고 설레발 금지" — 상승장에서 낸 브레이크</div>
+          <div class="key-desc">7,000선 회복 기대가 커진 아침, 대표님이 먼저 꺼낸 건 속도 조절이었어요. "3분기는 묵묵히 변동성을 이겨내고 <b>견고하게 쌓아올리는 시간</b>"이라며 "3분기 내 7,000P만 단단하게 회복하면 4분기 전망은 너무 좋아진다"고 정리했습니다. 지수가 오른 날에 나온 경고라는 점이 이 메시지의 무게예요.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">4</div>
+        <div class="key-content">
+          <div class="key-title">2차전지, ESS만이 아니라 '점유율 이동'이 본질</div>
+          <div class="key-desc">오후 포드 압박 뉴스에 이어 저녁에 대표님이 강조한 건 미국이 아니라 <b>유럽</b>이었어요. "단순 ESS 모멘텀뿐만 아니라, 유럽 시장에서 이제는 중국이 차지하던 점유율을 한국이 가져올 수밖에 없는 구조"라는 정리였고, EU 의회의 '메이드 인 유럽' 강화론 기사가 근거로 붙었습니다.</div>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-num">5</div>
+        <div class="key-content">
+          <div class="key-title">"저희의 뿌리와 본업은 재무설계입니다"</div>
+          <div class="key-desc">기초반 종료를 알리며 처음 공개한 이야기예요. 수십·수백만원짜리 강의가 즐비한 시대에 "누구나, 모두가 할 수 있는 <b>진짜 투자와 자산관리</b>를 알리고 싶었다"는 것이 아카데미를 연 이유였다고 했습니다. 그 증거로 은퇴 5년 전 고객에게 쓰는 예상 연금현금흐름표를 공개했어요 — 국민연금·퇴직연금·연금저축펀드·연금보험을 수령 방식과 세율까지 반영해 합산하는 자료입니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-quote">
+      3분기는 묵묵히 변동성을 이겨내고 견고하게 코스피 코스닥을 쌓아올리는 시간.
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#e0709a,#c14a76)">밝</div>
+      <div><div class="insight-name">밝쌤</div><div class="insight-role">프리마켓 브리핑 · 섹터 분석 · 오늘 37건 발언</div></div>
+    </div>
+    <div class="insight-body">
+      밝쌤은 오늘 두 역할을 했어요. 새벽엔 <b>하루의 인과 사슬을 한 줄로 정리한 사람</b>, 오전엔 <b>본인 통장을 열어 보여준 사람</b>이었습니다.
+    </div>
+    <ul class="insight-bullets">
+      <li class="chart"><b>"유가 → 물가 → 금리"</b> — 새벽 브리핑에서 오늘 시장의 최대 변수를 세 단어로 압축한 뒤, 곧바로 반대편 관찰을 붙였어요: <b>"지수 하락에도 반도체가 계속 강했다"</b>. 지수의 등락과 주도 업종의 흐름은 구분해서 봐야 한다는 결론이었습니다.</li>
+      <li class="money"><b>본인 적립 포트폴리오 공개</b> — 국내 ETF 5종은 매주 금요일 적립, 해외는 엔테구·반도체·나스닥 ETF를 매일 적립. 그리고 현금성 자산은 증권사 발행어음(4.75%)과 새마을금고 세제우대 예·적금으로 나눠 굴린다고 밝혔어요.</li>
+      <li class="tip"><b>"전력! 전력! 전력!"</b> — 대표님 수업 직후 구호를 외치며 밑줄을 그었어요. "중요하다고 1,000번을 말해도 부족함이 없음."</li>
+    </ul>
+    <div class="insight-quote">
+      지수의 등락과 주도 업종의 흐름은 구분해서 볼 필요가 있겠습니다.
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#4a8fe7,#2563eb)">수</div>
+      <div><div class="insight-name">오수진쌤</div><div class="insight-role">새벽 정리 · 마감 시황 · 오늘 38건 발언</div></div>
+    </div>
+    <div class="insight-body">
+      오늘 두 번째로 발언이 많았고, 새벽과 마감 양쪽을 채웠어요. 특히 <b>남들이 지나친 이상 신호를 붙잡는</b> 방식이 눈에 띄었습니다.
+    </div>
+    <ul class="insight-bullets">
+      <li class="eye"><b>"중동 리스크인데 금이 빠졌다"</b> — 공식대로면 안전자산인 금이 올라야 하는데 오히려 하락했죠. 오수진쌤은 그 이유를 <b>금리 인상 확률 상승이 안전자산 매력을 눌렀기 때문</b>으로 읽었어요. 공식이 깨진 지점을 그냥 넘기지 않은 관찰입니다.</li>
+      <li class="warn"><b>야간선물의 힌트</b> — 장 마감 직전 미군의 유조선 타격 보도로 KOSPI 야간선물 상승폭이 +2%에서 +0.6~0.8%로 축소된 점을 개장 전에 미리 짚었어요. 실제로 오늘 장중 고가에서 종가로 밀린 흐름과 이어지는 관찰이었습니다.</li>
+      <li class="chart"><b>조건을 명시한 전망</b> — <b>CPI 쇼크 + 금리 인상 + 고유가</b>가 겹치는 경우에만 단기 큰 변동성에 노출되고, "그런 경우 아니라면 종목 장세 이어질 전망"이라는 마감 코멘트였어요.</li>
+    </ul>
+    <div class="insight-quote">
+      초여름에 깨진 7,000p, 늦여름에 회복.
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#9b7ae8,#7c5ccc)">탱</div>
+      <div><div class="insight-name">탱이쌤</div><div class="insight-role">교육 콘텐츠 · 오늘 14건 발언 · 쉬운 경제 설명</div></div>
+    </div>
+    <div class="insight-body">
+      탱이쌤은 오늘도 <b>"이 종목이 아니라 이 순서"</b>를 가르쳤어요.
+    </div>
+    <ul class="insight-bullets">
+      <li class="chart"><b>750억 달러의 의미</b> — 미국 AI 데이터센터 건설비용이 사상 최대로 늘었다는 건 투자 사이클이 강해지고 있다는 뜻이고, 그건 GPU·CPU·메모리·스토리지 부족으로 이어진다는 것. 그래서 <b>"반도체 걱정은 당분간 전혀 안 하셔도 됩니다"</b>, 대신 뒤따라 오는 전력과 광통신을 미리 챙기라는 결론이었어요.</li>
+      <li class="edu"><b>코닝(GLW)으로 본 광통신</b> — "단순히 유리를 만드는 회사면 제가 체킹 안 하겠죠?"라며 계약 이력을 시간순으로 나열했어요. 26년 1월 메타 60억 달러, 5월 엔비디아, 6월 아마존. 광섬유는 "전기가 아니라 빛으로 데이터를 빠르게 많이 보내는 것"이라는 한 줄 번역도 함께였습니다.</li>
+      <li class="tip"><b>블록딜 vs 클럽딜</b> — 로보티즈 최대주주가 지분 2.5%를 1,000억원에 매각한 건을 두고 "핵심은 여러 기관에 나눈 게 아니라 <b>딱 2곳이 전부 가져갔다는 것</b>"이라고 짚었어요. 그리고 매각 자금이 로보티즈 AI 투자와 국민성장펀드 매칭 투자로 다시 들어간다는 후속까지 확인했습니다.</li>
+    </ul>
+    <div class="insight-quote">
+      아따... 마지막이라고.. 뭘 엄청씨리 주고가네요?
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-top">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,#3fae7a,#2b8b5e)">팀</div>
+      <div><div class="insight-name">문지영쌤 · 나현석썜 · 김병철쌤 · 김은지쌤 · 황유정쌤</div><div class="insight-role">세무 · 리서치 · 브리핑 · 데이터 · 실시간 서포트</div></div>
+    </div>
+    <ul class="insight-bullets">
+      <li class="money"><b>문지영쌤</b> — 오늘 세 번째로 많은 33건. 상호금융 세제우대를 이자 100만원 기준 실수령액 차이로 환산해 설명하고, 2026년부터 추가된 소득요건까지 빠짐없이 짚었어요.</li>
+      <li class="edu"><b>나현석썜</b> — 오늘의 메인 리서치. 키움증권 은행 산업분석(9/8 발간) PDF를 공유하고 ROE·PBR·예대금리차를 각각 한 문단으로 풀어준 뒤 음성 코멘트까지 붙였어요. 오전엔 한국전력 5년 61조원 투자계획으로 대표님의 전력 수업을 데이터로 뒷받침했습니다. 자세한 내용은 섹션 05에 있어요.</li>
+      <li class="news"><b>김병철쌤</b> — 미국 마감 4부작과 한국 마감 3부작(33건). 공부 포인트로 남긴 "전략적 파트너십" 설명은 오늘 삼성전자-미스트랄 AI 파트너십 뉴스와 정확히 맞물렸어요. 한경 월간지 9월호에 전력 특집이 두 개나 실렸다는 관찰도 함께였습니다.</li>
+      <li class="chart"><b>김은지쌤</b> — 글로벌 원유 4대 벤치마크(Dated Brent · Dubai FOB · WTI Cushing · ESPO)를 각각 어떤 시장의 기준가인지로 구분해 정리했어요. 저녁엔 한국경제 초판 7장을 배달했습니다.</li>
+      <li class="warn"><b>황유정쌤</b> — 개장 전 키움 한지영 자료와 Bloomberg 5대 뉴스를 배달했어요. 특히 <b>"7,000pt 저항은 개인의 대규모 매물을 외국인이 소화하는 손바뀜 구간"</b>이라는 관점을 아침에 미리 전했는데, 오늘 마감 수급이 정확히 그 모양이었습니다.</li>
+    </ul>
+  </div>
+
+</div>
+</div>
+
+<!-- 04. KEY MOVES -->
+<div class="section" id="s04">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-title">오늘의 수급 포인트</div>
+      <div class="section-subtitle">Key Moves · 기관이 받고, 외국인은 코스닥으로</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="callout green">
+    <span class="callout-icon">🎯</span>
+    오늘 수급의 한 줄 요약은 <b>"개인이 던진 2.29조원을 기관이 받아냈다"</b>입니다. 다만 여기엔 한 겹이 더 있어요 — 외국인은 코스피에서 4,272억을 팔고 코스닥에서 2,269억을 샀습니다. <b>같은 날 같은 주체가 시장을 갈라 대응했다</b>는 뜻이고, 오늘 코스닥이 코스피보다 더 오른 이유이기도 해요.
+  </div>
+
+  <div class="flow">
+    <div class="flow-h">코스피 투자주체별 순매수 <span class="tk-up">빨강 = 순매수</span> · <span class="tk-dn">파랑 = 순매도</span></div>
+    <div class="flow-group">
+      <div class="flow-row">
+        <div class="flow-name">기관</div>
+        <div class="flow-track"><div class="flow-bar buy" style="width:41%"></div></div>
+        <div class="flow-val">+9,417억</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-name">금융투자</div>
+        <div class="flow-track"><div class="flow-bar buy" style="width:32%"></div></div>
+        <div class="flow-val">+7,342억</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-name">투신</div>
+        <div class="flow-track"><div class="flow-bar buy" style="width:8%"></div></div>
+        <div class="flow-val">+1,705억</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-name">연기금</div>
+        <div class="flow-track"><div class="flow-bar sell" style="width:2%"></div></div>
+        <div class="flow-val">−411억</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-name">외국인</div>
+        <div class="flow-track"><div class="flow-bar sell" style="width:19%"></div></div>
+        <div class="flow-val">−4,272억</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-name">개인</div>
+        <div class="flow-track"><div class="flow-bar sell" style="width:100%"></div></div>
+        <div class="flow-val">−2조2,875억</div>
+      </div>
+    </div>
+    <div class="flow-note">9월 9일 KRX 증시 Brief 현물 기준(잠정) · 코스닥은 외국인 +2,269억 · 기관 −198억 · 개인 −2,145억. 순매수=빨강, 순매도=파랑, 국내 관례 표기예요.</div>
+  </div>
+
+  <div class="callout gold">
+    <span class="callout-icon">🔍</span>
+    기관 매수 9,417억 중 <b>7,342억이 금융투자</b>였다는 점은 따로 봐야 해요. 내일이 선물·옵션 동시만기라서 이 매수의 상당 부분은 방향성 베팅이 아니라 <b>만기 대응 성격</b>일 수 있습니다. 실제로 프로그램 매매를 뜯어보면 차익은 +265억인데 비차익은 −3,486억이었어요. 코스피200 선물에서 기관이 −6,303억, 외국인이 +7,172억으로 현물과 정반대였던 것도 같은 맥락입니다. <b>오늘 매수 주체가 내일도 같은 방향일 거라고 단정하기 어려운 이유</b>예요.
+  </div>
+
+  <div class="itabs">
+    <div class="itab-bar" role="tablist">
+      <button class="itab-btn" type="button" data-tab="km1">오늘 오른 자리</button>
+      <button class="itab-btn" type="button" data-tab="km2">기관이 담은 종목</button>
+      <button class="itab-btn" type="button" data-tab="km3">경계 신호</button>
+    </div>
+    <div class="itab-panel" data-tab="km1">
+      <div class="sector-grid">
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">🔋</div>
+            <div><div class="sector-name">2차전지</div><div class="sector-name-sub">美 포드 압박 → K배터리 LFP 반사이익</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>LG에너지솔루션 +6.46%</span>
+            <span>에코프로비엠 +9.64%</span>
+            <span>에코프로 +7.03%</span>
+            <span>롯데에너지머티리얼즈 +14.11%</span>
+          </div>
+          <div class="sector-note">
+            미 교통부가 포드에 CATL·지리·BYD와의 관계 단절을 요구하면서, 미국 내 LFP 조달에서 중국 기술 경로가 막힐 경우 대체 공급자가 한국 3사로 좁혀진다는 논리가 작동했어요. 대표님은 여기에 유럽 축을 더했습니다 — EU 의회에서도 '메이드 인 유럽' 강화론이 나오면서 <b>미국과 유럽 양쪽에서 동시에 빗장이 걸리는 구조</b>라는 것. 다만 지엘리서치는 포드의 EV 수요 부진을 감안하면 물량 전이가 <b>EV보다 ESS 라인에서 먼저</b> 확인될 가능성이 높다고 봤어요.
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">💾</div>
+            <div><div class="sector-name">반도체·소부장</div><div class="sector-name-sub">아스트라 발 AI 수요 재확산</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>SK하이닉스 +3.51%</span>
+            <span>심텍 +8.87%</span>
+            <span>주성엔지니어링 +6.12%</span>
+            <span>삼성전기 +2.48%</span>
+            <span>삼성전자 0.00%</span>
+          </div>
+          <div class="sector-note">
+            오픈AI 아스트라 공개 이후 추론용 서버 수요가 커진다는 해석이 재료였어요. 한국거래소 집계로 9월 3~9일 <b>외국인 순매수 1위가 SK하이닉스</b>(2조4,653억), 2위가 삼성전자(1조5,639억)였습니다 — 오늘 하루는 코스피에서 순매도였지만, 일주일 누적으로는 반도체를 집중적으로 담고 있었어요.
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">⚡</div>
+            <div><div class="sector-name">전력·광통신</div><div class="sector-name-sub">오늘 커뮤니티가 가장 많이 얘기한 테마</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>RF머트리얼즈 +22.61%</span>
+            <span>가온전선 +16.7%</span>
+            <span>우리기술 +12.81%</span>
+            <span>대한광통신 +9.20%</span>
+            <span>LS일렉트릭 +5.49%</span>
+          </div>
+          <div class="sector-note">
+            대표님과 탱이쌤이 오전 내내 강조한 테마가 그날 장에서 바로 확인된 드문 경우예요. 배경엔 한국전력의 5년 61조원 투자계획(송변전 33조·배전 22조)과 미국 데이터센터 건설비 750억 달러가 있습니다. 다만 <b>오늘 오른 것과 2027년에 이익이 나는 것은 다른 문제</b>라는 점은 함께 기억해 두세요.
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">🧪</div>
+            <div><div class="sector-name">화학·정유</div><div class="sector-name-sub">업종 전체 +3.6%로 오늘 1위</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>롯데케미칼 +18.12%</span>
+            <span>대한유화 +14.11%</span>
+            <span>SK이노베이션 +11.23%</span>
+            <span>LG화학 +5.56%</span>
+          </div>
+          <div class="sector-note">
+            유가 급등이 지수에는 악재였지만 정유·화학에는 정반대로 작동했어요. 롯데케미칼은 5월 말 대비 50%가량 하락했다가 <b>하루 만에 18% 반등</b>했습니다 — 같은 뉴스가 업종에 따라 얼마나 다르게 작동하는지 보여준 사례예요.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="itab-panel" data-tab="km2">
+      <div class="sector-grid">
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">🏛</div>
+            <div><div class="sector-name">코스피 · 기관 순매수 상위</div><div class="sector-name-sub">투신 / 연기금 / 사모펀드</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>투신: SK하이닉스 1,174억</span>
+            <span>투신: KODEX 200 891억</span>
+            <span>연기금: 삼성SDI 189억</span>
+            <span>연기금: 한국전력 145억</span>
+            <span>사모: 삼성전자 361억</span>
+          </div>
+          <div class="sector-note">
+            주체별로 성향이 갈렸어요. 투신은 SK하이닉스와 KODEX 200으로 <b>지수와 반도체를 함께</b> 담았고, 연기금은 삼성SDI·한국전력·HD현대중공업 같은 <b>정책·인프라 축</b>을 담았습니다. 연기금 순매수 2위가 한국전력이었다는 점은 오늘 커뮤니티의 전력 논의와 겹쳐 읽을 만해요.
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">🔬</div>
+            <div><div class="sector-name">코스닥 · 기관 순매수 상위</div><div class="sector-name-sub">소부장에 집중</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>투신: 유진테크 183억</span>
+            <span>투신: 심텍 71억</span>
+            <span>연기금: 심텍 48억</span>
+            <span>사모: 로보티즈 249억</span>
+            <span>사모: 지엔씨에너지 111억</span>
+          </div>
+          <div class="sector-note">
+            코스닥 쪽은 세 주체 모두 <b>반도체 소부장</b>으로 수렴했어요. 심텍은 투신·연기금·사모 상위에 동시에 이름을 올렸습니다. 눈에 띄는 건 사모펀드 1위 로보티즈(249억) — 오전에 탱이쌤이 다룬 1,000억 블록딜을 두 곳이 나눠 가져간 그 건과 시점이 맞물려요. 사모 2위 지엔씨에너지(111억)는 비상발전기 업체로, 여기서도 <b>데이터센터 전력</b>이라는 축이 다시 나타납니다.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="itab-panel" data-tab="km3">
+      <div class="sector-grid">
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">📉</div>
+            <div><div class="sector-name">지수는 올랐는데 하락 종목이 더 많았다</div><div class="sector-name-sub">주도주 장세의 다른 얼굴</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>카프로 −20.54%</span>
+            <span>골드앤에스 −24.96%</span>
+            <span>수성웹툰 −22.24%</span>
+            <span>삼성물산 −1.57%</span>
+          </div>
+          <div class="sector-note">
+            오수진쌤이 마감 시황에서 짚은 대목이에요. 양 시장 모두 지수가 올랐는데 하락 종목 수가 더 많았고, 그 원인으로 유가와 금리를 지목했습니다. <b>지수 상승이 곧 내 계좌의 상승이 아닐 수 있다</b>는 뜻이고, 오늘 같은 날일수록 보유 종목이 주도 테마 안에 있는지 밖에 있는지를 확인해야 해요.
+          </div>
+        </div>
+        <div class="sector-card">
+          <div class="sector-head">
+            <div class="sector-icon">🛢</div>
+            <div><div class="sector-name">유가 → 물가 → 금리 루프</div><div class="sector-name-sub">오늘 상승의 전제를 흔들 변수</div></div>
+          </div>
+          <div class="sector-stocks">
+            <span>WTI $94.27</span>
+            <span>Brent 장중 $100 돌파</span>
+            <span>US 10Y 4.790%</span>
+            <span>구리 사상 최고</span>
+          </div>
+          <div class="sector-note">
+            사우디 에너지 시설 피격, 이란 하르그섬 인근 타격, 호르무즈에서 홍해로의 전선 확대 가능성까지 겹쳤어요. 국제 투자은행들은 4분기 유가 전망치를 배럴당 최고 150달러까지 올려 잡았습니다. 유가가 오르면 물가가 자극되고, <b>물가가 오르면 금리 인상 압력이 커지는</b> 구조라 내일 PPI와 모레 CPI가 판정 자리예요.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 05. KEY READING -->
+<div class="section" id="s05">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-title">오늘 읽어둘 리포트</div>
+      <div class="section-subtitle">Key Reading · 나현석썜·밝쌤·문지영쌤이 남긴 자료</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="callout blue">
+    <span class="callout-icon">📚</span>
+    오늘은 시황보다 <b>교육</b>이 많았던 하루예요. 은행주 밸류에이션, 발행어음, 상호금융 세제우대 — 모두 "무엇을 살까"가 아니라 <b>"내 돈이 어디에 놓여 있어야 하는가"</b>를 다룹니다.
+  </div>
+
+  <div class="edu-card" style="--spine:var(--gold)">
+    <div class="edu-tag gold">🏦 오늘의 메인</div>
+    <div class="edu-title">키움증권 은행 산업분석 — "ROE 상승이 PBR 상승으로"</div>
+    <div class="edu-body">
+      나현석썜이 공유한 김은갑 애널리스트 리포트입니다. 한국이 금리 인상 사이클에 있다는 전제에서, 은행주가 왜 수혜주로 꼽히는지를 숫자로 설명해요. <span class="mono">9/8 발간 · 9/9 공유</span>
+
+      <div class="edu-box formula">
+        <b>📊 리포트의 핵심 숫자</b><br><br>
+        · 상반기 은행 순이익 증가율: 연초 전망 <b>9.6%</b> → 실적 발표 후 <b>13%</b>로 상향<br>
+        · 증가의 출처: 은행 자회사는 오히려 −1%, <b>증권 자회사 +120% · 캐피탈 +30%</b><br>
+        · 예대금리차: 2025년 5월 저점 2.19% → <b>2026년 6월 2.27%</b>로 반등<br>
+        · 업종 평균: ROE <b>9.2%</b> · PBR <b>0.74배</b><br>
+        · 투자의견 <b>비중확대(Overweight)</b> 유지 · 8개 종목 전 종목 매수
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 이 리포트의 진짜 논점</b><br><br>
+        표면적으로는 "은행주가 싸다"는 이야기지만, 실제 논점은 <b>이익이 어디서 늘었는가</b>예요. 은행 본업이 아니라 15년간 자본을 집중해 온 증권·캐피탈 자회사에서 늘었습니다. 여기에 이제야 예대금리차 반등이 얹히는 순서라, <b>본업 개선은 아직 반영되기 전</b>이라는 게 이 리포트의 시간 축이에요.<br><br>
+        근거는 일본 은행주입니다. 주주환원율 50% 이상 · ROE 11~12%를 배경으로 PBR이 1배를 훌쩍 넘었는데, 그 구간에서는 <b>주주환원율보다 ROE 상승이 결정적</b>이었다는 관찰이에요.
+      </div>
+
+      <details class="acc">
+        <summary class="acc-head">용어 먼저 — ROE · PBR · 예대금리차 (나현석썜 정리)</summary>
+        <div class="acc-body">
+          <div class="edu-box example">
+            <b>ROE(자기자본이익률)</b> — 주주들이 넣은 자기자본으로 얼마나 효율적으로 이익을 냈는지. ROE 10%면 자기자본 100원으로 1년에 10원을 벌었다는 뜻이에요. 은행처럼 자본을 두껍게 깔고 영업하는 업종에서 특히 중요합니다.<br><br>
+            <b>PBR(주가순자산비율)</b> — 지금 주가가 회사 순자산(장부가치) 대비 몇 배인가. 1배면 "주가 = 순자산", 1배보다 낮으면 회사를 통째로 청산했을 때 받을 돈보다 주가가 싸다는 뜻이라 저평가 신호로 자주 언급돼요. 현재 은행 업종 평균은 0.74배입니다.<br><br>
+            <b>예대금리차</b> — 대출금리와 예금금리의 차이. 은행의 기본 수익원(이자이익)이라, 이 차이가 벌어지면 실적에 긍정적으로 작용해요.<br><br>
+            <b>연결하면</b>: 이익이 늘어 ROE가 오르고 → 일본 선례처럼 ROE 상승이 PBR 상승으로 이어지며 → 0.74배라는 저평가가 해소된다, 는 것이 리포트의 논리 사슬입니다.
+          </div>
+        </div>
+      </details>
+
+      <div class="edu-box warning">
+        <b>⚠️ 함께 볼 반대편</b><br><br>
+        은행주는 금리 방향에 정면으로 노출된 업종이에요. 오늘처럼 <b>금리 인상 압력이 커지는 국면</b>에서는 유리하지만, 반대로 인하 기대가 커지면 같은 논리가 그대로 뒤집힙니다. 리포트가 전제한 "금리 인상 사이클"이 유지되는지가 이 논리의 생명선이고, 그 판정 재료가 바로 이번 주 PPI·CPI와 다음 주 FOMC예요. <b>결론을 외우지 말고 전제를 확인해야 하는</b> 대표적인 사례입니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="edu-card" style="--spine:var(--purple)">
+    <div class="edu-tag purple">💰 오늘의 경제 교실 ①</div>
+    <div class="edu-title">발행어음이 뭔가요? — 은행보다 금리가 높은 이유</div>
+    <div class="edu-body">
+      밝쌤이 본인의 현금성 자산 운용법을 공개하면서 나온 설명이에요. "적금 대신 증권사 발행어음 4.75% 이율 활용"이라는 한 줄에서 시작됐습니다.
+
+      <div class="edu-box example">
+        <b>📖 발행어음이란?</b><br><br>
+        <b>증권사가 자기 신용으로 직접 발행하는 단기 금융상품</b>이에요. 은행 정기예금과 비슷하지만, 돈을 빌리는 주체가 은행이 아니라 증권사라는 점이 다릅니다. 밝쌤 표현대로 "어음 = 약속"으로 바꿔 읽으면 이해가 쉬워요.<br><br>
+        · <b>확정금리</b> — 가입할 때 금리가 확정되고, 약속한 이자가 지급됩니다<br>
+        · <b>짧은 만기</b> — 1개월·3개월·6개월·1년 등 단기 운용에 적합<br>
+        · <b>수시형도 있음</b> — 파킹통장처럼 언제든 넣고 뺄 수 있어요(밝쌤이 이걸 '현금성 자산'이라 부른 이유)
+      </div>
+
+      <div class="edu-box warning">
+        <b>⚠️ 금리가 높은 만큼 알아야 할 것</b><br><br>
+        요즘 은행 기본금리는 우대금리를 받아야 겨우 3% 될까 말까인데, 증권사 적립식 발행어음은 4.35%(수시형은 4.75%) 수준입니다. 왜 더 높을까요? <b>발행어음은 예금자보호법 적용 대상이 아니기 때문</b>이에요. 은행 예금은 1인당 1억원까지 국가가 보호하지만, 발행어음은 <b>증권사 자체 신용</b>으로 보증합니다.<br><br>
+        다만 그래서 아무 증권사나 발행할 수 있는 것도 아니에요. 자기자본 4조원 이상 대형 IB(한투·미래·KB·NH 등)만 발행할 수 있도록 법으로 제한돼 있습니다. 밝쌤 정리: "예금자보호 대상은 아니지만, 대형 증권사가 자체 신용으로 발행하는 약속이기 때문에 <b>신용도가 높은 금융상품</b>으로 보셔도 됩니다."
+      </div>
+
+      <b>참고로 오늘 한국경제 A18면</b>에는 삼성증권이 신청 9년 만에 발행어음 사업 인가를 받았다는 기사가 실렸어요. 시장 잔액도 2020년 말 15.6조원에서 올해 6월 55.3조원으로 5년 반 만에 3.5배 늘었습니다.
+    </div>
+  </div>
+
+  <div class="edu-card" style="--spine:var(--green)">
+    <div class="edu-tag green">🧾 오늘의 경제 교실 ②</div>
+    <div class="edu-title">상호금융 세제우대 — 이자소득세 15.4%를 1.4%로</div>
+    <div class="edu-body">
+      밝쌤이 "현금성 자산 일부는 새마을금고 세제우대로 굴린다"고 하자, 문지영쌤이 그 제도를 이어받아 설명했어요.
+
+      <div class="edu-box formula">
+        <b>🧮 세금만 놓고 비교하면</b><br><br>
+        이자 100만원을 받았을 때 —<br>
+        · 일반과세(15.4%): 세금 <b>약 15만 4천원</b> · 실수령 84만 6천원<br>
+        · 세금우대(1.4%): 세금 <b>약 1만 4천원</b> · 실수령 98만 6천원<br>
+        · 차이: <b>약 14만원</b><br><br>
+        세금우대는 이자소득세 14%가 면제되고 농어촌특별세 1.4%만 부담하는 구조예요.
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 한도는 '기관별'이 아니라 '전체 합산'</b><br><br>
+        여기가 가장 많이 헷갈리는 대목이에요. 새마을금고에서 3,000만원, 신협에서 또 3,000만원씩 <b>각각 받는 게 아닙니다.</b> 상호금융기관을 <b>전부 합쳐서 1인당 3,000만원</b>이 한도예요. 이용 방법은 해당 기관에서 조합원·회원 자격을 갖춘 뒤 세제우대 예·적금으로 가입하는 것입니다.
+      </div>
+
+      <div class="edu-box warning">
+        <b>⚠️ 2026년부터 소득요건이 붙었어요</b><br><br>
+        · 직전연도 총급여 <b>7,000만원 이하</b> 또는 종합소득금액 <b>6,000만원 이하</b><br>
+        · 이 조건을 충족하면 2028년 12월 31일까지 가입 시 1.4% 세율 적용<br>
+        · 가입 직전 3개 과세기간 중 한 번이라도 <b>금융소득종합과세 대상자였다면 제외</b><br><br>
+        문지영쌤의 마무리: "이미 이용 중이시라면 그냥 일반과세로 두지 마시고, <b>내가 세금우대 대상인지, 남은 한도가 얼마인지</b> 꼭 한 번 확인해 보세요."
+      </div>
+    </div>
+  </div>
+
+  <div class="edu-card" style="--spine:var(--dn)">
+    <div class="edu-tag blue">🔦 배경 자료</div>
+    <div class="edu-title">지엘리서치 — "이번 건의 실질 쟁점은 관세가 아니라 기술 라이선스 구조"</div>
+    <div class="edu-body">
+      오늘 2차전지를 움직인 뉴스를 대표님이 리서치 코멘트와 함께 공유했어요. 뉴스는 "미국이 포드를 압박했다"인데, 리서치가 짚은 건 <b>압박의 성격</b>이었습니다.
+
+      <div class="edu-box example">
+        <b>📖 무슨 일이 있었나</b><br><br>
+        · 숀 더피 미 교통장관이 짐 팔리 포드 CEO에게 CATL·지리·BYD와의 관계 단절을 촉구하는 서한 발송<br>
+        · 핵심 쟁점은 국방부 블랙리스트에 오른 <b>CATL의 라이선스 기술을 쓰는 미시간 마셜 공장</b><br>
+        · <b>※ 이 서한은 법적 구속력이 없는 압박 단계</b> — 실제 제재·규제 전환 여부는 아직 미확정
+      </div>
+
+      <div class="edu-box tip">
+        <b>💡 리서치가 짚은 진짜 쟁점</b><br><br>
+        "미국 내 생산이라도 중국 기술을 쓰면 적격성을 잃는 방향으로 기준이 이동하면, <b>포드의 LFP 원가 우위는 떨어질 것</b>" — 관세는 물건이 국경을 넘을 때 붙지만, 기술 라이선스 규제는 <b>미국 안에서 만들어도 걸립니다</b>. 그래서 "미국에 공장을 지었으니 괜찮다"는 방어가 통하지 않는 구조예요.<br><br>
+        수혜 순서도 나눠 봤어요. <b>1차는 미국 현지 LFP 양산 능력을 가진 한국 셀 3사</b>, <b>2차는 LFP 양극재·전해질 업체</b>입니다.
+      </div>
+
+      <b>대표님이 저녁에 덧붙인 한 축</b>: AI 데이터센터 전력 수요 증가 → 재생에너지 변동성 보완 → ESS 수요 확대 → LFP 양극재 수요. <b>아침에 말한 '전력'과 오후의 '2차전지'가 결국 같은 사슬</b>이었다는 정리입니다.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 06. ACTION PLAN -->
+<div class="section" id="s06">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-title">오늘 우리가 할 일</div>
+      <div class="section-subtitle">Action Plan · 프로미 체크리스트</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="callout gold">
+    <span class="callout-icon">🎯</span>
+    오늘 핵심 원칙: "7,000을 되찾은 날일수록, <b>되찾은 이유가 유지되는지</b> 확인하자." 대표님이 지수가 오른 아침에 굳이 "전 고점 오른다고 설레발 금지"를 먼저 꺼낸 이유가 여기 있어요. 오늘의 상승은 <b>확인된 실적</b>이 아니라 아직 <b>기대</b>이고, 그 기대의 반대편에는 유가 100달러와 금리 4.79%가 있습니다.
+  </div>
+
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>내 적금 금리와 발행어음·세제우대를 비교해 보기</b> — 밝쌤과 문지영쌤이 오늘 같은 자리에서 준 숙제예요. 지금 굴리고 있는 현금성 자산의 세후 수익률을 한 번만 계산해 보면 됩니다</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>상호금융 세제우대 남은 한도 확인하기</b> — 기관별이 아니라 전체 합산 3,000만원. 2026년부터 총급여 7,000만원 이하 소득요건이 붙었다는 점까지 함께 확인해 보세요</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>'전력'을 종목이 아니라 순서로 정리해 두기</b> — 대표님이 오늘 알려준 건 종목이 아니라 자본지출 → 데이터센터 → 반도체 → 건설 → 전력·에너지라는 순서였어요. 내 관심 종목이 이 사슬의 어느 칸에 있는지 적어두기</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>은행주 리포트의 '전제'에 밑줄 긋기</b> — 결론은 비중확대지만 전제는 "금리 인상 사이클"이에요. 이번 주 PPI·CPI가 그 전제를 검증하는 자리라는 것까지 묶어서 기억해 두세요</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon do">✓</div>
+      <div><b>내 노후 준비를 '입구'와 '출구'로 나눠 보기</b> — 대표님이 공개한 은퇴설계 구분법. 20~40대는 은퇴자산을 모으는 입구전략, 50~70대는 모은 자산을 연금 현금흐름으로 바꾸는 출구전략. 나는 지금 어느 쪽인가요?</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>브렌트유 100달러 유지 여부</b> — 오늘 장중 돌파했습니다. 여기서 굳어지면 내일 PPI와 모레 CPI에 그대로 반영될 가능성이 커져요</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon watch">👁</div>
+      <div><b>내일 동시만기 이후의 수급</b> — 오늘 기관 매수 9,417억 중 7,342억이 금융투자였어요. 만기 대응 성격이 얼마나 섞였는지는 만기 다음 날 수급에서 드러납니다</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>오늘 급등 테마 추격매수 금지</b> — 2차전지를 움직인 서한은 <b>법적 구속력이 없는 압박 단계</b>이고, 실제 제재 전환 여부는 미확정이에요. 리서치가 굳이 이 단서를 단 이유를 먼저 읽어야 합니다</div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon dont">✕</div>
+      <div><b>"지수가 올랐으니 다 올랐겠지"로 넘기지 않기</b> — 오늘 양 시장 모두 지수는 올랐는데 하락 종목 수가 더 많았어요. 내 계좌를 지수 대신 종목별로 확인해 볼 날입니다</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 07. TOMORROW -->
+<div class="section" id="s07">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-title">다음 주 체크포인트</div>
+      <div class="section-subtitle">Watchlist · 내일부터 10월까지</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="watch-card">
+    <div class="key-row">
+      <div class="key-num" style="background:var(--red-bg);color:var(--red)">🇺🇸</div>
+      <div class="key-content">
+        <div class="key-title">9/10(목) — 미국 8월 생산자물가(PPI)</div>
+        <div class="key-desc">유가가 물가를 밀어 올렸는지 확인하는 첫 번째 자리예요. PPI는 소비자물가보다 앞단의 가격이라 <b>CPI의 선행 힌트</b>로 읽힙니다. 오늘 상승의 전제가 처음 시험대에 오르는 날이에요.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--gold-bg);color:var(--gold)">📊</div>
+      <div class="key-content">
+        <div class="key-title">9/10(목) — 국내 선물·옵션 동시만기</div>
+        <div class="key-desc">오늘 기관 순매수 9,417억 중 <b>7,342억이 금융투자</b>였고, 코스피200 선물에서는 기관이 −6,303억으로 현물과 정반대였어요. 프로그램 비차익도 −3,486억. 만기를 지나며 이 포지션이 어떻게 정리되는지가 다음 주 수급의 출발점입니다.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--purple-bg);color:var(--purple)">🔥</div>
+      <div class="key-content">
+        <div class="key-title">9/11(금) — 미국 8월 소비자물가(CPI)</div>
+        <div class="key-desc">이번 주의 본선이에요. 오수진쌤이 마감 시황에서 경계 조건으로 제시한 조합이 <b>"CPI 쇼크 + 금리 인상 + 고유가"</b>였는데, 그 첫 항목이 여기서 판정됩니다. 이 조건이 아니라면 종목 장세가 이어질 전망이라는 게 오늘 커뮤니티의 기본 시나리오였어요.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--green-bg);color:var(--green)">🏛</div>
+      <div class="key-content">
+        <div class="key-title">9/16(수) — 연준 FOMC 결과 · 미 소매판매</div>
+        <div class="key-desc">시장은 9월 25bp <b>인상</b> 가능성을 60% 안팎으로 반영하고 있어요(9/8 기준). 은행주 비중확대 논리의 전제이기도 하고, 반대로 유가·금리 부담을 키우는 요인이기도 합니다. 같은 날 발표되는 소매판매는 소비 체력을 보여주는 재료예요.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--blue-bg);color:var(--blue)">🔋</div>
+      <div class="key-content">
+        <div class="key-title">9월 16일 — EU 집행위, 캐나다와의 협력 계획 발표 예정</div>
+        <div class="key-desc">폰데어라이엔 EU 집행위원장이 이달 16일 국방·우주개발·과학연구를 포함한 대(對)캐나다 협력 계획을 발표할 것으로 예상됩니다. 오늘 저녁 대표님이 짚은 <b>EU의 '메이드 인 유럽' 강화론</b>과 함께 볼 대목이에요 — 유럽의 공급망 재편이 K배터리 점유율 이동으로 이어지는지가 관건입니다.</div>
+      </div>
+    </div>
+    <div class="key-row">
+      <div class="key-num" style="background:var(--gold-bg);color:var(--gold)">🇰🇷</div>
+      <div class="key-content">
+        <div class="key-title">10/22(목) — 한국은행 금융통화위원회 기준금리 결정</div>
+        <div class="key-desc">국내 금리 사이클의 판정 자리예요. 은행주 ROE·PBR 논리, 원화 강세 흐름, 그리고 한국전력의 61조원 투자계획 조달 비용까지 여기에 연결됩니다. 조금 멀지만 오늘 나온 여러 논의가 모이는 지점이라 달력에 표시해 둘 만해요.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 08. QUIZ -->
+<div class="section" id="s08">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div>
+      <div class="section-title">오늘의 복습 퀴즈</div>
+      <div class="section-subtitle">Review Quiz · 리포트를 닫기 전 다섯 문제</div>
+    </div>
+  </div>
+<div class="section-body">
+
+  <div class="callout blue">
+    <span class="callout-icon">📝</span>
+    정답을 맞히는 게 목적이 아니에요. 오늘 리포트의 <b>논리 연결</b>이 머릿속에 남았는지 확인하는 다섯 문제입니다. 틀린 문항이 있다면 해설에 적힌 섹션으로 돌아가 그 대목만 다시 읽어보세요.
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-kicker">Q1 · 성격 구분 (섹션 01)</div>
+    <div class="quiz-q">뉴욕 3대 지수가 모두 하락한 다음 날 코스피가 +1.40% 올랐습니다. 이 괴리를 만든 결정적 관찰은?</div>
+    <button class="quiz-opt" type="button">① 원·달러 환율이 6일 연속 하락하며 원화가 강세를 보였다</button>
+    <button class="quiz-opt" type="button">② 미국에서 다우가 −1.18%로 낙폭이 가장 컸고 나스닥은 −0.31%로 선방했다</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ 지수는 밀렸지만 필라델피아 반도체지수만 +1.30%로 4거래일 연속 올랐다</button>
+    <button class="quiz-opt" type="button">④ 미 재무부가 장기국채 바이백 규모를 두 배 이상으로 늘리기로 했다</button>
+    <div class="quiz-exp">정답은 ③. ①·②·④ 모두 사실이고 ①은 지수에 우호적으로 작동하기도 했지만, 국내 시장이 뉴욕과 정반대로 움직인 <b>직접적인 연결고리</b>는 반도체 업종의 차별화였어요(섹션 01·03).</div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-kicker">Q2 · 데이터 해석 (섹션 04)</div>
+    <div class="quiz-q">오늘 기관은 코스피에서 9,417억을 순매수했습니다. 이 숫자를 가장 신중하게 읽은 문장은?</div>
+    <button class="quiz-opt" type="button">① 기관이 대규모로 샀으니 상승 추세가 확정됐다고 볼 수 있다</button>
+    <button class="quiz-opt" type="button">② 연기금이 −411억으로 순매도했으므로 기관 매수는 의미가 없다</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ 매수의 78%가 금융투자였고 내일이 동시만기라, 방향성 매수와 만기 대응이 섞였을 수 있다</button>
+    <button class="quiz-opt" type="button">④ 외국인이 코스피에서 순매도했으므로 기관 매수는 외국인 물량을 받은 것이다</button>
+    <div class="quiz-exp">정답은 ③. 같은 9,417억도 <b>누가, 왜 샀는지</b>에 따라 무게가 달라져요. 코스피200 선물에서 기관이 −6,303억으로 현물과 정반대였고 프로그램 비차익이 −3,486억이었다는 점이 그 단서입니다. ④는 사실이지만 규모(외국인 −4,272억)로 보면 기관이 받아낸 물량의 주력은 개인(−2.29조)이었어요(섹션 04).</div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-kicker">Q3 · 구조 이해 (섹션 05)</div>
+    <div class="quiz-q">지엘리서치는 포드 건의 실질 쟁점이 "관세가 아니라 기술 라이선스 구조"라고 했습니다. 이 구분이 중요한 이유는?</div>
+    <button class="quiz-opt" type="button">① 관세는 세율이 낮지만 기술 규제는 과징금이 훨씬 크기 때문</button>
+    <button class="quiz-opt" type="button" data-ok="1">② 관세는 국경을 넘을 때 붙지만, 기술 라이선스 규제는 미국 안에서 생산해도 적격성을 잃게 만들기 때문</button>
+    <button class="quiz-opt" type="button">③ 관세는 대통령이 정하지만 기술 규제는 의회가 정해서 되돌리기 어렵기 때문</button>
+    <button class="quiz-opt" type="button">④ 포드가 이미 관세를 모두 납부해서 추가 부담이 없기 때문</button>
+    <div class="quiz-exp">정답은 ②. 기준이 <b>기술의 출처</b>로 이동하면 "미국에 공장이 있다"는 방어가 통하지 않아요. 그래서 CATL 기술 경로가 막힐 때 대체 공급자가 한국 3사로 좁혀진다는 논리가 성립합니다. ③은 사실관계가 달라요 — 오늘 서한은 <b>법적 구속력이 없는 압박 단계</b>입니다(섹션 05).</div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-kicker">Q4 · 근거 소거 (섹션 05)</div>
+    <div class="quiz-q">키움증권 리포트에서 상반기 은행주 이익 증가율이 9.6%에서 13%로 상향된 주된 이유는?</div>
+    <button class="quiz-opt" type="button">① 예대금리차가 2.19%에서 2.27%로 반등하며 이자이익이 늘었다</button>
+    <button class="quiz-opt" type="button">② 금리 인상으로 은행 본업의 대출 마진이 크게 개선됐다</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ 은행 자회사는 오히려 −1%였고, 증권(+120%)·캐피탈(+30%) 자회사가 증가를 견인했다</button>
+    <button class="quiz-opt" type="button">④ 주주환원율을 50% 이상으로 높이며 주당순이익이 늘었다</button>
+    <div class="quiz-exp">정답은 ③. ①은 사실이지만 <b>앞으로의</b> 개선 요인이지 상반기 실적을 끌어올린 원인이 아니에요 — 리포트는 본업 개선이 "추가로 기대된다"고 썼습니다. ②는 그 ①의 다른 표현이고, ④는 일본 사례에서 나온 이야기예요. 이익이 어디서 늘었는지를 정확히 보면, 이 리포트가 <b>15년간의 자회사 전략이 결실을 맺은 결과</b>를 말하고 있다는 게 보입니다(섹션 05).</div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-kicker">Q5 · 의미 파악 (섹션 03·07)</div>
+    <div class="quiz-q">이혜나 대표님은 오늘 "2027년 대표 키워드는 전력"이라고 했습니다. 이 주장의 핵심 근거는?</div>
+    <button class="quiz-opt" type="button">① 한국전력이 향후 5년간 61조원을 투자하기로 했기 때문</button>
+    <button class="quiz-opt" type="button">② 미국 AI 데이터센터 건설비용이 750억 달러로 사상 최대를 기록했기 때문</button>
+    <button class="quiz-opt" type="button" data-ok="1">③ 데이터센터가 다 지어져도 결국 전기가 있어야 돌아가는데, 현재 운용용량이 계획 용량의 1/5 수준이기 때문</button>
+    <button class="quiz-opt" type="button">④ 오늘 전력·광통신 관련주가 일제히 급등했기 때문</button>
+    <div class="quiz-exp">정답은 ③. ①·②는 이 주장을 뒷받침하는 <b>보조 데이터</b>이고(각각 나현석썜과 탱이쌤이 같은 날 공유했어요), ④는 근거가 아니라 결과예요 — 오늘 오른 것과 2027년에 이익이 나는 것은 다른 문제입니다. 대표님이 실제로 제시한 건 수요는 이미 예정돼 있는데 <b>공급이 그 20% 수준</b>에 머물러 있다는 구조적 격차였고, 여기에 에너지원별 리드타임에서 태양광·ESS가 가장 짧다는 관찰이 이어졌습니다(섹션 03·04).</div>
+  </div>
+
+  <div class="callout gold">
+    <span class="callout-icon">🌱</span>
+    다섯 문제 중 헷갈린 게 있었다면, 그 문항의 해설에 적힌 섹션으로 돌아가 그 대목만 다시 읽어보세요. 오늘 리포트를 관통하는 문장은 이거예요 — <b>지수가 오른 이유와 내 종목이 오른 이유는 다를 수 있다</b>. 그리고 오늘처럼 좋은 날일수록 그 구분이 더 필요합니다.
+  </div>
+
+</div>
+</div>
+
+<!-- DAILY QUOTE -->
+<div class="daily-quote">
+  <blockquote>"전 고점 오른다고 설레발 금지.<br>3분기는 묵묵히 변동성을 이겨내고<br>견고하게 코스피 코스닥을 쌓아올리는 시간."</blockquote>
+  <cite>— 이혜나 대표님, 2026년 9월 9일 오전 7시 51분</cite>
+</div>
+
+</div>
+
+<div class="report-footer">
+  <div class="logo serif">From Us</div>
+  <p>프롬어스 Daily Report · 2026.09.09 (수)</p>
+  <p style="margin-top:8px">카카오톡 대화 분석 기반 · 프로미를 위한 일일 리포트</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--ink-4)">본 리포트는 프롬어스 내부 대화를 분석하여 생성되었으며, 투자 권유가 아닙니다.</p>
+</div>
+
+
+</main></div>
+
+<script>
+
+(()=>{'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+document.documentElement.classList.add('enhanced');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 저장 키: masthead time[datetime] → 없으면 title 태그 날짜 → 없으면 'issue' (리포트별 분리) */
+const issueTime=$('.masthead time[datetime]');const issueKey=(issueTime&&issueTime.getAttribute('datetime'))||((document.title.match(/20\d{2}[.\-]\d{1,2}[.\-]\d{1,2}/)||['issue'])[0].replace(/\./g,'-'));const storePrefix='fromus-v3-'+issueKey+'-';
+const store={get(k,f){try{return JSON.parse(localStorage.getItem(storePrefix+k))??f}catch{return f}},set(k,v){try{localStorage.setItem(storePrefix+k,JSON.stringify(v));return true}catch{return false}}};
+const notice=document.createElement('div');notice.className='live-status';notice.setAttribute('role','status');document.body.append(notice);let noticeTimer;
+function announce(s){notice.textContent=s;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>notice.textContent='',2400)}
+const progress=document.createElement('div');progress.id='pbar';progress.setAttribute('aria-hidden','true');document.body.prepend(progress);
+const links=$$('.nav-chip'),sections=$$('.section[id]'),overview=$('#overview');
+const toTop=document.createElement('button');toTop.id='totop';toTop.type='button';toTop.textContent='↑';toTop.setAttribute('aria-label','리포트 맨 위로');document.body.append(toTop);toTop.addEventListener('click',()=>{scrollTo({top:0,behavior:reduced?'instant':'smooth'});if(overview)overview.focus({preventScroll:true})});
+let scheduled=false;function updateScroll(){scheduled=false;const max=document.documentElement.scrollHeight-innerHeight;const pct=max>0?Math.max(0,Math.min(100,scrollY/max*100)):0;progress.style.transform='scaleX('+pct/100+')';const rf=$('#reading-fill'),rp=$('#reading-percent');if(rf)rf.style.width=pct+'%';if(rp)rp.textContent=Math.round(pct)+'%';toTop.classList.toggle('on',scrollY>800);let current='overview';for(const sec of sections){if(sec.getBoundingClientRect().top<innerHeight*.35)current=sec.id}links.forEach(a=>{const active=a.hash==='#'+current;a.classList.toggle('on',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')})}
+addEventListener('scroll',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(updateScroll)}},{passive:true});addEventListener('resize',updateScroll);updateScroll();
+$$('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const target=$(a.hash);if(!target)return;e.preventDefault();const y=a.hash==='#overview'?0:target.getBoundingClientRect().top+scrollY-(innerWidth<=600?56:62);target.setAttribute('tabindex','-1');target.focus({preventScroll:true});try{history.replaceState(null,'',a.hash)}catch{}scrollTo({top:Math.max(0,y),behavior:reduced?'instant':'smooth'})}));
+let fontSize=store.get('font',15);if(![15,17,19].includes(fontSize))fontSize=15;
+const fontLess=$('#font-less'),fontMore=$('#font-more'),printBtn=$('#print-report');
+function applyFont(){document.documentElement.style.setProperty('--reading-size',fontSize+'px');if(fontLess){fontLess.disabled=fontSize===15;fontLess.setAttribute('aria-label','본문 글자 작게, 현재 '+fontSize+'픽셀')}if(fontMore){fontMore.disabled=fontSize===19;fontMore.setAttribute('aria-label','본문 글자 크게, 현재 '+fontSize+'픽셀')}}
+if(fontLess)fontLess.addEventListener('click',()=>{fontSize=Math.max(15,fontSize-2);applyFont();store.set('font',fontSize);announce('본문 글자 크기 '+fontSize+'px')});if(fontMore)fontMore.addEventListener('click',()=>{fontSize=Math.min(19,fontSize+2);applyFont();store.set('font',fontSize);announce('본문 글자 크기 '+fontSize+'px')});applyFont();
+if(printBtn)printBtn.addEventListener('click',()=>window.print());
+$$('.section-title').forEach(h=>{h.setAttribute('role','heading');h.setAttribute('aria-level','2')});
+$$('.itabs').forEach((wrap,i)=>{const buttons=$$('.itab-btn',wrap),panels=$$('.itab-panel',wrap);if(!buttons.length)return;wrap.classList.add('itabs-live');$('.itab-bar',wrap).setAttribute('role','tablist');$('.itab-bar',wrap).setAttribute('aria-label','수급 분류');function choose(index){buttons.forEach((b,j)=>{b.classList.toggle('on',index===j);b.setAttribute('aria-selected',String(index===j));b.tabIndex=index===j?0:-1});panels.forEach((p,j)=>p.classList.toggle('on',index===j))}buttons.forEach((b,j)=>{b.id='tab-'+i+'-'+j;b.setAttribute('role','tab');b.setAttribute('aria-controls','panel-'+i+'-'+j);panels[j].id='panel-'+i+'-'+j;panels[j].setAttribute('role','tabpanel');panels[j].setAttribute('aria-labelledby',b.id);b.addEventListener('click',()=>choose(j));b.addEventListener('keydown',e=>{let n=j;if(e.key==='ArrowRight')n=(j+1)%buttons.length;else if(e.key==='ArrowLeft')n=(j+buttons.length-1)%buttons.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=buttons.length-1;else return;e.preventDefault();choose(n);buttons[n].focus()})});choose(0)});
+$$('.tl-filter').forEach(bar=>{const buttons=$$('.tlf-chip',bar),items=$$('.tl-item',bar.closest('.section'));const status=document.createElement('div');status.className='source-note';status.setAttribute('role','status');bar.after(status);function filter(f){buttons.forEach(b=>{const on=b.dataset.f===f;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});let count=0;items.forEach(it=>{const on=f==='all'||(it.dataset.cat||'').split(' ').includes(f);it.classList.toggle('tl-hide',!on);if(on)count++});status.textContent=count+'개 항목 / 전체 '+items.length+'개';updateScroll()}buttons.forEach(b=>b.addEventListener('click',()=>filter(b.dataset.f)));filter('all')});
+const checklist=$('#s06 .checklist');if(checklist){const actionable=$$('.check-item',checklist).filter(item=>$('.check-icon.do',item));const saved=store.get('checks',[]);const savedArray=Array.isArray(saved)?saved:[];const summary=document.createElement('div');summary.className='check-summary';summary.innerHTML='<div><b id="check-count" role="status"></b><small id="save-note">이 브라우저에만 자동 저장됩니다.</small></div><button type="button" class="quiet-btn">체크 초기화</button>';checklist.before(summary);const inputs=[];function update(persist=false){inputs.forEach(input=>input.closest('.check-item').classList.toggle('done',input.checked));$('#check-count').textContent='실천 항목 '+inputs.filter(x=>x.checked).length+' / '+inputs.length+' 완료';if(persist){const ok=store.set('checks',inputs.map(x=>x.checked));$('#save-note').textContent=ok?'이 브라우저에만 자동 저장됩니다.':'저장이 제한되어 현재 화면에서만 유지됩니다.'}}actionable.forEach((item,i)=>{const input=document.createElement('input');input.type='checkbox';input.id='action-'+i;input.checked=savedArray[i]===true;const content=item.lastElementChild;content.id='action-label-'+i;input.setAttribute('aria-labelledby',content.id);$('.check-icon',item).replaceWith(input);input.addEventListener('change',()=>update(true));inputs.push(input)});$('.quiet-btn',summary).addEventListener('click',()=>{inputs.forEach(x=>x.checked=false);update(true);announce('실천 항목 체크를 초기화했습니다')});update()}
+const quizzes=$$('.quiz');if(quizzes.length){const summary=document.createElement('div');summary.className='quiz-summary';summary.innerHTML='<b id="quiz-score" role="status">0 / '+quizzes.length+'문제 완료</b><button type="button" class="quiet-btn">다시 풀기</button>';quizzes[0].before(summary);function score(){const answered=quizzes.filter(q=>q.classList.contains('quiz-open'));const correct=answered.filter(q=>q.dataset.correct==='true');$('#quiz-score').textContent=answered.length+' / '+quizzes.length+'문제 완료 · '+correct.length+'개 정답'}quizzes.forEach((q,i)=>{q.classList.add('quiz-live');const opts=$$('.quiz-opt',q);const feedback=document.createElement('div');feedback.className='quiz-feedback';feedback.setAttribute('role','status');feedback.id='quiz-feedback-'+i;q.append(feedback);$('.quiz-exp',q).id='quiz-explanation-'+i;opts.forEach(o=>o.addEventListener('click',()=>{if(q.classList.contains('quiz-open'))return;opts.forEach(b=>{b.disabled=true;if(b.hasAttribute('data-ok'))b.classList.add('q-ok')});const correct=o.hasAttribute('data-ok');if(!correct)o.classList.add('q-no');q.dataset.correct=String(correct);q.classList.add('quiz-open');feedback.classList.toggle('wrong',!correct);feedback.textContent=correct?'정답입니다. 아래 해설로 연결 논리를 확인해 보세요.':'다시 살펴보세요. 정답과 아래 해설을 확인해 보세요.';$('.quiz-exp',q).before(feedback);score()}))});$('.quiet-btn',summary).addEventListener('click',()=>{quizzes.forEach(q=>{q.classList.remove('quiz-open');delete q.dataset.correct;$$('.quiz-opt',q).forEach(b=>{b.disabled=false;b.classList.remove('q-ok','q-no')});$('.quiz-feedback',q).textContent=''});score();announce('다섯 문제를 다시 풀 수 있습니다')})}
+let openBeforePrint=[];addEventListener('beforeprint',()=>{openBeforePrint=$$('details').map(d=>[d,d.open]);openBeforePrint.forEach(([d])=>d.open=true)});addEventListener('afterprint',()=>openBeforePrint.forEach(([d,open])=>d.open=open));
+})();
+
+
+</script></body></html>
