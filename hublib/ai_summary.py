@@ -17,19 +17,39 @@ STOCK_JOBS_PER_RUN = 30
 NEWS_BATCH = 40
 NEWS_MAX_BATCHES = 5
 AI_WORKERS = 6                # 종목·뉴스 호출 동시성 — API 레이트리밋 안쪽에서 지연만 겹치게
-CACHE_VERSION = 1
+# max_tokens 상한 — Sonnet 5.5 는 thinking 토큰이 max_tokens 에 포함되고(effort 로만 조절, 끌 수 없음)
+# 토크나이저가 4.6 대비 약 30% 더 쓴다. 잘리면 파싱 실패 → 실패 센티널이 7일 잠그므로 넉넉히 둔다.
+WEEKLY_MAX_TOKENS = 2000      # 4.6 시절 1200 · 실측 출력 ≈870자
+DAILY_MAX_TOKENS = 600        # 4.6 시절 400 · 3줄×40자
+STOCK_MAX_TOKENS = 500        # 4.6 시절 200 · 60자 1문장
+NEWS_MAX_TOKENS = 2500        # 4.6 시절 1500 · url 40개 재출력(≈3,200자 ASCII)
+CACHE_VERSION = 1             # 파일 포맷 버전. 모델 전환은 버전 범프가 아니라 'model' 마커로 처리한다(_migrate_items)
+_PENDING_KEY = "__news_batch__"
+SUMMARY_PREFIXES = ("weekly:", "daily:", "stock:")   # 모델 산출물 — 모델이 바뀌면 버리고 재생성(실패 센티널 포함)
+
+
+def _migrate_items(items, stored_model, model):
+    """캐시 항목을 현재 모델에 맞춘다 — 모델이 같거나 미지정이면 그대로, 다르면 요약 키만 버린다.
+    뉴스 플래그(news:*)와 pending 배치는 지킨다: 뉴스 재분류는 하루 200건 상한 때문에 전량(≈3천건)이면 3주가 걸리고,
+    pending 배치는 이미 결제된 요청이다. 입력은 변경하지 않는다."""
+    if not model or stored_model == model:
+        return items
+    return {k: v for k, v in items.items() if not k.startswith(SUMMARY_PREFIXES)}
 
 
 class AiCache:
-    """키 → 결과 캐시. 손상·버전 불일치 시 비어 있는 상태로 폴백."""
+    """키 → 결과 캐시. 손상·버전 불일치 시 비어 있는 상태로 폴백.
+    model 을 주면(CLI) 파일의 model 마커와 비교해 모델 전환 시 요약 키를 비운다 — 테스트·오프라인 호출자는 생략."""
 
-    def __init__(self, path="build/ai_cache.json"):
-        self.path, self.data, self.dirty = path, {}, False
+    def __init__(self, path="build/ai_cache.json", model=None):
+        self.path, self.model, self.data, self.dirty = path, model or "", {}, False
         try:
             with open(path, encoding="utf-8") as f:
                 raw = json.load(f)
             if raw.get("v") == CACHE_VERSION:
-                self.data = raw.get("items") or {}
+                stored = raw.get("model") or ""
+                self.data = _migrate_items(raw.get("items") or {}, stored, self.model)
+                self.dirty = bool(self.model) and stored != self.model   # 마커 갱신을 저장해야 다음 빌드가 또 지우지 않는다
         except Exception:
             self.data = {}
 
@@ -45,7 +65,7 @@ class AiCache:
             return
         os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
         with open(self.path, "w", encoding="utf-8") as f:
-            json.dump({"v": CACHE_VERSION, "items": self.data}, f, ensure_ascii=False)
+            json.dump({"v": CACHE_VERSION, "model": self.model, "items": self.data}, f, ensure_ascii=False)
 
 
 def parse_json(text):
@@ -160,7 +180,7 @@ def _cached_or_call(cache, key, prompt, call, max_tokens, parse):
 
 
 def _run_weekly(kb, cache, call, to, cutoff):
-    return _cached_or_call(cache, f"weekly:{cutoff}~{to}", WEEKLY_PROMPT.format(ctx=_j(weekly_ctx(kb))), call, 1200,
+    return _cached_or_call(cache, f"weekly:{cutoff}~{to}", WEEKLY_PROMPT.format(ctx=_j(weekly_ctx(kb))), call, WEEKLY_MAX_TOKENS,
                            lambda d: d if isinstance(d, dict) and d.get("title") else None)
 
 
@@ -169,14 +189,14 @@ def _run_daily(kb, cache, call, to):
     if not today:
         return None
     ctx = {"스탠스": today[0], "센티멘트": [s for s in kb.get("sentiment", []) if s.get("date") == to]}
-    d = _cached_or_call(cache, f"daily:{to}", DAILY_PROMPT.format(date=to, ctx=_j(ctx)), call, 400,
+    d = _cached_or_call(cache, f"daily:{to}", DAILY_PROMPT.format(date=to, ctx=_j(ctx)), call, DAILY_MAX_TOKENS,
                         lambda d: d if isinstance(d, dict) and isinstance(d.get("lines"), list) else None)
     return {"date": to, "lines": [str(x) for x in d["lines"][:3]]} if d else None
 
 
 def _run_stock_reasons(kb, cache, call):
     def one(job):
-        return job["name"], _cached_or_call(cache, job["key"], STOCK_PROMPT.format(name=job["name"], ctx=_j(job["ctx"])), call, 200,
+        return job["name"], _cached_or_call(cache, job["key"], STOCK_PROMPT.format(name=job["name"], ctx=_j(job["ctx"])), call, STOCK_MAX_TOKENS,
                                             lambda d, j=job: {"text": d["text"], "as_of": j["as_of"]} if isinstance(d, dict) and d.get("text") else None)
 
     with ThreadPoolExecutor(max_workers=AI_WORKERS) as ex:
@@ -190,14 +210,14 @@ def _run_stock_reasons(kb, cache, call):
     return reasons
 
 
-_PENDING_KEY = "__news_batch__"
 
-
-def _news_batch_requests(todo, model, chunk_size=NEWS_BATCH):
-    """미분류 뉴스 → (Batches API 요청 목록, {custom_id: [url]} 청크 멤버십). custom_id 'b<i>' 는 40건 묶음 인덱스."""
+def _news_batch_requests(todo, model, chunk_size=NEWS_BATCH, effort=None):
+    """미분류 뉴스 → (Batches API 요청 목록, {custom_id: [url]} 청크 멤버십). custom_id 'b<i>' 는 40건 묶음 인덱스.
+    effort 가 있으면 동기 경로와 같은 output_config 를 싣는다(없으면 생략 — 구형 호출자 호환)."""
     chunks = [todo[i:i + chunk_size] for i in range(0, len(todo), chunk_size)]
+    extra = {"output_config": {"effort": effort}} if effort else {}
     reqs = [{"custom_id": f"b{i}",
-             "params": {"model": model, "max_tokens": 1500,
+             "params": {"model": model, "max_tokens": NEWS_MAX_TOKENS, **extra,
                         "messages": [{"role": "user", "content": NEWS_PROMPT.format(ctx=_j(chunk))}]}}
             for i, chunk in enumerate(chunks)]
     return reqs, {f"b{i}": [it["url"] for it in chunk] for i, chunk in enumerate(chunks)}
@@ -230,7 +250,7 @@ def _run_news_flags(kb, cache, call, batch=None):
     if batch is None:
         def one(chunk):                        # 배치는 캐시 키가 없다(항목별로 저장) — _cached_or_call 을 쓰지 않는다
             try:
-                d = parse_json(call(NEWS_PROMPT.format(ctx=_j(chunk)), 1500))
+                d = parse_json(call(NEWS_PROMPT.format(ctx=_j(chunk)), NEWS_MAX_TOKENS))
                 return chunk, d.get("flags") if isinstance(d, dict) and isinstance(d.get("flags"), dict) else {}
             except Exception as e:
                 print(f"  ✗ AI news batch: {repr(e)[:80]}")
@@ -272,7 +292,8 @@ def _run_news_flags(kb, cache, call, batch=None):
     still = cache.get(_PENDING_KEY)
     if todo and not (isinstance(still, dict) and still.get("id")):   # 한 번에 한 배치만
         try:
-            reqs, chunks = _news_batch_requests(todo[:NEWS_BATCH * NEWS_MAX_BATCHES], batch.get("model", ""))
+            reqs, chunks = _news_batch_requests(todo[:NEWS_BATCH * NEWS_MAX_BATCHES], batch.get("model", ""),
+                                                effort=batch.get("effort"))
             bid = batch["submit"](reqs)
             cache.put(_PENDING_KEY, {"id": bid, "at": datetime.date.today().isoformat(), "chunks": chunks})
         except Exception as e:

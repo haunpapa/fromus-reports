@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1245" width="1320" height="1245"
+     role="img" aria-labelledby="fu-title fu-desc" color="#1e293b" fill="currentColor"
+     font-family="Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif">
+<title id="fu-title">fromus-reports 흐름도 — 소스 준비, CI 빌드, GitHub Pages 배포, 브라우저 로딩</title>
+<desc id="fu-desc">카카오톡 CSV 와 리포트 HTML 을 사람이 커밋하면 GitHub Actions 가 collect(파싱·집계·시세·채팅 병합·콜 검증) 로 knowledge_base.json 을 만들고, AI 요약을 거쳐 render 가 hub.html 셸과 해시 이름의 앱 JS·kb 청크를 배출한다. 테스트 후 Pages artifact 로 배포되며 브라우저는 서비스워커를 통해 셸과 청크를 받는다.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+  </marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="58" y="26" font-size="15" text-anchor="start" fill="currentColor" font-weight="bold">fromus-reports 흐름도 — 소스 준비 → CI 빌드 → GitHub Pages → 브라우저</text>
+<text x="1262" y="26" font-size="11" text-anchor="end" fill="currentColor" opacity="0.7">2026-10-06 기준 · main · build.yml / hublib / hub</text>
+<rect x="40" y="44" width="1240" height="206" rx="10" fill="#f8fafc" stroke="currentColor" stroke-width="1" stroke-opacity="0.35"/>
+<text x="58" y="68" font-size="14" text-anchor="start" fill="currentColor" font-weight="bold">① 로컬 — 소스 준비</text>
+<text x="1262" y="68" font-size="11" text-anchor="end" fill="currentColor" opacity="0.7">사람이 export·작성하고 직접 커밋한다 · 생성기는 네트워크를 쓰므로 CI 에서 돌리지 않는다</text>
+<rect x="70" y="92" width="180" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="160.0" y="114" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">카카오톡 CSV export</text>
+<text x="160.0" y="133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">~/Downloads · 방별 최신본</text>
+<rect x="300" y="92" width="240" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="420.0" y="114" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">generator/refresh.sh</text>
+<text x="420.0" y="133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">update_archive.py · 방별 fold 병합</text>
+<rect x="300" y="180" width="240" height="30" rx="15.0" fill="#f8fafc" stroke="currentColor" stroke-width="1.1"/>
+<text x="420.0" y="199.0" font-size="11" text-anchor="middle" fill="currentColor">네이버 단축링크 해제 (네트워크)</text>
+<rect x="610" y="92" width="180" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="700.0" y="114" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">chat_kb.json</text>
+<text x="700.0" y="133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">리포 루트 · refresh.sh 가 커밋</text>
+<rect x="610" y="180" width="180" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="700.0" y="202" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">reports/daily·weekly/*.html</text>
+<text x="700.0" y="221" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">사람이 작성 · 직접 커밋</text>
+<rect x="920" y="137" width="190" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="1015.0" y="159" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">git push origin main</text>
+<text x="1015.0" y="178" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">소스만 커밋 · 산출물 .gitignore</text>
+<polyline points="250,121 300,121" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="540,121 610,121" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="575" y="114" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">재생성</text>
+<polyline points="420,180 420,150" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<polyline points="790,121 855,121 855,158 920,158" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="855" y="110" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">변경 시에만 커밋</text>
+<polyline points="790,209 855,209 855,174 920,174" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="855" y="228" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">수동 커밋</text>
+<polyline points="1015,195 1015,272 250,272 250,340" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="640" y="266" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">push → workflow 트리거 (reports/ · chat_kb.json · 빌더 · hub/ 경로 변경 시)</text>
+<rect x="40" y="290" width="1240" height="718" rx="10" fill="#f8fafc" stroke="currentColor" stroke-width="1" stroke-opacity="0.35"/>
+<text x="58" y="314" font-size="14" text-anchor="start" fill="currentColor" font-weight="bold">② CI — build.yml</text>
+<text x="1262" y="314" font-size="11" text-anchor="end" fill="currentColor" opacity="0.7">.github/workflows/build.yml · build job · ubuntu · 타임아웃 20분 (실제 약 2~3분) · 크론 KST 월~금 07:30</text>
+<rect x="70" y="340" width="240" height="72" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="190.0" y="362" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">트리거 → checkout</text>
+<text x="190.0" y="381" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">main push · 크론 KST 월~금 07:30 · 수동</text>
+<text x="190.0" y="397" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">checkout: reports/ · chat_kb.json · 빌더</text>
+<rect x="350" y="340" width="210" height="72" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="455.0" y="362" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">trade.html 동기화</text>
+<text x="455.0" y="381" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">curl raw → &lt;/html&gt; 꼬리 검증</text>
+<text x="455.0" y="397" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">실패 시 리포 내 스냅샷 유지</text>
+<rect x="600" y="340" width="250" height="72" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="725.0" y="362" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">캐시 복원 (actions/cache)</text>
+<text x="725.0" y="381" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">parse_cache — hashFiles 키</text>
+<text x="725.0" y="397" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">price · kb_summary · ai — run_id 롤링</text>
+<rect x="890" y="340" width="250" height="72" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="1015.0" y="362" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">build_index.py → index.html</text>
+<text x="1015.0" y="381" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">아카이브 목록 페이지</text>
+<text x="1015.0" y="397" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">허브 버튼은 render 가 주입</text>
+<polyline points="310,376 350,376" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="560,376 600,376" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="850,376 890,376" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1015,412 1015,490" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="1026" y="455" font-size="10.5" text-anchor="start" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">collect 시작</text>
+<rect x="350" y="436" width="210" height="32" rx="16.0" fill="#f8fafc" stroke="currentColor" stroke-width="1.1"/>
+<text x="455.0" y="456.0" font-size="11" text-anchor="middle" fill="currentColor">korea-trade-dashboard (raw)</text>
+<polyline points="455,436 455,412" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<rect x="620" y="436" width="360" height="32" rx="16.0" fill="#f8fafc" stroke="currentColor" stroke-width="1.1"/>
+<text x="800.0" y="456.0" font-size="11" text-anchor="middle" fill="currentColor">yfinance (지수) · FinanceDataReader/KRX (모멘텀·일봉)</text>
+<polyline points="800,468 800,482 438,482 438,500" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<polyline points="800,482 882,482 882,500" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<rect x="70" y="490" width="1180" height="110" rx="8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-opacity="0.6"/>
+<rect x="82" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="142.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">리포트 파싱</text>
+<text x="142.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">bs4 · sha1 증분 캐시</text>
+<polyline points="202,525 230,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="230" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="290.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">집계</text>
+<text x="290.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">종목·섹터·원칙·용어</text>
+<polyline points="350,525 378,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="378" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="438.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">지수·모멘텀</text>
+<text x="438.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">yfinance · KRX</text>
+<polyline points="498,525 526,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="526" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="586.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">검색 인덱스</text>
+<text x="586.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">build_search</text>
+<polyline points="646,525 674,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="674" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="734.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">채팅 병합</text>
+<text x="734.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">merge_hub.py</text>
+<polyline points="794,525 822,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="822" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="882.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">콜 검증</text>
+<text x="882.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">일봉 8워커 병렬</text>
+<polyline points="942,525 970,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="970" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="1030.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">what&#x27;s new</text>
+<text x="1030.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">전일 요약 대비</text>
+<polyline points="1090,525 1118,525" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="1118" y="500" width="120" height="50" rx="5" fill="#ffffff" stroke="currentColor" stroke-width="1.1"/>
+<text x="1178.0" y="520" font-size="12" text-anchor="middle" fill="currentColor" font-weight="bold">스키마 검사</text>
+<text x="1178.0" y="538" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.78">키 누락 → 빌드 중단</text>
+<text x="82" y="586" font-size="11.5" text-anchor="start" fill="currentColor" font-weight="bold" opacity="0.85">build_hub.py --phase collect  →  파싱·집계·시세·병합·검증 (무거운 단계 · 빌드당 1회)</text>
+<polyline points="1178,550 1178,616 185,616 185,660" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="690" y="610" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">knowledge_base.json 기록</text>
+<polyline points="250,660 250,640 1110,640 1110,660" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="690" y="634" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">render 입력 (파싱·네트워크 없이 읽기만)</text>
+<rect x="70" y="660" width="220" height="58" rx="6" fill="#e2e8f0" stroke="currentColor" stroke-width="1.2"/>
+<text x="180.0" y="682" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">knowledge_base.json</text>
+<text x="180.0" y="701" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">≈14MB 중간 산출물 · 배포 안 함</text>
+<rect x="330" y="660" width="250" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="455.0" y="682" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">ai_digest.py (ANTHROPIC_API_KEY)</text>
+<text x="455.0" y="701" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">키 없으면 생략 · 실패해도 exit 0</text>
+<rect x="330" y="736" width="250" height="32" rx="16.0" fill="#f8fafc" stroke="currentColor" stroke-width="1.1"/>
+<text x="455.0" y="756.0" font-size="11" text-anchor="middle" fill="currentColor">Anthropic API — sync + Batches(뉴스)</text>
+<polyline points="455,718 455,736" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="4 3" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<rect x="630" y="660" width="170" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="715.0" y="682" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">ai_digest.json</text>
+<text x="715.0" y="701" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">ai_cache 증분 · 실패 센티널</text>
+<rect x="980" y="660" width="260" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="1110.0" y="682" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">build_hub.py --phase render</text>
+<text x="1110.0" y="701" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">split_payload · 템플릿 마커 주입</text>
+<polyline points="290,689 330,689" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="580,689 630,689" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="800,689 980,689" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="890" y="682" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">news_flags 병합</text>
+<polyline points="1110,718 1110,815" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1110,795 195,795" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="195,795 195,815" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="480,795 480,815" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="785,795 785,815" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="650" y="789" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">내용 해시 파일명 → 코드·데이터가 바뀐 날만 재다운로드</text>
+<rect x="70" y="815" width="250" height="58" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="195.0" y="837" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">hub.html (셸 ≈147KB)</text>
+<text x="195.0" y="856" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">hub_template.html + KBURL·preload 주입</text>
+<rect x="360" y="815" width="240" height="58" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="480.0" y="837" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">hub.app.&lt;hash&gt;.js</text>
+<text x="480.0" y="856" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">hub/*.js 숫자 순 concat</text>
+<rect x="640" y="815" width="290" height="58" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="785.0" y="837" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">kb.core.&lt;hash&gt;.json + 청크 4종</text>
+<text x="785.0" y="856" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">chat · search · glossary · stockchat</text>
+<rect x="970" y="815" width="280" height="58" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="1110.0" y="837" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">version.json · feed.json</text>
+<text x="1110.0" y="856" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">새 빌드 감지 · JSON Feed 1.1</text>
+<polyline points="195,873 195,900" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="480,873 480,900" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="785,873 785,900" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="1110,873 1110,900" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="195,900 1110,900" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+<polyline points="350,900 350,920" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="70" y="920" width="560" height="66" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="350.0" y="942" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">pytest 유닛 → kb 크기 예산 → _site 조립 → E2E (Playwright · 4워커)</text>
+<text x="350.0" y="961" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">_site: index·hub·trade·sw.js·manifest·kb.*·hub.app.*·version·feed·reports/·icons/</text>
+<text x="350.0" y="977" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">예산은 경고만(코어 2배 초과 시 실패) · E2E 는 _site 를 서빙해 검사</text>
+<rect x="680" y="920" width="270" height="66" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="815.0" y="942" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">upload-pages-artifact</text>
+<text x="815.0" y="961" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">→ deploy job (actions/deploy-pages)</text>
+<text x="815.0" y="977" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">산출물은 커밋하지 않음</text>
+<rect x="1000" y="920" width="250" height="66" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="1125.0" y="942" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">캐시 저장 (if: always)</text>
+<text x="1125.0" y="961" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">price · kb_summary · ai</text>
+<text x="1125.0" y="977" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">테스트 실패일에도 당일 수집분 저장</text>
+<polyline points="630,953 680,953" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="655" y="946" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">통과</text>
+<rect x="40" y="1040" width="1240" height="145" rx="10" fill="#f8fafc" stroke="currentColor" stroke-width="1" stroke-opacity="0.35"/>
+<text x="58" y="1064" font-size="14" text-anchor="start" fill="currentColor" font-weight="bold">③ 배포 · 클라이언트</text>
+<text x="1262" y="1064" font-size="11" text-anchor="end" fill="currentColor" opacity="0.7">Pages 소스 = GitHub Actions · 셸은 서드파티 JS 없음 · 청크는 탭을 열 때 받는다</text>
+<polyline points="815,986 815,1026 270,1026 270,1092" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="540" y="1020" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">Pages 배포</text>
+<rect x="70" y="1092" width="230" height="58" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+<text x="185.0" y="1114" font-size="13" text-anchor="middle" fill="#1e3a8a" font-weight="bold">GitHub Pages</text>
+<text x="185.0" y="1133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">deploy job · artifact 배포</text>
+<rect x="360" y="1092" width="270" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="495.0" y="1114" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">브라우저 — hub.html 셸</text>
+<text x="495.0" y="1133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">kb.core 먼저 → 첫 화면 · 청크 지연 fetch</text>
+<rect x="690" y="1092" width="260" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="820.0" y="1114" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">sw.js (fu-hub-v5)</text>
+<text x="820.0" y="1133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">셸 SWR · 해시 파일 cache-first</text>
+<rect x="1010" y="1092" width="240" height="58" rx="6" fill="#ffffff" stroke="currentColor" stroke-width="1.2"/>
+<text x="1130.0" y="1114" font-size="13" text-anchor="middle" fill="currentColor" font-weight="bold">새 빌드 감지</text>
+<text x="1130.0" y="1133" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.78">version.json?nosw= → core 해시 비교</text>
+<polyline points="300,1121 360,1121" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="330" y="1114" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">GET</text>
+<polyline points="630,1121 690,1121" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="660" y="1114" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">fetch 경유</text>
+<polyline points="950,1121 1010,1121" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="980" y="1114" font-size="10.5" text-anchor="middle" fill="currentColor" opacity="0.9" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">SW 우회</text>
+<rect x="70" y="1210" width="18" height="12" rx="2" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="96" y="1220.5" font-size="11" text-anchor="start" fill="currentColor" opacity="0.85">Pages 배포 산출물 (클라이언트가 받는 파일)</text>
+<rect x="400" y="1210" width="18" height="12" rx="2" fill="#e2e8f0" stroke="currentColor" stroke-width="1.1"/>
+<text x="426" y="1220.5" font-size="11" text-anchor="start" fill="currentColor" opacity="0.85">중간 산출물 · 커밋/배포 안 함</text>
+<rect x="650" y="1210" width="18" height="12" rx="2" fill="#fff" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3"/>
+<text x="676" y="1220.5" font-size="11" text-anchor="start" fill="currentColor" opacity="0.85">롤링 캐시 (restore ↔ save)</text>
+<rect x="880" y="1210" width="26" height="12" rx="6" fill="#f8fafc" stroke="currentColor" stroke-width="1.1"/>
+<text x="914" y="1220.5" font-size="11" text-anchor="start" fill="currentColor" opacity="0.85">외부 네트워크</text>
+<polyline points="1050,1216 1090,1216" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<text x="1098" y="1220.5" font-size="11" text-anchor="start" fill="currentColor" opacity="0.85">네트워크 호출</text>
+</svg>

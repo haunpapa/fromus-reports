@@ -58,7 +58,8 @@ AI 요약까지 넣으려면 CI 와 같은 순서로 `collect` → `python ai_di
 | 변수 | 용도 | 기본값 |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | `ai_digest.py` 의 API 키 (CI Secret). 없으면 AI 요약을 생략한다 | — |
-| `AI_DIGEST_MODEL` | AI 요약 모델 | `claude-sonnet-4-6` |
+| `AI_DIGEST_MODEL` | AI 요약 모델 | `claude-sonnet-5-5` |
+| `AI_DIGEST_EFFORT` | AI 요약 `output_config.effort` (Sonnet 5.5 는 thinking 을 끌 수 없어 effort 로 조절한다 — thinking 토큰이 `max_tokens` 에 포함된다) | `medium` |
 | `SITE_BASE_URL` | `feed.json` 절대 URL 기준 (CI Variable). 없으면 상대 URL | — |
 | `VERIFY_SKIP` | `1` 이면 검증 레이어 가격 수집을 건너뛴다 (테스트 네트워크 격리) | — |
 | `MARKET_MOMENTUM_AUTO_INSTALL` | FinanceDataReader 누락 시 런타임 pip 설치 여부. CI 는 `0`(누락 시 모멘텀 생략) | `1` |
@@ -140,7 +141,7 @@ E2E_SITE_DIR=. python -m pytest tests/e2e -q -n 4
 | `build/parse_cache.json` | 리포트 파싱 캐시 (CI 키 `parse-cache-`) |
 | `build/price_cache.json` | 검증 레이어 일봉 캐시 (CI 키 `price-cache-v1-`) |
 | `build/kb_summary.json` | what's new 의 전일 요약 (CI 키 `kb-summary-`) |
-| `build/ai_cache.json` | AI 증분 요약 캐시 (CI 키 `ai-cache-v1-`). 실패 응답도 센티널로 남겨 3회 연속 실패하면 7일간 재호출하지 않는다. 뉴스 배치의 pending 상태도 여기 둔다 |
+| `build/ai_cache.json` | AI 증분 요약 캐시 (CI 키 `ai-cache-v1-`). 실패 응답도 센티널로 남겨 3회 연속 실패하면 7일간 재호출하지 않는다. 뉴스 배치의 pending 상태도 여기 둔다. 파일에 `model` 마커가 있어 `AI_DIGEST_MODEL` 이 바뀌면 위클리·데일리·종목 사유 키만 버리고(종목 사유는 빌드당 30개씩 재생성) 뉴스 플래그·pending 배치는 유지한다 |
 | `build/report.md`·`build/e2e_timing.json` | kb 크기·예산·E2E 타이밍 — CI Job Summary 로 출력 |
 
 ## 주의
