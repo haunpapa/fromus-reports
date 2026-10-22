@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1791900674404,
+  "lastScanned": 1792594407063,
   "projectRoot": "/Users/haunpapa/Documents/GitHub/fromus-reports",
   "techStack": {
     "languages": [
@@ -48,7 +48,7 @@
       "path": "__pycache__",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1791900674395,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "ai_digest.cpython-311.pyc",
         "build_hub.cpython-311.pyc",
@@ -59,7 +59,7 @@
       "path": "_site",
       "purpose": null,
       "fileCount": 10,
-      "lastAccessed": 1791900674395,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "hub.app.8598067fdc.js",
         "hub.html",
@@ -72,7 +72,7 @@
       "path": "build",
       "purpose": "Build output",
       "fileCount": 9,
-      "lastAccessed": 1791900674395,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "_probe_dartlab.py",
         "_probe_schema.json",
@@ -85,7 +85,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 1,
-      "lastAccessed": 1791900674395,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "architecture-flow.svg"
       ]
@@ -94,7 +94,7 @@
       "path": "generator",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1791900674396,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "README.md",
         "chat_to_kb.py",
@@ -107,7 +107,7 @@
       "path": "hub",
       "purpose": null,
       "fileCount": 19,
-      "lastAccessed": 1791900674396,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "00_util.js",
         "10_tabs.js",
@@ -120,7 +120,7 @@
       "path": "hublib",
       "purpose": null,
       "fileCount": 15,
-      "lastAccessed": 1791900674396,
+      "lastAccessed": 1792594407053,
       "keyFiles": [
         "__init__.py",
         "aggregate.py",
@@ -133,7 +133,7 @@
       "path": "icons",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1791900674396,
+      "lastAccessed": 1792594407054,
       "keyFiles": [
         "icon-192.png",
         "icon-512.png"
@@ -143,14 +143,14 @@
       "path": "reports",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1791900674396,
+      "lastAccessed": 1792594407054,
       "keyFiles": []
     },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
       "fileCount": 17,
-      "lastAccessed": 1791900674396,
+      "lastAccessed": 1792594407054,
       "keyFiles": [
         "__init__.py",
         "test_ai_digest.py",
@@ -163,7 +163,7 @@
       "path": "tests/fixtures",
       "purpose": "Test fixtures",
       "fileCount": 1,
-      "lastAccessed": 1791900674397,
+      "lastAccessed": 1792594407054,
       "keyFiles": [
         "chat_kb_mini.json"
       ]
